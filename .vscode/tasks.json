@@ -57,6 +57,15 @@
             "problemMatcher": []
         },
         {
+            "label": "Diagnóstico do ambiente",
+            "type": "shell",
+            "command": "php",
+            "args": ["scripts/diag.php"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
             "label": "Banco: recarregar dados do Access",
             "type": "shell",
             "command": "php",

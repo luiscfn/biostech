@@ -7,6 +7,22 @@
 
 ---
 
+## 0. Como subir (resumo)
+
+```powershell
+# opção 1: duplo clique em iniciar.bat  (sobe o servidor e abre o navegador)
+# opção 2: terminal / task do VS Code
+php -S 127.0.0.1:8090 router.php
+```
+
+- Abrir no VS Code: **File → Open Folder** em `C:\desenvolvimento\PROJETOS_PHP\biostech`.
+- Tasks prontas: **Servidor: iniciar**, **Servidor: parar**, **Teste: fumaça (HTTP)**,
+  **Diagnóstico do ambiente**, **Teste: lint**, **Banco: recarregar dados do Access**.
+- Diagnóstico rápido: `php scripts/diag.php` (20 verificações: PHP, extensões, banco,
+  tabelas, senhas bcrypt e servidor).
+
+---
+
 ## 1. O que está no ar
 
 Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
@@ -78,6 +94,11 @@ no final (via HTTP para admin, via banco para gestor).
 Verificações complementares:
 
 - `php -l` em todos os arquivos da aplicação (fora `system/`): **0 erros**.
+- `php scripts/diag.php`: **20 verificações ok, 0 problemas** (PHP 7.4.33, `pgsql`,
+  `pdo_pgsql`, `mbstring`, `json`, `curl`, `openssl`, conexão, 5 tabelas, 26 senhas
+  bcrypt, servidor ativo).
+- Página aberta no navegador (Chromium): `/dashboard` com 4 cartões, 12 eventos,
+  CSS e favicon carregados, **0 erros de console**.
 - Paginação real: 4.773 clientes e 4.522 produtos (25 por página).
 - Busca sem acento/caixa: `cabeca` retorna 30 produtos (`CABEÇA ...`).
 

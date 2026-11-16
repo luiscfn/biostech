@@ -44,7 +44,8 @@ biostech/
 ├─ scripts/
 │  ├─ etl/             export.ps1 (Access → JSON), tabelas.json, instalar.php
 │  ├─ sql/             01-schema.sql (DDL com placeholder {schema})
-│  └─ test/            smoke.php (teste de fumaça HTTP)
+│  ├─ test/            smoke.php (teste de fumaça HTTP)
+│  └─ diag.php         diagnóstico de PHP, extensões, banco e servidor
 ├─ system/             CodeIgniter 2.1.2 (não alterar)
 ├─ index.php           bootstrap
 ├─ router.php          router do servidor embutido do PHP
@@ -120,7 +121,7 @@ php scripts\etl\instalar.php
    - **PHP Debug** (opcional, só funciona com Xdebug instalado)
    - **PowerShell**
 4. A pasta já vem com configuração pronta em `.vscode/`:
-   - `tasks.json` — iniciar/parar servidor, teste de fumaça, lint, recarregar banco.
+   - `tasks.json` — iniciar/parar servidor, teste de fumaça, lint, diagnóstico, banco.
    - `settings.json` — caminho do PHP (`C:\php\php.exe`), exclusões de `system/` e logs.
    - `launch.json` — depuração Xdebug (opcional, ver observação abaixo).
 
@@ -133,6 +134,7 @@ php scripts\etl\instalar.php
 3. Entre com `DIMENSIONAMENTO` / `dimensionamento` (admin) ou `ANDRIUS` / `123123` (gestor).
 4. Para parar: `Ctrl+C` no terminal da task, ou rode a task **Servidor: parar**.
 5. Para validar tudo de uma vez: task **Teste: fumaça (HTTP)** (o servidor precisa estar ativo).
+6. Para checar ambiente/banco: task **Diagnóstico do ambiente** (`php scripts/diag.php`).
 
 **Opção B — duplo clique**
 
