@@ -157,6 +157,8 @@ class Auth
             'perfil'   => $usuario['perfil'],
             'setor_id' => $usuario['setor_id'] === NULL ? NULL : (int) $usuario['setor_id'],
             'setor'    => $usuario['setor_nome'],
+            'funcionario_id'      => $usuario['funcionario_id'] === NULL ? NULL : (int) $usuario['funcionario_id'],
+            'acesso_almoxarifado' => bd_bool($usuario['acesso_almoxarifado']),
         );
 
         $_SESSION['biostech_usuario'] = $this->usuario;

@@ -17,6 +17,13 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
 
+        // DataStyle ISO em todas as conexoes (ver MY_Model).
+        if (empty($GLOBALS['biostech_datestyle']))
+        {
+            $this->db->simple_query("SET datestyle TO 'ISO'");
+            $GLOBALS['biostech_datestyle'] = TRUE;
+        }
+
         $this->load->library('auth');
 
         if ( ! $this->auth->logado())
@@ -55,6 +62,16 @@ class MY_Controller extends CI_Controller
         {
             show_error('Voce nao tem permissao para acessar esta area.', 403, 'Acesso negado');
         }
+    }
+
+    // ------------------------------------------------------------------
+
+    protected function eh_post()
+    {
+        // O CI 2.1.2 remove o token CSRF de $_POST; quando o formulario so tem
+        // o token, $_POST fica vazio e input->post() retorna FALSE.
+        return isset($_SERVER['REQUEST_METHOD'])
+            && strtoupper($_SERVER['REQUEST_METHOD']) === 'POST';
     }
 
     // ------------------------------------------------------------------

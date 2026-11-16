@@ -576,6 +576,139 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     font-size: 13.5px;
 }
 
+/* ------------------------------------------------------ chamados / OS */
+
+.abas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--borda);
+    background: #fbfcfe;
+}
+
+.aba {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.aba:hover {
+    color: var(--azul);
+    text-decoration: none;
+}
+
+.aba.ativa {
+    color: var(--azul);
+    font-weight: 600;
+    border-bottom-color: var(--azul);
+}
+
+.aba-conteudo .painel-corpo {
+    padding-top: 16px;
+}
+
+.acoes-ficha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.secao-titulo {
+    margin: 4px 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.divisor {
+    border: none;
+    border-top: 1px solid var(--borda);
+    margin: 22px 0;
+}
+
+.texto-longo {
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px 16px;
+}
+
+form.inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+/* ---------------------------------------------------------- autocomplete */
+
+.autocomplete {
+    position: relative;
+}
+
+.autocomplete input[type=text] {
+    width: 100%;
+}
+
+.autocomplete-lista {
+    position: absolute;
+    z-index: 40;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 3px;
+    background: #fff;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    box-shadow: var(--sombra);
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+}
+
+.autocomplete-opcao {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f3f7;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.autocomplete-opcao:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-opcao:hover {
+    background: var(--azul-claro);
+}
+
+.autocomplete-opcao strong {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.autocomplete-opcao span {
+    font-size: 11.5px;
+    color: var(--muted);
+}
+
+.autocomplete-vazio {
+    padding: 10px 12px;
+    color: var(--muted);
+    font-size: 12.5px;
+}
+
 /* ------------------------------------------------------------ responsivo */
 
 @media (max-width: 900px) {

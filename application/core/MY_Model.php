@@ -10,6 +10,14 @@ class MY_Model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+
+        // O PostgreSQL desta instalacao usa DateStyle DMY; a aplicacao trabalha
+        // sempre com ISO (Y-m-d), inclusive nos <input type="date">.
+        if (empty($GLOBALS['biostech_datestyle']))
+        {
+            $this->db->simple_query("SET datestyle TO 'ISO'");
+            $GLOBALS['biostech_datestyle'] = TRUE;
+        }
     }
 
     // ------------------------------------------------------------------

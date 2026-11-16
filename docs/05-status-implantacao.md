@@ -35,7 +35,8 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 | Produtos (lista, busca, ficha) | `/produtos` | pronto |
 | Setores (lista, busca, CRUD) | `/setores` | pronto |
 | Usuários (lista, CRUD, senha, ativar/desativar) | `/usuarios` | pronto |
-| Chamados / OS, Orçamentos, Estoque, Compras, Financeiro | — | "em breve" no menu |
+| Chamados / OS (ficha, intervenções, peças, serviços, contatos, financeiro, status, encerramento, reabertura, par, impressão) | `/chamados` | **pronto (piloto)** |
+| Orçamentos, Estoque, Compras, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
 
 ---
 
@@ -56,6 +57,25 @@ Tabelas criadas no schema **`material_grafico`**, com prefixo `biostech_`:
 > Por isso as tabelas foram isoladas por prefixo no schema existente. O código lê
 > `DB_SCHEMA` (padrão `material_grafico`); ao provisionar um schema dedicado `biostech`,
 > basta rodar `DB_SCHEMA=biostech php scripts/etl/instalar.php`.
+
+### 2.1 Módulo Chamados / OS
+
+Criado por `scripts/sql/02-chamados-os.sql` e `scripts/sql/03-dominios-financeiro.sql`:
+
+- **27 tabelas** `biostech_chamado*`, `biostech_contas_receber`, `biostech_orcamento*`,
+  `biostech_estoque_*` e `biostech_numeracao` (ver DDL para a lista completa).
+- **Domínios de domínio legados preservados 1:1**: status de OS, situação detalhada,
+  tipo de garantia, prioridade, segmento, tipo de equipamento, checklist, forma de
+  recebimento (8), condição de pagamento (27), documento (8), tipo de pagamento (33), etc.
+- **Estoque**: `biostech_estoque_saldos` e `biostech_estoque_movimentos`, carregados por
+  `scripts/etl/estoque.php` (4.521 saldos, 953 produtos sem saldo ignorados,
+  100.579.957 unidades).
+- **Numeração atômica** (`application/libraries/Numeracao.php`): `OS` por competência
+  `aaaa-mm` e `CR` global, via `INSERT ... ON CONFLICT ... RETURNING`.
+- **Trilha**: `biostech_chamado_eventos` (linha do tempo) e `biostech_chamado_log`
+  (alteração por campo, com JSONB antes/depois).
+- **Regras**: `docs/06-regras-chamados-os.md` (RN-001..RN-283, VD-01..VD-72,
+  AC-01..AC-24 e decisões D-01..D-10).
 
 ---
 
@@ -91,6 +111,23 @@ Cobertura: `/login` (200 + token CSRF) → autenticação → `/dashboard`, `/cl
 exclusão de setor → logout. Ambas as execuções passaram; o registro de teste é removido
 no final (via HTTP para admin, via banco para gestor).
 
+### 4.1 Teste end-to-end de Chamados/OS
+
+Executado por `teste-fluxo.ps1` (PowerShell, `HttpWebRequest`, `KeepAlive=false`)
+contra `http://127.0.0.1:8090`, cobrindo o fluxo abaixo:
+
+1. login; 2. criação do chamado; 3. ficha; 4. intervenção; 5. peça (baixa de estoque);
+6. serviço previsto; 7. conclusão do serviço; 8. contato; 9. parcelas (2x R$ 100,00);
+10. status 2/1 (em atendimento); 11. status 4/10 (concluída); 12. encerramento;
+13. contas a receber; 14. cancelar encerramento (CRs canceladas logicamente);
+15. reencerramento; 16. reabertura (mantém `status_codigo = 5`, `reaberto = true`);
+17. geração do par (Chamado ↔ Ordem de Serviço, vínculo 1:1); 18. impressão, pesquisa e
+autocomplete.
+
+Resultado: **todas as etapas ok**. Os dados do teste (`2026110002`..`2026110014`,
+movimentos de estoque, CRs, numeração e equipamento `TESTE-AGENTE-01`) foram removidos
+e o saldo do produto 64 restaurado (126 unidades, 2.406 consumidas).
+
 Verificações complementares:
 
 - `php -l` em todos os arquivos da aplicação (fora `system/`): **0 erros**.
@@ -114,6 +151,12 @@ Verificações complementares:
 | Botões "Editar/Excluir" não apareciam | `MY_Controller::render()` passou a enviar `$usuario` às views antes de renderizar o conteúdo |
 | Todos os 26 usuários como `admin` | mapeamento `PRIVILEGIADO` corrigido (`2`=admin, `1`=gestor) |
 | Smoke test deixava setor de teste no banco | teste passou a excluir/limpar no final |
+| `Numeracao` não gravava (`query()` retorna `TRUE` no CI 2.1.2) | trocado por `pg_query_params` + `RETURNING` |
+| `RETURNING` da movimentação de estoque ignorado | passou a usar `currval` da sequência |
+| `inteiro_ou_nulo(FALSE)` gravava `0` | normalização de `FALSE` para `NULL` |
+| Datas ISO quebravam `strtotime` | `SET datestyle TO 'ISO'` em `MY_Controller`/`MY_Model` |
+| Endpoints com formulário só de token caíam no redirect | `MY_Controller::eh_post()` no lugar de `input->post()` como booleano |
+| Teste PowerShell gerava `/chamados/ver/=servicos` (400) | `"$numero?aba"` é lido como variável `$numero?aba`; usar `${numero}?` |
 
 ---
 
@@ -122,14 +165,13 @@ Verificações complementares:
 1. **Schema dedicado** `biostech` — depende do DBA (sem `CREATE SCHEMA` hoje).
 2. **Staging 1:1 do legado** (`biostech_legacy`) — o DDL completo está em
    `docs/04-schema-legacy-postgresql.sql` (243 tabelas).
-3. **Chamados / OS** (módulo piloto) — extrair o VBA dos formulários do
-   `BIOSTECH_A2003H.mdb` para capturar as regras (os 11 módulos padrão não cobrem as
-   regras de tela).
-4. **Estoque** — entradas/saídas, saldos, inventário; **Compras** e **Financeiro** na
-   sequência.
-5. **Normalização de dados sujos** — datas herdadas inválidas (1899, 0202, 0209, 1976,
+3. **Próximos módulos** — matriz completa em `docs/07-plano-conversao-total.md`.
+   Ordem sugerida: Estoque, Orçamentos, Financeiro, Compras, Faturamento/NF,
+   Clientes/Escolas (complementos), Equipamentos, RH, Frota, Acessos/Permissões.
+4. **Normalização de dados sujos** — datas herdadas inválidas (1899, 0202, 0209, 1976,
    2106, 7201, 7202) precisam de quarentena antes de relatórios.
-6. **Validação dos perfis** com os usuários do legado (o VBA do formulário `USUARIO` não
+5. **Validação dos perfis** com os usuários do legado (o VBA do formulário `USUARIO` não
    foi recuperado; o mapeamento atual segue a indicação do responsável).
+6. **Relatórios** — 25 relatórios Access a reimplementar em HTML/PDF (ver `docs/07`).
 7. **Deploy** — Apache com `mod_rewrite` + variáveis de ambiente (`CI_ENV=production`,
    `DB_*`), HTTPS e backup do banco.

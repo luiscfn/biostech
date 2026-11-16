@@ -24,7 +24,7 @@
             <a class="item <?= $menu_ativo === 'dashboard' ? 'ativo' : '' ?>" href="<?= site_url('dashboard') ?>">Painel</a>
 
             <div class="grupo">Operacao</div>
-            <span class="item">Chamados / OS <span class="tag">em breve</span></span>
+            <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
             <span class="item">Orcamentos <span class="tag">em breve</span></span>
             <span class="item">Estoque <span class="tag">em breve</span></span>
             <span class="item">Compras <span class="tag">em breve</span></span>

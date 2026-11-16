@@ -31,3 +31,27 @@ $route['clientes/ver/(:num)']    = 'clientes/ver/$1';
 
 $route['produtos']               = 'produtos/index';
 $route['produtos/ver/(:num)']    = 'produtos/ver/$1';
+
+// Chamados / Ordens de Servico
+$route['chamados']                            = 'chamados/index';
+$route['chamados/novo']                       = 'chamados/novo';
+$route['chamados/buscar_clientes']            = 'chamados/buscar_clientes';
+$route['chamados/buscar_produtos']            = 'chamados/buscar_produtos';
+$route['chamados/ver/(:any)']                 = 'chamados/ver/$1';
+$route['chamados/editar/(:any)']              = 'chamados/editar/$1';
+$route['chamados/status/(:any)']              = 'chamados/status/$1';
+$route['chamados/encerrar/(:any)']            = 'chamados/encerrar/$1';
+$route['chamados/reabrir/(:any)']             = 'chamados/reabrir/$1';
+$route['chamados/cancelar_encerramento/(:any)'] = 'chamados/cancelar_encerramento/$1';
+$route['chamados/gerar/(:any)']               = 'chamados/gerar/$1';
+$route['chamados/equipamento/(:any)']         = 'chamados/equipamento/$1';
+$route['chamados/atendimento/(:any)']         = 'chamados/atendimento/$1';
+$route['chamados/intervencoes/(:any)']        = 'chamados/intervencoes/$1';
+$route['chamados/pecas/(:any)']               = 'chamados/pecas/$1';
+$route['chamados/excluir_peca/(:any)/(:num)'] = 'chamados/excluir_peca/$1/$2';
+$route['chamados/baixar_estoque/(:any)']      = 'chamados/baixar_estoque/$1';
+$route['chamados/servicos/(:any)']            = 'chamados/servicos/$1';
+$route['chamados/concluir_servico/(:any)/(:num)'] = 'chamados/concluir_servico/$1/$2';
+$route['chamados/contatos/(:any)']            = 'chamados/contatos/$1';
+$route['chamados/financeiro/(:any)']          = 'chamados/financeiro/$1';
+$route['chamados/imprimir/(:any)']            = 'chamados/imprimir/$1';
