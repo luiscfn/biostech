@@ -1,0 +1,26 @@
+{
+    "php.validate.executablePath": "C:\\php\\php.exe",
+    "php.suggest.basic": false,
+    "files.associations": {
+        "*.php": "php"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/application/cache/sessions": true,
+        "**/application/logs/*.php": true
+    },
+    "search.exclude": {
+        "system": true,
+        "scripts/etl/dados": true,
+        "docs/04-schema-legacy-postgresql.sql": true
+    },
+    "emmet.includeLanguages": {
+        "php": "html"
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "files.eol": "\r\n",
+    "[php]": {
+        "editor.tabSize": 4
+    }
+}

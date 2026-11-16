@@ -1,0 +1,83 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Servidor: iniciar (http://127.0.0.1:8090)",
+            "type": "shell",
+            "command": "php",
+            "args": ["-S", "127.0.0.1:8090", "router.php"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Servidor: parar",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "Get-NetTCPConnection -State Listen -LocalPort 8090 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }; Write-Host 'Servidor da porta 8090 encerrado.'"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Teste: fumaça (HTTP)",
+            "type": "shell",
+            "command": "php",
+            "args": [
+                "scripts/test/smoke.php",
+                "http://127.0.0.1:8090",
+                "DIMENSIONAMENTO",
+                "dimensionamento"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": [],
+            "group": { "kind": "test", "isDefault": true }
+        },
+        {
+            "label": "Teste: lint (php -l em tudo)",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "$erros = 0; Get-ChildItem -Recurse -Include *.php -File | Where-Object { $_.FullName -notlike '*\\system\\*' -and $_.FullName -notlike '*\\.git\\*' } | ForEach-Object { $o = & php -l $_.FullName 2>&1; if ($LASTEXITCODE -ne 0) { $erros++; Write-Host $_.FullName; Write-Host $o } }; Write-Host \"Erros de sintaxe: $erros\""
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Banco: recarregar dados do Access",
+            "type": "shell",
+            "command": "php",
+            "args": ["scripts/etl/instalar.php"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Banco: exportar Access (PowerShell 32 bits)",
+            "type": "shell",
+            "command": "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "scripts/etl/export.ps1",
+                "-Mdb", "C:\\SISBIOST\\Dados\\SISBIOSD_01.mdb"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "dedicated" },
+            "problemMatcher": []
+        }
+    ]
+}

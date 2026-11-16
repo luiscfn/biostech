@@ -30,6 +30,7 @@ Reescrita web do sistema legado **BIOSTECH** (Microsoft Access 2003), a partir d
 
 ```
 biostech/
+├─ .vscode/            tasks (servidor/testes), settings, extensões recomendadas
 ├─ application/
 │  ├─ config/          config.php, database.php, routes.php, constants.php
 │  ├─ controllers/     Login, Dashboard, Clientes, Produtos, Setores, Usuarios
@@ -47,6 +48,8 @@ biostech/
 ├─ system/             CodeIgniter 2.1.2 (não alterar)
 ├─ index.php           bootstrap
 ├─ router.php          router do servidor embutido do PHP
+├─ iniciar.bat         atalho: sobe o servidor e abre o navegador
+├─ parar.bat           atalho: encerra o servidor da porta 8090
 └─ .htaccess           URLs limpas no Apache
 ```
 
@@ -107,16 +110,47 @@ php scripts\etl\instalar.php
 - Se o `.mdb` estiver aberto no Access, use uma cópia (`-Mdb <copia.mdb>`), pois o Jet
   bloqueia a tabela.
 
-### 4.2 Servidor embutido (desenvolvimento)
+### 4.2 Abrir no Visual Studio Code
+
+1. Abra o VS Code.
+2. **File → Open Folder…** e escolha `C:\desenvolvimento\PROJETOS_PHP\biostech`
+   (ou, no terminal: `code "C:\desenvolvimento\PROJETOS_PHP\biostech"`).
+3. Aceite as extensões recomendadas (`.vscode/extensions.json`):
+   - **PHP Intelephense** (autocomplete/navegação)
+   - **PHP Debug** (opcional, só funciona com Xdebug instalado)
+   - **PowerShell**
+4. A pasta já vem com configuração pronta em `.vscode/`:
+   - `tasks.json` — iniciar/parar servidor, teste de fumaça, lint, recarregar banco.
+   - `settings.json` — caminho do PHP (`C:\php\php.exe`), exclusões de `system/` e logs.
+   - `launch.json` — depuração Xdebug (opcional, ver observação abaixo).
+
+### 4.3 Rodar a aplicação para testar
+
+**Opção A — pelo VS Code (recomendada)**
+
+1. `Ctrl+Shift+P` → **Tasks: Run Task** → **Servidor: iniciar (http://127.0.0.1:8090)**.
+2. Abra o navegador em <http://127.0.0.1:8090>.
+3. Entre com `DIMENSIONAMENTO` / `dimensionamento` (admin) ou `ANDRIUS` / `123123` (gestor).
+4. Para parar: `Ctrl+C` no terminal da task, ou rode a task **Servidor: parar**.
+5. Para validar tudo de uma vez: task **Teste: fumaça (HTTP)** (o servidor precisa estar ativo).
+
+**Opção B — duplo clique**
+
+- `iniciar.bat` sobe o servidor e abre o navegador.
+- `parar.bat` encerra o processo da porta 8090.
+
+**Opção C — terminal**
 
 ```powershell
 cd C:\desenvolvimento\PROJETOS_PHP\biostech
 php -S 127.0.0.1:8090 router.php
 ```
 
-Acesse <http://127.0.0.1:8090>.
+> **Depuração (breakpoints):** exige Xdebug. Verifique com `php -m | findstr xdebug`.
+> Se não houver, o `launch.json` fica apenas como configuração futura; use as tasks e o
+> `php -l` para validar o código.
 
-### 4.3 Apache
+### 4.4 Apache (produção)
 
 Aponte o *DocumentRoot* para a pasta do projeto (ou publique-a em um alias). O `.htaccess`
 já reescreve as URLs para `index.php` e bloqueia listagem de diretórios. `mod_rewrite`

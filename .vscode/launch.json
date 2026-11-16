@@ -1,0 +1,25 @@
+{
+    // Depuracao PHP exige a extensao Xdebug habilitada no php.ini.
+    // Verifique com:  php -m | findstr xdebug
+    // Sem Xdebug, use as tasks de "Servidor: iniciar" e "Teste: fumaça".
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Ouvir Xdebug (requer Xdebug)",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "pathMappings": {
+                "${workspaceFolder}": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Executar script atual (CLI, requer Xdebug)",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "port": 9003
+        }
+    ]
+}
