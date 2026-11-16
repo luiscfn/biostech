@@ -309,6 +309,8 @@ a:hover { text-decoration: underline; }
 .cartao .valor { font-size: 28px; font-weight: 700; line-height: 1; color: var(--azul); }
 .cartao .detalhe { font-size: 12px; color: var(--muted); margin-top: 8px; }
 .cartao.verde .valor { color: var(--verde); }
+.cartao.amarelo .valor { color: var(--amarelo); }
+.cartao.vermelho .valor { color: var(--vermelho); }
 
 .painel {
     background: var(--branco);
@@ -707,6 +709,89 @@ form.inline {
     padding: 10px 12px;
     color: var(--muted);
     font-size: 12.5px;
+}
+
+/* ---------------------------------------------------------- estoque */
+
+.cartoes-estoque {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.cartoes-estoque .cartao .valor {
+    font-size: 21px;
+}
+
+.tabela-itens td {
+    vertical-align: middle;
+}
+
+.tabela-itens input[type=text],
+.tabela-itens input[type=number] {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--borda);
+    border-radius: 7px;
+    font: inherit;
+    font-size: 12.5px;
+    background: #fff;
+}
+
+.tabela-itens input[readonly] {
+    background: #f5f7fa;
+    color: var(--muted);
+}
+
+.tabela-itens .autocomplete-lista {
+    min-width: 340px;
+    text-align: left;
+}
+
+.tabela-itens .total-linha {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.linha-total {
+    text-align: right;
+    font-size: 14px;
+    padding: 8px 0 0;
+}
+
+.linha-total strong {
+    font-size: 16px;
+    color: var(--azul);
+}
+
+.abas-catalogo {
+    margin: -18px -18px 18px;
+}
+
+.ficha-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px 22px;
+}
+
+.ficha-grade .rotulo {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.ficha-grade .dado {
+    font-size: 13.5px;
+    word-break: break-word;
+}
+
+.saldo-grande {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--azul);
+    line-height: 1.1;
 }
 
 /* ------------------------------------------------------------ responsivo */

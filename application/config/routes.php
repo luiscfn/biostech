@@ -55,3 +55,23 @@ $route['chamados/concluir_servico/(:any)/(:num)'] = 'chamados/concluir_servico/$
 $route['chamados/contatos/(:any)']            = 'chamados/contatos/$1';
 $route['chamados/financeiro/(:any)']          = 'chamados/financeiro/$1';
 $route['chamados/imprimir/(:any)']            = 'chamados/imprimir/$1';
+
+// Estoque
+$route['estoque']                              = 'estoque/index';
+$route['estoque/movimentos']                   = 'estoque/movimentos';
+$route['estoque/entrada']                      = 'estoque/entrada';
+$route['estoque/saida']                        = 'estoque/saida';
+$route['estoque/ajuste']                       = 'estoque/ajuste';
+$route['estoque/ver/(:num)']                   = 'estoque/ver/$1';
+$route['estoque/estornar/(:num)']              = 'estoque/estornar/$1';
+$route['estoque/catalogos']                    = 'estoque/catalogos';
+$route['estoque/catalogo_salvar']              = 'estoque/catalogo_salvar';
+$route['estoque/catalogo_excluir']             = 'estoque/catalogo_excluir';
+$route['estoque/fornecedores']                 = 'estoque/fornecedores';
+$route['estoque/fornecedor']                   = 'estoque/fornecedor';
+$route['estoque/fornecedor/(:num)']            = 'estoque/fornecedor/$1';
+$route['estoque/fornecedor_salvar']            = 'estoque/fornecedor_salvar';
+$route['estoque/fornecedor_vincular']          = 'estoque/fornecedor_vincular';
+$route['estoque/fornecedor_desvincular']       = 'estoque/fornecedor_desvincular';
+$route['estoque/buscar_produtos']              = 'estoque/buscar_produtos';
+$route['estoque/buscar_fornecedores']          = 'estoque/buscar_fornecedores';

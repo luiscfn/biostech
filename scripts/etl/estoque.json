@@ -1,0 +1,36 @@
+{
+  "tabelas": [
+    {
+      "tabela": "FORNECEDOR",
+      "colunas": ["CODFOR", "NOMFOR", "NOMFANT", "INS_EST", "CGC_FOR", "ENDFOR", "NUMERO", "COMPLEMENTO", "BAIRRO", "CIDADE", "CEP", "UF", "FONE", "FAX", "EMAIL", "CONTATO", "PONTO_REF"]
+    },
+    {
+      "tabela": "PROD_FORNEC_01",
+      "colunas": ["COD_FORN", "COD_PROD", "COD_PFORN", "NOME_PFORN", "PRECO_VENDA"]
+    },
+    {
+      "tabela": "GRUPO",
+      "colunas": ["COD_GRUPO", "NOM_GRUPO", "PERC_VENDA"]
+    },
+    {
+      "tabela": "SUB_GRUPO",
+      "colunas": ["COD_GRUPO", "COD_SUB_GRUPO", "NOM_SUB_GRUPO", "ULTIMO_ITEM"]
+    },
+    {
+      "tabela": "POSICAO",
+      "colunas": ["CODPOS", "NOMPOS"]
+    },
+    {
+      "tabela": "ESTANTE_01",
+      "colunas": ["COD_ESTANTE", "NOME_ESTANTE"]
+    },
+    {
+      "tabela": "PRATELEIRA_01",
+      "colunas": ["COD_ESTANTE", "COD_PRATELEIRA", "NOME_PRATELEIRA"]
+    },
+    {
+      "tabela": "FINALIDADE",
+      "colunas": ["CODFINAL", "NOMFINAL"]
+    }
+  ]
+}

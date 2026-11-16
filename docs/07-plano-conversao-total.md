@@ -14,8 +14,9 @@ com paridade funcional e dados migrados do back-end `SISBIOSD_01.mdb`.
 |---|---|
 | Base web (login, dashboard, clientes, produtos, setores, usuários, auditoria) | pronto |
 | Módulo piloto Chamados / OS | **pronto** (fluxo completo testado) |
-| Tabelas criadas | 27 de Chamados/OS/Estoque + 5 tabelas base + domínios |
-| Dados migrados | setores, usuários, clientes, produtos e saldos de estoque |
+| Módulo Estoque / Produtos | **pronto (núcleo)** (entradas, saídas, inventário, estorno, catálogos, fornecedores) |
+| Tabelas criadas | 27 de Chamados/OS/Estoque + 11 tabelas próprias do Estoque + 5 base + domínios |
+| Dados migrados | setores, usuários, clientes, produtos, saldos, fornecedores e catálogos |
 | Regras documentadas | `docs/06-regras-chamados-os.md` (RN-001..283, VD-01..72, AC-01..24, D-01..D-10) |
 | Extração VBA | 107 forms e 25 relatórios **do módulo Chamados/OS** (filtro de nome) |
 | Banco | schema `material_grafico`, prefixo `biostech_` (DBA ainda não liberou schema próprio) |
@@ -34,7 +35,7 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 |---:|---|---:|---:|---|---|
 | 1 | Chamados / OS | 30 | 35.803 | **concluído (piloto)** | F2 |
 | 2 | Clientes / Escolas | 9 | 7.363 | parcial (clientes migrados; contratos/escolas/municípios pendentes) | F1 |
-| 3 | Estoque / Produtos | 40 | 24.650 | parcial (produtos e saldos; entradas, saídas, inventário e ferramentas pendentes) | F4 |
+| 3 | Estoque / Produtos | 40 | 24.650 | **concluído (núcleo)**: saldos, entradas, saídas, inventário, estorno, catálogos e fornecedores | F4 |
 | 4 | Orçamentos | 18 | 93.618 | pendente | F3 |
 | 5 | Financeiro | 32 | 141.663 | parcial (contas a receber do encerramento; contas a pagar, baixas, bancos e caixa pendentes) | F5 |
 | 6 | Compras | 8 | 19.203 | pendente | F4/F6 |
@@ -81,8 +82,14 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
   ferramentas, fornecedores do produto.
 - **Regras:** saldo nunca negativo (D-04); movimentos imutáveis; custo médio; reserva;
   baixa automática pelo encerramento (já implementada para Chamados).
-- **Já pronto:** `biostech_estoque_saldos` e `biostech_estoque_movimentos`, carga de
-  4.521 saldos, baixa por peça do Chamado.
+- **Já pronto (núcleo):** saldos e movimentos com lote, entrada/saída multi-item,
+  ajuste por contagem com cabeçalho de inventário, estorno por movimento inverso,
+  catálogos (grupos, subgrupos, posições, estantes, prateleiras, finalidades),
+  fornecedores e vínculo produto×fornecedor, autocomplete e ficha do produto.
+  Cargas: 2.188 fornecedores, 16 vínculos, 60 grupos, 468 subgrupos, 3 posições,
+  37 estantes, 900 prateleiras e 21 finalidades.
+- **Pendências:** transferência entre locais, reserva, custo médio ponderado, kits e
+  ferramentas (`KIT_FERRAMENTA_01..04`), mínimo/máximo automático e relatórios.
 
 ### 3.4 Orçamentos
 
@@ -231,7 +238,7 @@ Checklist obrigatório (repetir para cada um dos 14 módulos):
 | F1 | Acessos/Permissões, Clientes/Escolas, Equipamentos | cadastros completos e permissões |
 | F2 | Chamados/OS | **concluído** |
 | F3 | Orçamentos | orçamento comum e dimensionamento |
-| F4 | Estoque/Produtos, Compras | entradas, saídas, inventário, cotação e pedido |
+| F4 | Estoque/Produtos, Compras | **Estoque concluído (núcleo)**; Compras pendente |
 | F5 | Financeiro | CR/CP, caixa, banco, baixas e relatórios |
 | F6 | Faturamento/NF, Compras (recebimento) | NF, recibos, faturamento em lote |
 | F7 | RH, Frota | fichas, férias, benefícios, veículos e abastecimentos |
@@ -291,9 +298,9 @@ relatórios serão levantados na extração de cada um (o front-end tem ~300 rel
 
 ## 10. Próximos passos imediatos
 
-1. **Commit local** do módulo Chamados/OS (sem push).
-2. **Extrair o módulo Estoque** do front-end com filtro
-   `ESTOQUE|ENTRADA|SAIDA|PRODUTO|MATERIAL|FERRAMENTA|ESTANTE|PRATELEIRA|GRUPO|SUB_GRUPO|FINALIDADE|POSICAO|KIT`.
-3. Escrever `docs/08-regras-estoque.md` e o DDL `scripts/sql/04-estoque.sql`.
-4. Implementar entradas/saídas/inventário e telas de saldo.
-5. Repetir o ciclo para Orçamentos e Financeiro.
+1. **Commit local** do módulo Estoque (sem push).
+2. **Compras (F4/F6)**: cotação, pedido e recebimento (gera entrada de estoque e conta a pagar).
+3. **Orçamentos (F3)**: orçamento comum e de dimensionamento, itens/serviços, situação,
+   aprovação e conversão em Chamado/OS.
+4. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios.
+5. Pendências do Estoque: transferência, reserva, custo médio, kits/ferramentas e relatórios.

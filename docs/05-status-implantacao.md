@@ -36,7 +36,8 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 | Setores (lista, busca, CRUD) | `/setores` | pronto |
 | Usuários (lista, CRUD, senha, ativar/desativar) | `/usuarios` | pronto |
 | Chamados / OS (ficha, intervenções, peças, serviços, contatos, financeiro, status, encerramento, reabertura, par, impressão) | `/chamados` | **pronto (piloto)** |
-| Orçamentos, Estoque, Compras, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
+| Estoque (saldos, ficha, movimentos, entradas/saídas multi-item, ajuste/inventário, estorno, catálogos, fornecedores) | `/estoque` | **pronto (núcleo)** |
+| Orçamentos, Compras, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
 
 ---
 
@@ -50,6 +51,11 @@ Tabelas criadas no schema **`material_grafico`**, com prefixo `biostech_`:
 | `biostech_usuarios` | 26 | `USUARIOS` |
 | `biostech_clientes` | 4.773 | `CLIENTES` |
 | `biostech_produtos` | 4.522 (1.950 ativos) | `PRODUTO` |
+| `biostech_fornecedores` | 2.188 | `FORNECEDOR` |
+| `biostech_produto_fornecedor` | 16 | `PROD_FORNEC_01` |
+| `biostech_estoque_grupos` / `subgrupos` | 60 / 468 | `GRUPO`, `SUB_GRUPO` |
+| `biostech_estoque_posicoes` / `estantes` / `prateleiras` | 3 / 37 / 900 | `POSICAO`, `ESTANTE_01`, `PRATELEIRA_01` |
+| `biostech_estoque_finalidades` | 21 | `FINALIDADE` |
 | `biostech_auditoria` | — | nova (login/logout/CRUD) |
 
 > **Limitação de infraestrutura:** o usuário `matgrafico` não tem privilégio de
@@ -76,6 +82,26 @@ Criado por `scripts/sql/02-chamados-os.sql` e `scripts/sql/03-dominios-financeir
   (alteração por campo, com JSONB antes/depois).
 - **Regras**: `docs/06-regras-chamados-os.md` (RN-001..RN-283, VD-01..VD-72,
   AC-01..AC-24 e decisões D-01..D-10).
+
+### 2.2 Módulo Estoque
+
+Criado por `scripts/sql/04-estoque.sql` e carregado por `scripts/etl/estoque-catalogos.php`:
+
+- **Tabelas**: `biostech_fornecedores`, `biostech_produto_fornecedor`,
+  `biostech_estoque_grupos/subgrupos/posicoes/estantes/prateleiras/finalidades`,
+  `biostech_estoque_inventarios` e `biostech_estoque_inventario_itens`, além das
+  colunas de movimento (`lote`, `documento`, `fornecedor_id`, `setor_id`,
+  `funcionario_id`, `custo_unitario`, `motivo`, `origem`, `estornado`,
+  `estornado_por`, `inventario_id`).
+- **Telas**: saldos com filtros e ordenação, ficha do produto (saldo, consumido, valor,
+  localização, fornecedores, contagens), movimentos com filtros e estorno, entrada e
+  saída multi-item com autocomplete, ajuste por contagem, catálogos com edição inline,
+  fornecedores com vínculo de produtos.
+- **Regras**: saldo nunca negativo (D-04); correção apenas por estorno (movimento
+  inverso); movimento de Chamado/OS só é estornado pelo cancelamento do encerramento;
+  ajuste gera cabeçalho de inventário + item e movimento `tipo='ajuste'`; entrada
+  atualiza o custo do produto quando o custo informado é maior que zero.
+- **Numeração**: `biostech_estoque_lote_seq` agrupa os itens de cada operação.
 
 ---
 
@@ -128,6 +154,24 @@ Resultado: **todas as etapas ok**. Os dados do teste (`2026110002`..`2026110014`
 movimentos de estoque, CRs, numeração e equipamento `TESTE-AGENTE-01`) foram removidos
 e o saldo do produto 64 restaurado (126 unidades, 2.406 consumidas).
 
+### 4.2 Teste end-to-end do Estoque
+
+Executado por `teste-estoque.ps1` (PowerShell) contra `http://127.0.0.1:8090`, com
+produto temporário criado e removido no fim:
+
+1. login; 2. entrada de 10 unidades com custo (saldo 0 → 10, custo atualizado);
+3. saída de 3 unidades (saldo 7, consumidas 3); 4. saída de 999 bloqueada por saldo
+insuficiente (saldo preservado, sem movimento extra); 5. ajuste/contagem para 8
+(saldo 8, consumidas 2, inventário gravado, movimento `ajuste`); 6. estorno da saída
+(saldo 11, consumidas 0, saída marcada e apontando para o estorno); 7. estorno da
+entrada (saldo 1, consumidas 10); 8. estorno repetido bloqueado; 9. grupo e subgrupo
+criados, listados e excluídos; 10. fornecedor criado, produto vinculado e desvinculado;
+11. autocomplete de produto e de fornecedor.
+
+Resultado: **41 verificações ok, 0 falhas**. Ao final, produto, movimentos, saldos,
+inventários, catálogos `Z9T` e fornecedor de teste foram removidos; produto 64
+permaneceu com 126 unidades e 2.406 consumidas.
+
 Verificações complementares:
 
 - `php -l` em todos os arquivos da aplicação (fora `system/`): **0 erros**.
@@ -157,6 +201,11 @@ Verificações complementares:
 | Datas ISO quebravam `strtotime` | `SET datestyle TO 'ISO'` em `MY_Controller`/`MY_Model` |
 | Endpoints com formulário só de token caíam no redirect | `MY_Controller::eh_post()` no lugar de `input->post()` como booleano |
 | Teste PowerShell gerava `/chamados/ver/=servicos` (400) | `"$numero?aba"` é lido como variável `$numero?aba`; usar `${numero}?` |
+| `ativo` booleano recusava `1` no INSERT de fornecedor | cast `?::boolean` no `Estoque_model` |
+| `input->post()` devolve `FALSE` e virava código `0` | helper `_vazio()` no `Estoque_model` |
+| Constraint `tipo_ck` não aceitava `ajuste` | recriada em `scripts/sql/04-estoque.sql` |
+| Autocomplete não achava código em maiúsculas | `lower(p.codigo) LIKE ?` |
+| `strtoupper` corrompia UTF-8 nos catálogos | `mb_strtoupper` |
 
 ---
 
@@ -166,8 +215,9 @@ Verificações complementares:
 2. **Staging 1:1 do legado** (`biostech_legacy`) — o DDL completo está em
    `docs/04-schema-legacy-postgresql.sql` (243 tabelas).
 3. **Próximos módulos** — matriz completa em `docs/07-plano-conversao-total.md`.
-   Ordem sugerida: Estoque, Orçamentos, Financeiro, Compras, Faturamento/NF,
-   Clientes/Escolas (complementos), Equipamentos, RH, Frota, Acessos/Permissões.
+   Chamados/OS e o núcleo do Estoque estão prontos. Ordem sugerida: Orçamentos,
+   Financeiro, Compras, Faturamento/NF, Clientes/Escolas (complementos), Equipamentos,
+   RH, Frota, Acessos/Permissões.
 4. **Normalização de dados sujos** — datas herdadas inválidas (1899, 0202, 0209, 1976,
    2106, 7201, 7202) precisam de quarentena antes de relatórios.
 5. **Validação dos perfis** com os usuários do legado (o VBA do formulário `USUARIO` não
