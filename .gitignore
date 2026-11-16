@@ -1,0 +1,14 @@
+# Sessoes e cache da aplicacao
+application/cache/*
+!application/cache/index.html
+application/logs/*
+!application/logs/index.html
+
+# Dados exportados do Access (contem dados pessoais reais)
+scripts/etl/dados/
+
+# Temporarios
+*.log
+*.bak
+Thumbs.db
+.DS_Store

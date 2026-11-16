@@ -1,0 +1,28 @@
+{
+  "tabelas": [
+    {
+      "tabela": "SETORES",
+      "colunas": ["CODSETOR", "NOMSETOR"]
+    },
+    {
+      "tabela": "USUARIOS",
+      "colunas": ["USUARIO", "NOMUSU", "SENHA", "PRIVILEGIADO", "SETOR", "CODFUN", "ACESSO_ALMOX"]
+    },
+    {
+      "tabela": "CLIENTES",
+      "colunas": [
+        "CODCLI", "NOMCLI", "NOME_FANTASIA", "TIPO", "INS_EST", "CGC_CLI", "CPF", "RG",
+        "ENDCLI", "NUMERO", "COMPLEMENTO", "BAIRRO", "CIDADE", "CEP", "UF",
+        "FONE", "FAX", "CELULAR", "CONTATO", "EMAIL", "DATA_CADASTRO", "OBSERVACAO"
+      ]
+    },
+    {
+      "tabela": "PRODUTO",
+      "colunas": [
+        "COD_PROD", "COD_COMPLETO", "DES_PROD", "UNI_PROD", "EST_MINIMO",
+        "VALOR_COMPRA", "VALOR_VENDA", "GRUPO", "SUB_GRUPO", "ESTANTE", "PRATELEIRA",
+        "MARCA", "APLICACAO", "ATIVO", "SITUACAO"
+      ]
+    }
+  ]
+}
