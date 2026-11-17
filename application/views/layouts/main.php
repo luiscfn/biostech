@@ -27,7 +27,7 @@
             <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
             <span class="item">Orcamentos <span class="tag">em breve</span></span>
             <a class="item <?= $menu_ativo === 'estoque' ? 'ativo' : '' ?>" href="<?= site_url('estoque') ?>">Estoque</a>
-            <span class="item">Compras <span class="tag">em breve</span></span>
+            <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
             <span class="item">Financeiro <span class="tag">em breve</span></span>
 
             <div class="grupo">Cadastros</div>

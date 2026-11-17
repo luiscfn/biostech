@@ -46,7 +46,7 @@ class Estoque_model extends MY_Model
 
         if ($busca !== '')
         {
-            $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+            $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
             $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
             $onde[] = '(' . sprintf($sem_acento, 'p.descricao') . ' LIKE ?'
@@ -222,7 +222,7 @@ class Estoque_model extends MY_Model
 
         if ($busca !== '')
         {
-            $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+            $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
             $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
             $onde[] = '(' . sprintf($sem_acento, 'p.descricao') . ' LIKE ? OR lower(p.codigo) LIKE ?)';
@@ -323,17 +323,17 @@ class Estoque_model extends MY_Model
     // Entradas / saidas
     // ==================================================================
 
-    public function entrada($itens, $cabecalho, $usuario)
+    public function entrada($itens, $cabecalho, $usuario, $transacao = TRUE)
     {
-        return $this->_movimentar('entrada', $itens, $cabecalho, $usuario);
+        return $this->_movimentar('entrada', $itens, $cabecalho, $usuario, $transacao);
     }
 
-    public function saida($itens, $cabecalho, $usuario)
+    public function saida($itens, $cabecalho, $usuario, $transacao = TRUE)
     {
-        return $this->_movimentar('saida', $itens, $cabecalho, $usuario);
+        return $this->_movimentar('saida', $itens, $cabecalho, $usuario, $transacao);
     }
 
-    private function _movimentar($tipo, $itens, $cabecalho, $usuario)
+    private function _movimentar($tipo, $itens, $cabecalho, $usuario, $transacao = TRUE)
     {
         if ( ! in_array($tipo, array('entrada', 'saida'), TRUE))
         {
@@ -354,7 +354,21 @@ class Estoque_model extends MY_Model
         $funcionario = ! empty($cabecalho['funcionario_id']) ? (int) $cabecalho['funcionario_id'] : NULL;
         $motivo     = isset($cabecalho['motivo']) ? trim((string) $cabecalho['motivo']) : NULL;
 
-        $this->db->trans_start();
+        $origem = isset($cabecalho['origem']) ? strtolower(trim((string) $cabecalho['origem'])) : 'manual';
+
+        if ( ! in_array($origem, array('manual', 'chamado', 'compra', 'inventario'), TRUE))
+        {
+            $origem = 'manual';
+        }
+
+        $origem_id = isset($cabecalho['origem_id']) && trim((string) $cabecalho['origem_id']) !== ''
+            ? trim((string) $cabecalho['origem_id'])
+            : NULL;
+
+        if ($transacao)
+        {
+            $this->db->trans_start();
+        }
 
         foreach ($itens as $item)
         {
@@ -365,7 +379,11 @@ class Estoque_model extends MY_Model
 
             if (empty($produto))
             {
-                $this->db->trans_rollback();
+                if ($transacao)
+                {
+                    $this->db->trans_rollback();
+                }
+
                 return array('ok' => FALSE, 'erro' => 'Produto ' . $item['produto_id'] . ' nao encontrado.');
             }
 
@@ -399,7 +417,11 @@ class Estoque_model extends MY_Model
 
                 if ($posterior < 0)
                 {
-                    $this->db->trans_rollback();
+                    if ($transacao)
+                    {
+                        $this->db->trans_rollback();
+                    }
+
                     return array(
                         'ok'   => FALSE,
                         'erro' => $produto['descricao'] . ': saldo insuficiente (disponivel ' . $anterior . ', solicitado ' . $qtd . ').',
@@ -425,7 +447,8 @@ class Estoque_model extends MY_Model
                 'funcionario_id'  => $funcionario,
                 'custo_unitario'  => $item['custo_unitario'],
                 'motivo'          => $motivo,
-                'origem'          => 'manual',
+                'origem'          => $origem,
+                'origem_id'       => $origem_id,
             ));
 
             $this->db->query(
@@ -444,11 +467,14 @@ class Estoque_model extends MY_Model
             }
         }
 
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE)
+        if ($transacao)
         {
-            return array('ok' => FALSE, 'erro' => 'Falha ao gravar o movimento.');
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE)
+            {
+                return array('ok' => FALSE, 'erro' => 'Falha ao gravar o movimento.');
+            }
         }
 
         return array('ok' => TRUE, 'erro' => NULL, 'lote' => $lote, 'itens' => count($itens));
@@ -624,11 +650,14 @@ class Estoque_model extends MY_Model
         )->result_array();
     }
 
-    public function estornar($movimento_id, $motivo, $usuario)
+    public function estornar($movimento_id, $motivo, $usuario, $transacao = TRUE)
     {
         $movimento_id = (int) $movimento_id;
 
-        $this->db->trans_start();
+        if ($transacao)
+        {
+            $this->db->trans_start();
+        }
 
         $m = $this->db->query(
             "SELECT * FROM " . T_ESTOQUE_MOVIMENTOS . " WHERE id = ? FOR UPDATE",
@@ -637,19 +666,31 @@ class Estoque_model extends MY_Model
 
         if (empty($m))
         {
-            $this->db->trans_rollback();
+            if ($transacao)
+            {
+                $this->db->trans_rollback();
+            }
+
             return array('ok' => FALSE, 'erro' => 'Movimento nao encontrado.');
         }
 
         if (bd_bool($m['estornado']))
         {
-            $this->db->trans_rollback();
+            if ($transacao)
+            {
+                $this->db->trans_rollback();
+            }
+
             return array('ok' => FALSE, 'erro' => 'Este movimento ja foi estornado.');
         }
 
         if ($m['origem'] === 'chamado')
         {
-            $this->db->trans_rollback();
+            if ($transacao)
+            {
+                $this->db->trans_rollback();
+            }
+
             return array('ok' => FALSE, 'erro' => 'Movimento de Chamado/OS deve ser estornado pelo cancelamento do encerramento.');
         }
 
@@ -663,7 +704,11 @@ class Estoque_model extends MY_Model
 
         if (empty($saldo))
         {
-            $this->db->trans_rollback();
+            if ($transacao)
+            {
+                $this->db->trans_rollback();
+            }
+
             return array('ok' => FALSE, 'erro' => 'Saldo do produto nao encontrado.');
         }
 
@@ -678,7 +723,11 @@ class Estoque_model extends MY_Model
 
             if ($posterior < 0)
             {
-                $this->db->trans_rollback();
+                if ($transacao)
+                {
+                    $this->db->trans_rollback();
+                }
+
                 return array('ok' => FALSE, 'erro' => 'Estorno deixaria o saldo negativo (disponivel ' . $anterior . ').');
             }
 
@@ -700,7 +749,11 @@ class Estoque_model extends MY_Model
 
                 if ($posterior < 0)
                 {
-                    $this->db->trans_rollback();
+                    if ($transacao)
+                    {
+                        $this->db->trans_rollback();
+                    }
+
                     return array('ok' => FALSE, 'erro' => 'Estorno deixaria o saldo negativo.');
                 }
             }
@@ -727,7 +780,10 @@ class Estoque_model extends MY_Model
             'setor_id'        => $m['setor_id'],
             'funcionario_id'  => $m['funcionario_id'],
             'custo_unitario'  => $m['custo_unitario'],
-            'motivo'          => 'Estorno do movimento #' . $movimento_id . ($motivo ? ' - ' . $motivo : ''),
+            'motivo'          => mb_substr(
+                'Estorno do movimento #' . $movimento_id . ($motivo ? ' - ' . $motivo : ''),
+                0, 80, 'UTF-8'
+            ),
             'origem'          => 'estorno',
         ));
 
@@ -749,11 +805,14 @@ class Estoque_model extends MY_Model
             array($novo_id, $movimento_id)
         );
 
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE)
+        if ($transacao)
         {
-            return array('ok' => FALSE, 'erro' => 'Falha ao estornar o movimento.');
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE)
+            {
+                return array('ok' => FALSE, 'erro' => 'Falha ao estornar o movimento.');
+            }
         }
 
         return array('ok' => TRUE, 'erro' => NULL, 'movimento' => $novo_id);
@@ -1037,7 +1096,7 @@ class Estoque_model extends MY_Model
             return array();
         }
 
-        $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+        $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
         $like       = '%' . mb_strtolower($termo, 'UTF-8') . '%';
 
         $sql = "SELECT p.id, p.codigo, p.descricao, p.unidade, p.valor_compra, p.valor_venda,
@@ -1087,7 +1146,7 @@ class Estoque_model extends MY_Model
             return array('', array());
         }
 
-        $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+        $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
         $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
         $onde = '(' . sprintf($sem_acento, 'razao_social') . ' LIKE ?'

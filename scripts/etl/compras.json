@@ -1,0 +1,104 @@
+{
+  "tabelas": [
+    {
+      "tabela": "SOLICITACAO_COMPRA_01",
+      "arquivo": "compras_pedidos",
+      "colunas": [
+        "NUMREQ", "DATA", "HORA", "SETOR", "FUNC", "COD_FORN", "COD_SOLIC_COMPRA",
+        "SOLIC_COMPRA", "OBSERV_GERAL", "REPOR_ESTOQUE", "REPOR_VENDA",
+        "ATENDER_PROP_APROV", "NUM_PROPOSTA", "DESCONTO", "CODPAG", "ENTREGA",
+        "FORN_PROD", "NUM_NF_FORNEC", "DATA_NF_FORNEC", "FECHAMENTO", "DATAVENC",
+        "TIPO", "COD_CC", "FORMA_REC", "DOC_REC", "COD_CP", "DESC_PERC",
+        "LOCAL_ENTREGA", "RESP_RECEBIMENTO", "FONE_RESP_REC", "USUARIO",
+        "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO",
+        "DATA_ULTIMA_ALTERACAO", "USUARIO_FECHAMENTO", "DATA_FECHAMENTO",
+        "QTDIAS", "TOTPARC", "VALTOT",
+        "NPARC1", "VPARC1", "QTDIAS1", "DVENC1",
+        "NPARC2", "VPARC2", "QTDIAS2", "DVENC2",
+        "NPARC3", "VPARC3", "QTDIAS3", "DVENC3",
+        "NPARC4", "VPARC4", "QTDIAS4", "DVENC4",
+        "NPARC5", "VPARC5", "QTDIAS5", "DVENC5",
+        "NPARC6", "VPARC6", "QTDIAS6", "DVENC6",
+        "NPARC7", "VPARC7", "QTDIAS7", "DVENC7",
+        "NPARC8", "VPARC8", "QTDIAS8", "DVENC8",
+        "NPARC9", "VPARC9", "QTDIAS9", "DVENC9",
+        "NPARC10", "VPARC10", "QTDIAS10", "DVENC10",
+        "NPARC11", "VPARC11", "QTDIAS11", "DVENC11",
+        "NPARC12", "VPARC12", "QTDIAS12", "DVENC12"
+      ]
+    },
+    {
+      "tabela": "SOLICITACAO_COMPRA_02",
+      "arquivo": "compras_itens",
+      "colunas": [
+        "NUMREQ", "COD_PROD", "DESPROD", "QTDE", "VALUNIT", "NEW_VALUNIT",
+        "DESC_PERC", "DESC_ITEM", "VALTOT", "OBS_PROD", "ATUALIZA_PCOMPRA",
+        "USUARIO_CADASTRO", "DATA_CADASTRO"
+      ]
+    },
+    {
+      "tabela": "COTACAO_PRECOS_01",
+      "arquivo": "compras_cotacoes",
+      "colunas": [
+        "COD_COTACAO", "DATA_COTACAO", "NUM_OS", "SOLICITANTE", "FUNC_COTOU",
+        "OBSERVACAO"
+      ]
+    },
+    {
+      "tabela": "COTACAO_PRECOS_02",
+      "arquivo": "compras_cotacao_itens",
+      "colunas": [
+        "COD_COTACAO", "COD_PROD", "DESPROD", "QTDE", "FORNEC_01", "PRECO_01",
+        "FORNEC_02", "PRECO_02", "FORNEC_03", "PRECO_03", "FORNEC_ESCOLHIDO"
+      ]
+    },
+    {
+      "tabela": "FORNECEDOR_PRAZOS",
+      "arquivo": "compras_prazos",
+      "colunas": ["CODFOR", "COD_PRAZO", "FORMA_PAGTO", "PRAZO"]
+    },
+    {
+      "tabela": "SOLICITACAO_COMPRA_01A",
+      "arquivo": "compras_solicitacoes",
+      "colunas": [
+        "NUMREQ", "DATA", "HORA", "SETOR", "FUNC", "FECHAMENTO", "EXPORTADO",
+        "COTADO", "LOCAL_ENTREGA", "RESP_RECEBIMENTO", "FONE_RESP_REC",
+        "COD_PED_COMPRA", "USUARIO_CADASTRO", "DATA_CADASTRO",
+        "USUARIO_FECHAMENTO", "DATA_FECHAMENTO"
+      ]
+    },
+    {
+      "tabela": "SOLICITACAO_COMPRA_02A",
+      "arquivo": "compras_solicitacao_itens",
+      "colunas": [
+        "NUMREQ", "COD_PROD", "DES_PROD", "QTDE", "SELECIONADO", "EXPORTADO",
+        "COTADO", "REP_EST", "DATA_UTILIZACAO", "PERIODO", "USUARIO_CADASTRO",
+        "DATA_CADASTRO"
+      ]
+    },
+    {
+      "tabela": "SOLICITACAO_COMPRA_LOG_01",
+      "arquivo": "compras_log_pedidos",
+      "colunas": [
+        "ID", "DATAMOV", "USUARIO", "TIPOMOV", "NUMREQ", "DATA", "DATA_OLD",
+        "SETOR", "SETOR_OLD", "SOLIC_COMPRA", "SOLIC_COMPRA_OLD", "COD_FORN",
+        "COD_FORN_OLD", "CODPAG", "CODPAG_OLD", "ENTREGA", "ENTREGA_OLD",
+        "LOCAL_ENTREGA", "LOCAL_ENTREGA_OLD", "NUM_NF_FORNEC", "NUM_NF_FORNEC_OLD",
+        "DATA_NF_FORNEC", "DATA_NF_FORNEC_OLD", "RESP_RECEBIMENTO",
+        "RESP_RECEBIMENTO_OLD", "OBSERV_GERAL", "OBSERV_GERAL_OLD",
+        "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO"
+      ]
+    },
+    {
+      "tabela": "SOLICITACAO_COMPRA_LOG_01A",
+      "arquivo": "compras_log_solicitacoes",
+      "colunas": [
+        "ID", "DATAMOV", "USUARIO", "TIPOMOV", "NUMREQ", "DATA", "DATA_OLD",
+        "SETOR", "SETOR_OLD", "FUNC", "FUNC_OLD", "LOCAL_ENTREGA",
+        "LOCAL_ENTREGA_OLD", "RESP_RECEBIMENTO", "RESP_RECEBIMENTO_OLD",
+        "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_FECHAMENTO",
+        "DATA_FECHAMENTO"
+      ]
+    }
+  ]
+}

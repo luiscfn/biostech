@@ -106,6 +106,7 @@ ALTER TABLE {schema}.biostech_estoque_movimentos
     ADD COLUMN IF NOT EXISTS custo_unitario   numeric(15,4),
     ADD COLUMN IF NOT EXISTS motivo           varchar(80),
     ADD COLUMN IF NOT EXISTS origem           varchar(20) NOT NULL DEFAULT 'manual',
+    ADD COLUMN IF NOT EXISTS origem_id        varchar(30),
     ADD COLUMN IF NOT EXISTS estornado        boolean NOT NULL DEFAULT false,
     ADD COLUMN IF NOT EXISTS estornado_por    bigint,
     ADD COLUMN IF NOT EXISTS inventario_id    bigint;

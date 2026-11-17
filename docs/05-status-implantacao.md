@@ -37,7 +37,8 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 | Usuários (lista, CRUD, senha, ativar/desativar) | `/usuarios` | pronto |
 | Chamados / OS (ficha, intervenções, peças, serviços, contatos, financeiro, status, encerramento, reabertura, par, impressão) | `/chamados` | **pronto (piloto)** |
 | Estoque (saldos, ficha, movimentos, entradas/saídas multi-item, ajuste/inventário, estorno, catálogos, fornecedores) | `/estoque` | **pronto (núcleo)** |
-| Orçamentos, Compras, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
+| Compras (pedidos, itens, parcelas, fechamento/recebimento, cotações, solicitações internas, prazos, contas a pagar, impressão) | `/compras` | **pronto** |
+| Orçamentos, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
 
 ---
 
@@ -102,6 +103,30 @@ Criado por `scripts/sql/04-estoque.sql` e carregado por `scripts/etl/estoque-cat
   ajuste gera cabeçalho de inventário + item e movimento `tipo='ajuste'`; entrada
   atualiza o custo do produto quando o custo informado é maior que zero.
 - **Numeração**: `biostech_estoque_lote_seq` agrupa os itens de cada operação.
+
+### 2.3 Módulo Compras
+
+Criado por `scripts/sql/05-compras.sql` e carregado por `scripts/etl/compras.php`:
+
+- **Tabelas** (10): `biostech_compras_pedidos`, `_itens`, `_parcelas`, `_cotacoes`,
+  `_cotacao_itens`, `_solicitacoes`, `_solicitacao_itens`,
+  `biostech_fornecedor_prazos`, `biostech_contas_pagar` e `biostech_compras_log`.
+- **Dados migrados**: 2.694 pedidos (236 abertos / 2.458 fechados), 7.316 itens,
+  251 parcelas, 184 cotações, 696 itens de cotação, 1.119 solicitações
+  (972 abertas / 147 fechadas), 7.071 itens de solicitação, 44 prazos e 298 logs.
+- **Telas**: pedidos com filtros, paginação e ficha em abas (dados, itens, parcelas,
+  contas a pagar, histórico); formulário multi-item com autocomplete e cálculo de
+  desconto/total; fechamento com parcelas e recebimento; cotações com três
+  fornecedores por item e mapa comparativo; solicitações internas com sugestão de
+  produtos abaixo do mínimo; prazos por fornecedor; três impressões.
+- **Operações herdadas do Access**: gerar pedido da solicitação, importar solicitação
+  para cotação, transferir item entre pedidos, excluir item, replicar pedido,
+  fechar/cancelar fechamento, cancelar/reabrir pedido.
+- **Integração**: o fechamento gera entrada de estoque (`origem='compra'`) e títulos
+  em `biostech_contas_pagar` na mesma transação; o cancelamento estorna o estoque e
+  cancela os títulos logicamente.
+- **Numeração**: `PC`, `COT`, `SC` e `CP` na library `Numeracao`.
+- **Regras**: `docs/08-regras-compras.md`.
 
 ---
 
@@ -172,6 +197,22 @@ Resultado: **41 verificações ok, 0 falhas**. Ao final, produto, movimentos, sa
 inventários, catálogos `Z9T` e fornecedor de teste foram removidos; produto 64
 permaneceu com 126 unidades e 2.406 consumidas.
 
+### 4.3 Teste end-to-end de Compras
+
+Executado por `php scripts/test/compras.php` (PHP + `curl` + `PDO`) contra
+`http://127.0.0.1:8090`:
+
+1. login e perfil; 2. criação de pedido com 2 itens (bruto 21,00); 3. edição com 10%
+de desconto (total 18,90); 4. fechamento com 2 parcelas, 2 títulos a pagar e 2
+movimentos de estoque; 5. saldo, custo, último pedido e última NF do produto;
+6. abas e impressão do pedido fechado; 7. cancelamento do fechamento (títulos
+cancelados, movimentos estornados, saldo restaurado); 8. replicação, exclusão de itens,
+transferência e devolução de item; 9. cancelamento, reabertura e exclusão do pedido;
+10. solicitação interna → cotação → pedido gerado; 11. prazos de fornecedor.
+
+Resultado: **100 verificações ok, 0 falhas**. O teste remove os pedidos, cotações e
+solicitações criados e restaura produtos e saldos ao final.
+
 Verificações complementares:
 
 - `php -l` em todos os arquivos da aplicação (fora `system/`): **0 erros**.
@@ -206,6 +247,11 @@ Verificações complementares:
 | Constraint `tipo_ck` não aceitava `ajuste` | recriada em `scripts/sql/04-estoque.sql` |
 | Autocomplete não achava código em maiúsculas | `lower(p.codigo) LIKE ?` |
 | `strtoupper` corrompia UTF-8 nos catálogos | `mb_strtoupper` |
+| Desconto do cabeçalho e dos itens colidiam em `desconto_percentual` | cabeçalho renomeado para `desconto_pedido_percentual` |
+| Pedido gerado da solicitação era recusado por falta de fornecedor | `salvar_pedido(..., $permite_sem_fornecedor = TRUE)` |
+| Itens apontando para produto inexistente sumiam das listagens | `_produtos_existem()` valida os ids antes de gravar |
+| Estorno de compra falhava com `value too long for varchar(80)` no `motivo` | `Estoque_model::estornar()` trunca o motivo em 80 caracteres |
+| Teste funcional escolhia produto de código `0` | seleção restrita a `id > 0` |
 
 ---
 
@@ -215,9 +261,9 @@ Verificações complementares:
 2. **Staging 1:1 do legado** (`biostech_legacy`) — o DDL completo está em
    `docs/04-schema-legacy-postgresql.sql` (243 tabelas).
 3. **Próximos módulos** — matriz completa em `docs/07-plano-conversao-total.md`.
-   Chamados/OS e o núcleo do Estoque estão prontos. Ordem sugerida: Orçamentos,
-   Financeiro, Compras, Faturamento/NF, Clientes/Escolas (complementos), Equipamentos,
-   RH, Frota, Acessos/Permissões.
+   Chamados/OS, o núcleo do Estoque e Compras estão prontos. Ordem sugerida:
+   Orçamentos, Financeiro, Faturamento/NF, Clientes/Escolas (complementos),
+   Equipamentos, RH, Frota, Acessos/Permissões.
 4. **Normalização de dados sujos** — datas herdadas inválidas (1899, 0202, 0209, 1976,
    2106, 7201, 7202) precisam de quarentena antes de relatórios.
 5. **Validação dos perfis** com os usuários do legado (o VBA do formulário `USUARIO` não

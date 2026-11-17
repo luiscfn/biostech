@@ -38,7 +38,7 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 | 3 | Estoque / Produtos | 40 | 24.650 | **concluído (núcleo)**: saldos, entradas, saídas, inventário, estorno, catálogos e fornecedores | F4 |
 | 4 | Orçamentos | 18 | 93.618 | pendente | F3 |
 | 5 | Financeiro | 32 | 141.663 | parcial (contas a receber do encerramento; contas a pagar, baixas, bancos e caixa pendentes) | F5 |
-| 6 | Compras | 8 | 19.203 | pendente | F4/F6 |
+| 6 | Compras | 8 | 19.203 | **concluído**: pedidos, itens, parcelas, fechamento/recebimento, cotações (3 fornecedores), solicitações internas, prazos e contas a pagar | F4/F6 |
 | 7 | Faturamento / NF | 9 | 4.019 | pendente | F6 |
 | 8 | Equipamentos | 6 | 12.076 | pendente (só a ficha usada pelo Chamado) | F1/F2 |
 | 9 | Auxiliares | 14 | 2.271 | parcial (domínios importados 1:1) | contínuo |
@@ -114,13 +114,26 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 - **Regras:** baixa parcial/total, juros/multa/desconto, `VLIQ`, ISS, retenções,
   fechamento de caixa, numeração de documentos.
 
-### 3.6 Compras
+### 3.6 Compras — concluído
 
-- **Tabelas:** `SOLICITACAO_COMPRA_01/01A/02/02A`, `COTACAO_PRECOS_01/02`,
-  `SOLICITACAO_COMPRA_PVENDA_01/02`.
-- **Telas:** solicitação, cotação (3 fornecedores), mapa comparativo, aprovação, pedido,
-  recebimento (gera entrada de estoque e conta a pagar).
-- **Dependências:** Estoque, Financeiro, Fornecedores.
+- **Tabelas Access:** `SOLICITACAO_COMPRA_01/01A/02/02A`, `COTACAO_PRECOS_01/02`,
+  `FORNECEDOR_PRAZOS`, `SOLICITACAO_COMPRA_LOG_01/01A` e `CONTAS_PAGAR_01`
+  (no Access, `_01/_02` são o pedido e `_01A/_02A` a solicitação interna).
+- **Tabelas novas (10):** ver `scripts/sql/05-compras.sql`.
+- **Telas:** pedidos (lista, ficha em abas, formulário multi-item, fechamento),
+  cotações (3 fornecedores por item e mapa comparativo), solicitações internas
+  (com sugestão de produtos abaixo do mínimo), prazos de fornecedor e três impressões.
+- **Operações herdadas:** `F_PEDIDO_COMPRA_01A`, `F_CONFIRMA_COTACAO_PRECO_01`,
+  `F_TRANSFERE_ITEM_PEDIDO_COMPRA_01`, `F_CANCELA_ITEM_PEDIDO_COMPRA_01`,
+  `C_replica_PEDIDO_COMPRA_01`, `F_CONFIRMA_PEDIDO_COMPRA_011` e cancelamento do
+  fechamento.
+- **Integrações:** fechamento gera entrada de estoque e títulos a pagar na mesma
+  transação; cancelamento estorna estoque e cancela títulos logicamente; atualiza
+  custo, último pedido, última NF e preço de venda do produto.
+- **Numeração:** `PC`, `COT`, `SC` e `CP` (library `Numeracao`).
+- **Regras:** `docs/08-regras-compras.md`.
+- **Pendências:** gerar pedido diretamente da cotação aprovada; 17 dos 20 relatórios do
+  módulo; baixa financeira dos títulos (módulo Financeiro); recebimento parcial por NF.
 
 ### 3.7 Faturamento / NF
 
@@ -238,7 +251,7 @@ Checklist obrigatório (repetir para cada um dos 14 módulos):
 | F1 | Acessos/Permissões, Clientes/Escolas, Equipamentos | cadastros completos e permissões |
 | F2 | Chamados/OS | **concluído** |
 | F3 | Orçamentos | orçamento comum e dimensionamento |
-| F4 | Estoque/Produtos, Compras | **Estoque concluído (núcleo)**; Compras pendente |
+| F4 | Estoque/Produtos, Compras | **Estoque concluído (núcleo)**; **Compras concluído** |
 | F5 | Financeiro | CR/CP, caixa, banco, baixas e relatórios |
 | F6 | Faturamento/NF, Compras (recebimento) | NF, recibos, faturamento em lote |
 | F7 | RH, Frota | fichas, férias, benefícios, veículos e abastecimentos |
@@ -264,6 +277,10 @@ Foram extraídos **25 relatórios** do módulo Chamados/OS:
 Estratégia: uma view PHP por relatório, com filtros equivalentes aos parâmetros do
 Access, saída HTML `@media print` e opção de PDF pelo navegador. Nos demais módulos, os
 relatórios serão levantados na extração de cada um (o front-end tem ~300 relatórios).
+
+No módulo Compras foram levantados **20 relatórios**; já convertidos: pedido de compra,
+cotação (mapa comparativo) e solicitação interna. Faltam os relatórios por período,
+fornecedor, produto e curva de preços.
 
 ---
 
@@ -298,9 +315,11 @@ relatórios serão levantados na extração de cada um (o front-end tem ~300 rel
 
 ## 10. Próximos passos imediatos
 
-1. **Commit local** do módulo Estoque (sem push).
-2. **Compras (F4/F6)**: cotação, pedido e recebimento (gera entrada de estoque e conta a pagar).
-3. **Orçamentos (F3)**: orçamento comum e de dimensionamento, itens/serviços, situação,
+1. **Commit local** do módulo Compras (sem push).
+2. **Orçamentos (F3)**: orçamento comum e de dimensionamento, itens/serviços, situação,
    aprovação e conversão em Chamado/OS.
-4. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios.
+3. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios (inclui a baixa dos
+   títulos gerados por Compras e Chamados).
+4. **Compras — complementos**: gerar pedido da cotação aprovada, recebimento parcial
+   por NF e os relatórios restantes do módulo.
 5. Pendências do Estoque: transferência, reserva, custo médio, kits/ferramentas e relatórios.

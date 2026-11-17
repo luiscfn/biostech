@@ -50,6 +50,18 @@ define('T_ORCAMENTO_SERVICOS',    DB_SCHEMA . '.biostech_orcamento_servicos');
 define('T_CONTAS_RECEBER',        DB_SCHEMA . '.biostech_contas_receber');
 define('T_CONTAS_RECEBER_BAIXAS', DB_SCHEMA . '.biostech_contas_receber_baixas');
 
+// Modulo Compras
+define('T_COMPRAS_PEDIDOS',           DB_SCHEMA . '.biostech_compras_pedidos');
+define('T_COMPRAS_ITENS',             DB_SCHEMA . '.biostech_compras_itens');
+define('T_COMPRAS_PARCELAS',          DB_SCHEMA . '.biostech_compras_parcelas');
+define('T_COMPRAS_COTACOES',          DB_SCHEMA . '.biostech_compras_cotacoes');
+define('T_COMPRAS_COTACAO_ITENS',     DB_SCHEMA . '.biostech_compras_cotacao_itens');
+define('T_COMPRAS_SOLICITACOES',      DB_SCHEMA . '.biostech_compras_solicitacoes');
+define('T_COMPRAS_SOLICITACAO_ITENS', DB_SCHEMA . '.biostech_compras_solicitacao_itens');
+define('T_FORNECEDOR_PRAZOS',         DB_SCHEMA . '.biostech_fornecedor_prazos');
+define('T_CONTAS_PAGAR',              DB_SCHEMA . '.biostech_contas_pagar');
+define('T_COMPRAS_LOG',               DB_SCHEMA . '.biostech_compras_log');
+
 // Nome do sistema
 define('APP_NOME', 'BIOSTECH');
 define('APP_VERSAO', '1.0.0');
