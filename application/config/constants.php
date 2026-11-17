@@ -89,6 +89,11 @@ define('T_FIN_BALANCO',            DB_SCHEMA . '.biostech_fin_balanco');
 define('T_CONTAS_PAGAR_BAIXAS',    DB_SCHEMA . '.biostech_contas_pagar_baixas');
 define('T_CONTAS_PAGAR_LOG',       DB_SCHEMA . '.biostech_contas_pagar_log');
 
+// Modulo Tabelas Basicas
+define('T_BASICO_PARAMETROS', DB_SCHEMA . '.biostech_basico_parametros');
+define('T_BASICO_MODULOS',    DB_SCHEMA . '.biostech_basico_modulos');
+define('T_BASICO_PROGRAMAS',  DB_SCHEMA . '.biostech_basico_programas');
+
 // Nome do sistema
 define('APP_NOME', 'BIOSTECH');
 define('APP_VERSAO', '1.0.0');

@@ -1,0 +1,73 @@
+{
+  "tabelas": [
+    {
+      "tabela": "TIPO_EQUIPAMENTO",
+      "arquivo": "basico_tipos_equipamento",
+      "colunas": ["CODTIPO", "NOMTIPO"]
+    },
+    {
+      "tabela": "STATUS_OS",
+      "arquivo": "basico_status_os",
+      "colunas": ["CODSTATUS", "NOMSTATUS"]
+    },
+    {
+      "tabela": "STATUS_EQUIP",
+      "arquivo": "basico_status_equipamento",
+      "colunas": ["CODSTATUS", "NOMSTATUS"]
+    },
+    {
+      "tabela": "CODICAO_PAGTO",
+      "arquivo": "basico_condicoes_pagamento",
+      "colunas": ["CODPAGTO", "NOMPAGTO", "DESCONTO"]
+    },
+    {
+      "tabela": "SIT_ORCAMENTO_01",
+      "arquivo": "basico_situacoes_orcamento",
+      "colunas": ["COD_SIT_01", "NOM_SIT_01"]
+    },
+    {
+      "tabela": "SIT_ORCAMENTO_02",
+      "arquivo": "basico_resultados_orcamento",
+      "colunas": ["COD_SIT_02", "NOM_SIT_02"]
+    },
+    {
+      "tabela": "FINALIDADE",
+      "arquivo": "basico_finalidades",
+      "colunas": ["CODFINAL", "NOMFINAL"]
+    },
+    {
+      "tabela": "FUNCOES",
+      "arquivo": "basico_funcoes",
+      "colunas": ["CODFUNCAO", "NOMEFUNCAO", "VALOR"]
+    },
+    {
+      "tabela": "TIPO_PAGTO",
+      "arquivo": "basico_tipos_pagamento",
+      "colunas": ["CODPAGTO", "NOMPAGTO"]
+    },
+    {
+      "tabela": "NAT_OPERACAO",
+      "arquivo": "basico_naturezas_nota",
+      "colunas": ["CODOPER", "NOMOPER"]
+    },
+    {
+      "tabela": "VALOR_ORC_NAPROV",
+      "arquivo": "basico_valor_orcamento_nao_aprovado",
+      "colunas": ["CODIGO", "VALOR", "PRAZO_RET_EQUIP", "VALOR_TAXA_PERM", "PRAZO_INI_ENVIO_ORC", "PRAZO_FIM_ENVIO_ORC", "DIAS_LIMITE", "TEXTO_RODAPE"]
+    },
+    {
+      "tabela": "PERMISSOES_MODULO_01",
+      "arquivo": "basico_permissoes_modulos",
+      "colunas": ["COD_MODULO", "NOM_MODULO"]
+    },
+    {
+      "tabela": "PERMISSOES_MODULO_02",
+      "arquivo": "basico_permissoes_programas",
+      "colunas": ["COD_MODULO", "COD_PROGRAMA", "NOM_PROGRAMA", "NOM_FORM"]
+    },
+    {
+      "arquivo": "basico_locais_atendimento",
+      "sql": "SELECT DISTINCT LOCAL_ATEND FROM CHAMADO_03 WHERE LOCAL_ATEND IS NOT NULL AND LOCAL_ATEND <> '' ORDER BY LOCAL_ATEND"
+    }
+  ]
+}

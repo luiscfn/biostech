@@ -203,3 +203,20 @@ $route['financeiro/cadastro_excluir/(:any)/(:any)']   = 'financeiro/cadastro_exc
 $route['financeiro/relatorios']                       = 'financeiro/relatorios';
 $route['financeiro/buscar_fornecedores']              = 'financeiro/buscar_fornecedores';
 $route['financeiro/buscar_clientes']                  = 'financeiro/buscar_clientes';
+
+// Tabelas Basicas
+$route['tabelas_basicas']                                  = 'tabelas_basicas/index';
+$route['tabelas_basicas/categoria/(:any)']                 = 'tabelas_basicas/categoria/$1';
+$route['tabelas_basicas/salvar/(:any)']                    = 'tabelas_basicas/salvar/$1';
+$route['tabelas_basicas/excluir/(:any)/(:any)']            = 'tabelas_basicas/excluir/$1/$2';
+
+$route['tabelas_basicas/parametros']                       = 'tabelas_basicas/parametros';
+$route['tabelas_basicas/parametros_salvar']                = 'tabelas_basicas/parametros_salvar';
+
+$route['tabelas_basicas/permissoes']                       = 'tabelas_basicas/permissoes';
+$route['tabelas_basicas/modulo_salvar']                    = 'tabelas_basicas/modulo_salvar';
+$route['tabelas_basicas/modulo_excluir/(:num)']            = 'tabelas_basicas/modulo_excluir/$1';
+
+$route['tabelas_basicas/programas/(:num)']                 = 'tabelas_basicas/programas/$1';
+$route['tabelas_basicas/programa_salvar/(:num)']           = 'tabelas_basicas/programa_salvar/$1';
+$route['tabelas_basicas/programa_excluir/(:num)/(:num)']   = 'tabelas_basicas/programa_excluir/$1/$2';

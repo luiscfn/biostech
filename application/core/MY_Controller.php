@@ -10,6 +10,9 @@ class MY_Controller extends CI_Controller
     /** item de menu ativo */
     protected $menu_ativo = '';
 
+    /** subitem de menu ativo */
+    protected $menu_sub = '';
+
     /** titulo da pagina */
     protected $titulo = '';
 
@@ -102,6 +105,7 @@ class MY_Controller extends CI_Controller
     {
         $dados['usuario']     = $this->usuario;
         $dados['menu_ativo']  = $this->menu_ativo;
+        $dados['menu_sub']    = $this->menu_sub;
         $dados['titulo']      = $this->titulo;
 
         $dados['conteudo']    = $this->load->view($view, $dados, TRUE);

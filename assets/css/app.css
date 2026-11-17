@@ -210,6 +210,25 @@ a:hover { text-decoration: underline; }
 .sidebar span.item { color: #7fa2c6; cursor: default; }
 .sidebar span.item .tag { font-size: 9px; background: rgba(255, 255, 255, .08); padding: 2px 6px; border-radius: 20px; }
 
+.sidebar .submenu {
+    margin: 2px 0 6px 10px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, .14);
+}
+
+.sidebar a.item.sub {
+    padding: 6px 8px;
+    font-size: 12px;
+    color: #a9c6e2;
+    line-height: 1.25;
+}
+
+.sidebar a.item.sub.ativo {
+    background: rgba(255, 255, 255, .10);
+    color: #fff;
+    font-weight: 600;
+}
+
 .sidebar .rodape {
     padding: 14px 16px;
     border-top: 1px solid rgba(255, 255, 255, .08);
