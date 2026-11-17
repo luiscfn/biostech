@@ -25,7 +25,7 @@
 
             <div class="grupo">Operacao</div>
             <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
-            <span class="item">Orcamentos <span class="tag">em breve</span></span>
+            <a class="item <?= $menu_ativo === 'orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('orcamentos') ?>">Orcamentos</a>
             <a class="item <?= $menu_ativo === 'estoque' ? 'ativo' : '' ?>" href="<?= site_url('estoque') ?>">Estoque</a>
             <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
             <span class="item">Financeiro <span class="tag">em breve</span></span>

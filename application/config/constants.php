@@ -47,6 +47,15 @@ define('T_PRODUTO_FORNECEDOR',    DB_SCHEMA . '.biostech_produto_fornecedor');
 define('T_ORCAMENTOS',            DB_SCHEMA . '.biostech_orcamentos');
 define('T_ORCAMENTO_ITENS',       DB_SCHEMA . '.biostech_orcamento_itens');
 define('T_ORCAMENTO_SERVICOS',    DB_SCHEMA . '.biostech_orcamento_servicos');
+define('T_ORCAMENTO_SERVICOS_VALORES', DB_SCHEMA . '.biostech_orcamento_servicos_valores');
+define('T_ORCAMENTO_CONTATOS',    DB_SCHEMA . '.biostech_orcamento_contatos');
+define('T_ORCAMENTO_LOG',         DB_SCHEMA . '.biostech_orcamento_log');
+define('T_ORCAMENTOS_DIMENSIONAMENTO', DB_SCHEMA . '.biostech_orcamentos_dimensionamento');
+define('T_ORCAMENTO_DIMENSIONAMENTO_ITENS', DB_SCHEMA . '.biostech_orcamento_dimensionamento_itens');
+define('T_ORCAMENTO_DIMENSIONAMENTO_SERVICOS', DB_SCHEMA . '.biostech_orcamento_dimensionamento_servicos');
+define('T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS', DB_SCHEMA . '.biostech_orcamento_dimensionamento_materiais');
+define('T_ORCAMENTO_DIMENSIONAMENTO_COTACOES', DB_SCHEMA . '.biostech_orcamento_dimensionamento_cotacoes');
+define('T_ORCAMENTO_DIMENSIONAMENTO_LOG', DB_SCHEMA . '.biostech_orcamento_dimensionamento_log');
 define('T_CONTAS_RECEBER',        DB_SCHEMA . '.biostech_contas_receber');
 define('T_CONTAS_RECEBER_BAIXAS', DB_SCHEMA . '.biostech_contas_receber_baixas');
 

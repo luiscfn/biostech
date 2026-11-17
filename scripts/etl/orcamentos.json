@@ -1,0 +1,154 @@
+{
+  "tabelas": [
+    {
+      "tabela": "ORCAMENTO_01",
+      "arquivo": "orcamentos",
+      "colunas": [
+        "NUM_ORC", "DATA", "APROVADO", "NAPROVADO", "NUM_OS", "ATENCAO",
+        "DATA_APROVACAO", "DATA_ENVIO", "NUM_ORC_DIMEN", "SIT_ORC_01",
+        "SIT_ORC_02", "USUARIO_CADASTRO", "DATA_CADASTRO",
+        "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO",
+        "USUARIO_FECHAMENTO", "DATA_FECHAMENTO"
+      ]
+    },
+    {
+      "tabela": "ORCAMENTO_01A",
+      "arquivo": "orcamento_clientes",
+      "colunas": ["NUM_ORC", "COD_CLI", "COD_EQUIP", "NUM_NF_CHEGADA"]
+    },
+    {
+      "tabela": "ORCAMENTO_01B",
+      "arquivo": "orcamento_comercial",
+      "colunas": [
+        "NUM_ORC", "FINALIDADE", "OBSERVACAO", "CODPAG", "ENTREGA", "GARANTIA",
+        "VALIDADE", "VALMAT", "VALMOBRA", "VALSERV", "VALIMPOSTO", "VALDESC",
+        "VALTOTAL", "DESCPERC", "PERCIMP", "ASSINA", "VALID_PECAS",
+        "MAT_FIXACAO", "PERC_MAO_OBRA", "PERC_SERVICO", "PERC_NOTA_FISCAL",
+        "PERC_MAT_FIXACAO", "ACRESCIMO_CUSTO", "PERC_ACRESCIMO_CUSTO",
+        "PERC_DESCONTO_ITEM", "PERC_ACRESCIMO_ITEM", "VALMAT_ORIGINAL",
+        "VALOR_MAXIMO_CLIENTE", "VALOR_CUSTOS_INDIRETOS"
+      ]
+    },
+    {
+      "tabela": "ORCAMENTO_01C",
+      "arquivo": "orcamento_comercial_c",
+      "colunas": [
+        "NUM_ORC", "FINALIDADE", "OBSERVACAO", "CODPAG", "ENTREGA", "GARANTIA",
+        "VALIDADE", "ASSINA", "VALID_PECAS"
+      ]
+    },
+    {
+      "tabela": "ORCAMENTO_02",
+      "arquivo": "orcamento_itens",
+      "colunas": [
+        "CODIGO", "NUM_ORC", "CODPROD", "DESPROD", "DESCRICAO", "QTDE",
+        "VALUNIT", "VALTOT", "NUMITEM", "VALUNIT_ORIGINAL", "VALTOT_ORIGINAL"
+      ]
+    },
+    {
+      "tabela": "ORCAMENTO_03",
+      "arquivo": "orcamento_servicos_valores",
+      "colunas": ["NUM_ORC", "NUM_ITEM", "DES_ITEM", "QTDE", "VALUNIT", "VALTOT"]
+    },
+    {
+      "tabela": "ORCAMENTO_04",
+      "arquivo": "orcamento_contatos",
+      "colunas": [
+        "NUM_ORC", "DATAMOV", "HORAMOV", "ASSUNTO", "CODIFUNC", "CONTATO",
+        "DESCRICAO", "DATA_PROX_CONT", "HORA_PROX_CONT"
+      ]
+    },
+    {
+      "tabela": "ORCAMENTO_05",
+      "arquivo": "orcamento_servicos",
+      "colunas": ["NUM_ORC", "NUMITEM", "DESC_SERV", "CONCLUIDO"]
+    },
+    {
+      "tabela": "ORCAMENTO_LOG_01",
+      "arquivo": "orcamento_log",
+      "colunas": [
+        "ID", "DATAMOV", "USUARIO", "TIPOMOV", "NUM_ORC", "DATA", "DATA_OLD",
+        "APROVADO", "APROVADO_OLD", "NAPROVADO", "NAPROVADO_OLD", "NUM_OS",
+        "NUM_OS_OLD", "ATENCAO", "ATENCAO_OLD", "DATA_APROVACAO",
+        "DATA_APROVACAO_OLD", "DATA_ENVIO", "DATA_ENVIO_OLD", "SIT_ORC_01",
+        "SIT_ORC_01_OLD", "SIT_ORC_02", "SIT_ORC_02_OLD", "USUARIO_CADASTRO",
+        "USUARIO_CADASTRO_OLD", "DATA_CADASTRO", "DATA_CADASTRO_OLD",
+        "USUARIO_ULTIMA_ALTERACAO", "USUARIO_ULTIMA_ALTERACAO_OLD",
+        "DATA_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO_OLD"
+      ]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_01",
+      "arquivo": "dimensionamentos",
+      "colunas": [
+        "NUM_PLA", "DATA", "NUM_OS", "NUM_ORC", "COD_CLI", "CONTATO", "TECNICO",
+        "LOCAL_INST", "TIPO_CONTATO", "SETOR", "EMAIL", "QTDE_TECNICOS",
+        "QTD_COMERCIAIS", "QTD_NAO_COMERCIAIS", "SOLICITANTE", "USUARIO",
+        "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO",
+        "DATA_ULTIMA_ALTERACAO", "USUARIO_FECHAMENTO", "DATA_FECHAMENTO"
+      ]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_02",
+      "arquivo": "dimensionamento_itens",
+      "colunas": [
+        "NUM_PLA", "NUMITEM", "CODPROD", "DESCRICAO", "DESPROD", "QTDE",
+        "VALOR_COMPRA", "VALOR_GASTO", "TOTAL_COMPRA", "VALOR_VENDA",
+        "TOTAL_VENDA", "GRUPO", "SUB_GRUPO", "PG", "PSG"
+      ]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_03",
+      "arquivo": "dimensionamento_levantamento",
+      "colunas": [
+        "NUM_PLA", "QTDE_TECNICOS", "QTDE_DIAS", "QUE_FUNCIONA", "QUER_FAZER",
+        "DIFICULDADES", "MAT_PRECISA", "PROVIDENCIAR", "OBSERV", "ALTURA",
+        "CUMPRIM_MURO", "LADO_DIREITO", "LADO_ESQUERDO", "FRENTE", "FUNDO",
+        "REBOCADO", "CERCA_ARAME", "TELHADO", "ARVORE", "CINTA_CIMENTO",
+        "PEGA_LADRAO", "PERC_MAT_FIXACAO", "MAT_FIXACAO", "PERC_MAO_OBRA",
+        "MAO_OBRA", "PERC_NOTA_FISCAL", "NOTA", "PERC_ACRESCIMO_CUSTO",
+        "ACRESCIMO_CUSTO", "SEGUNDA", "HORA_SEG_01", "HORA_SEG_02", "TERCA",
+        "HORA_TER_01", "HORA_TER_02", "QUARTA", "HORA_QUA_01", "HORA_QUA_02",
+        "QUINTA", "HORA_QUI_01", "HORA_QUI_02", "SEXTA", "HORA_SEX_01",
+        "HORA_SEX_02", "SABADO", "HORA_SAB_01", "HORA_SAB_02", "DOMINGO",
+        "HORA_DOM_01", "HORA_DOM_02"
+      ]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_03A",
+      "arquivo": "dimensionamento_levantamento_a",
+      "colunas": ["NUM_PLA", "DIFICULDADES", "MAT_PRECISA", "OBSERV"]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_04",
+      "arquivo": "dimensionamento_cotacoes",
+      "colunas": ["NUM_PLA", "CODPROD", "CODFOR", "DES_PROD", "DATA", "PRECO_UNIT"]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_06",
+      "arquivo": "dimensionamento_servicos",
+      "colunas": ["NUM_PLA", "NUMITEM", "DESC_SERV", "CONCLUIDO"]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_07",
+      "arquivo": "dimensionamento_materiais",
+      "colunas": ["NUM_PLA", "NUMITEM", "DESC_MAT", "QTDE"]
+    },
+    {
+      "tabela": "ORCAM_DIMEN_LOG_01",
+      "arquivo": "dimensionamento_log",
+      "colunas": [
+        "ID", "DATAMOV", "USUARIO", "TIPOMOV", "NUM_PLA", "NUM_PLA_OLD", "DATA",
+        "DATA_OLD", "NUM_OS", "NUM_OS_OLD", "NUM_ORC", "NUM_ORC_OLD", "COD_CLI",
+        "COD_CLI_OLD", "CONTATO", "CONTATO_OLD", "TECNICO", "TECNICO_OLD",
+        "LOCAL_INST", "LOCAL_INST_OLD", "TIPO_CONTATO", "TIPO_CONTATO_OLD",
+        "SETOR", "SETOR_OLD", "EMAIL", "EMAIL_OLD", "QTDE_TECNICOS",
+        "QTDE_TECNICOS_OLD", "QTD_COMERCIAIS", "QTD_COMERCIAIS_OLD",
+        "QTD_NAO_COMERCIAIS", "QTD_NAO_COMERCIAIS_OLD", "SOLICITANTE",
+        "SOLICITANTE_OLD", "USUARIO_ULTIMA_ALTERACAO",
+        "USUARIO_ULTIMA_ALTERACAO_OLD", "DATA_ULTIMA_ALTERACAO",
+        "DATA_ULTIMA_ALTERACAO_OLD"
+      ]
+    }
+  ]
+}

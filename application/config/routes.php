@@ -109,3 +109,43 @@ $route['compras/imprimir_cotacao/(:num)']      = 'compras/imprimir_cotacao/$1';
 $route['compras/imprimir_solicitacao/(:num)']  = 'compras/imprimir_solicitacao/$1';
 $route['compras/buscar_produtos']              = 'compras/buscar_produtos';
 $route['compras/buscar_fornecedores']          = 'compras/buscar_fornecedores';
+
+// Orcamentos
+$route['orcamentos']                                   = 'orcamentos/index';
+$route['orcamentos/novo']                              = 'orcamentos/novo';
+$route['orcamentos/editar/(:num)']                     = 'orcamentos/editar/$1';
+$route['orcamentos/ver/(:num)']                        = 'orcamentos/ver/$1';
+$route['orcamentos/excluir/(:num)']                    = 'orcamentos/excluir/$1';
+$route['orcamentos/status/(:num)']                     = 'orcamentos/status/$1';
+$route['orcamentos/gerar_chamado/(:num)']              = 'orcamentos/gerar_chamado/$1';
+$route['orcamentos/imprimir/(:num)']                   = 'orcamentos/imprimir/$1';
+$route['orcamentos/adicionar_item/(:num)']             = 'orcamentos/adicionar_item/$1';
+$route['orcamentos/atualizar_item/(:num)/(:num)']      = 'orcamentos/atualizar_item/$1/$2';
+$route['orcamentos/excluir_item/(:num)/(:num)']        = 'orcamentos/excluir_item/$1/$2';
+$route['orcamentos/aplicar_percentual/(:num)']         = 'orcamentos/aplicar_percentual/$1';
+$route['orcamentos/restaurar_valores/(:num)']          = 'orcamentos/restaurar_valores/$1';
+$route['orcamentos/adicionar_servico/(:num)']          = 'orcamentos/adicionar_servico/$1';
+$route['orcamentos/atualizar_servico/(:num)/(:num)']   = 'orcamentos/atualizar_servico/$1/$2';
+$route['orcamentos/excluir_servico/(:num)/(:num)']     = 'orcamentos/excluir_servico/$1/$2';
+$route['orcamentos/adicionar_servico_valor/(:num)']    = 'orcamentos/adicionar_servico_valor/$1';
+$route['orcamentos/atualizar_servico_valor/(:num)/(:num)'] = 'orcamentos/atualizar_servico_valor/$1/$2';
+$route['orcamentos/excluir_servico_valor/(:num)/(:num)']   = 'orcamentos/excluir_servico_valor/$1/$2';
+$route['orcamentos/adicionar_contato/(:num)']          = 'orcamentos/adicionar_contato/$1';
+$route['orcamentos/excluir_contato/(:num)/(:num)']     = 'orcamentos/excluir_contato/$1/$2';
+$route['orcamentos/buscar_clientes']                   = 'orcamentos/buscar_clientes';
+$route['orcamentos/buscar_produtos']                   = 'orcamentos/buscar_produtos';
+
+// Orcamentos - dimensionamento
+$route['orcamentos/dimensionamentos']                  = 'orcamentos/dimensionamentos';
+$route['orcamentos/dimensionamento_novo']              = 'orcamentos/dimensionamento_novo';
+$route['orcamentos/dimensionamento_editar/(:num)']     = 'orcamentos/dimensionamento_editar/$1';
+$route['orcamentos/dimensionamento/(:num)']            = 'orcamentos/dimensionamento/$1';
+$route['orcamentos/dimensionamento_excluir/(:num)']    = 'orcamentos/dimensionamento_excluir/$1';
+$route['orcamentos/dimensionamento_gerar_orcamento/(:num)'] = 'orcamentos/dimensionamento_gerar_orcamento/$1';
+$route['orcamentos/dimensionamento_imprimir/(:num)']   = 'orcamentos/dimensionamento_imprimir/$1';
+$route['orcamentos/dim_adicionar_item/(:num)']         = 'orcamentos/dim_adicionar_item/$1';
+$route['orcamentos/dim_atualizar_item/(:num)/(:num)']  = 'orcamentos/dim_atualizar_item/$1/$2';
+$route['orcamentos/dim_excluir_item/(:num)/(:num)']    = 'orcamentos/dim_excluir_item/$1/$2';
+$route['orcamentos/dim_adicionar_servico/(:num)']      = 'orcamentos/dim_adicionar_servico/$1';
+$route['orcamentos/dim_atualizar_servico/(:num)/(:num)'] = 'orcamentos/dim_atualizar_servico/$1/$2';
+$route['orcamentos/dim_excluir_servico/(:num)/(:num)'] = 'orcamentos/dim_excluir_servico/$1/$2';

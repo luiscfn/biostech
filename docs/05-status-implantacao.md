@@ -38,7 +38,9 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 | Chamados / OS (ficha, intervenções, peças, serviços, contatos, financeiro, status, encerramento, reabertura, par, impressão) | `/chamados` | **pronto (piloto)** |
 | Estoque (saldos, ficha, movimentos, entradas/saídas multi-item, ajuste/inventário, estorno, catálogos, fornecedores) | `/estoque` | **pronto (núcleo)** |
 | Compras (pedidos, itens, parcelas, fechamento/recebimento, cotações, solicitações internas, prazos, contas a pagar, impressão) | `/compras` | **pronto** |
-| Orçamentos, Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
+| Orçamentos (comercial: cabeçalho, itens, desconto/acréscimo em massa, serviços, contatos, histórico, status, impressão, geração de chamado) | `/orcamentos` | **pronto** |
+| Dimensionamento (levantamento, itens, serviços, cronograma, cotações, geração de orçamento, impressão) | `/orcamentos/dimensionamentos` | **pronto** |
+| Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
 
 ---
 
@@ -127,6 +129,35 @@ Criado por `scripts/sql/05-compras.sql` e carregado por `scripts/etl/compras.php
   cancela os títulos logicamente.
 - **Numeração**: `PC`, `COT`, `SC` e `CP` na library `Numeracao`.
 - **Regras**: `docs/08-regras-compras.md`.
+
+### 2.4 Módulo Orçamentos
+
+Criado por `scripts/sql/06-orcamentos.sql` e carregado por
+`scripts/etl/orcamentos.php`:
+
+- **Tabelas** (7 novas + 2 alteradas): `biostech_orcamento_contatos`,
+  `biostech_orcamento_servicos_valores`, `biostech_orcamento_log`,
+  `biostech_orcamento_dimensionamento_servicos`, `_materiais`, `_cotacoes` e
+  `_log`; `biostech_orcamentos` recebeu `resultado`, `data_resultado` e
+  `motivo_cancelamento`; `biostech_orcamentos_dimensionamento` recebeu o
+  levantamento técnico e o cronograma semanal.
+- **Dados migrados**: 2.163 orçamentos, 45.914 itens (renumerados 1..N por
+  orçamento), 10 serviços com valor, 13.255 serviços a executar, 50 contatos,
+  407 logs; 1.101 dimensionamentos, 16.449 itens, 1.029 levantamentos, 6.711
+  serviços e 292 logs. `ORCAMENTO_02_AM` e `ORCAM_DIMEN_05` estavam vazias.
+- **Normalização**: `ORCAMENTO_01/01A/01B/01C` unificadas em
+  `biostech_orcamentos` com `01B` prevalecendo sobre `01C` campo a campo.
+- **Telas**: lista com filtros e paginação; formulário do cabeçalho; ficha do
+  orçamento em abas (dados, itens, serviços, serviços com valor, contatos,
+  histórico); desconto/acréscimo em massa com restauração; alteração de status;
+  impressão; geração de chamado. Dimensionamento com formulário de levantamento
+  técnico e cronograma, abas de itens, serviços, materiais e cotações, impressão
+  e geração de orçamento.
+- **Integração**: o dimensionamento gera orçamento (itens com preço de venda);
+  o orçamento aprovado e concluído gera chamado/OS com cópia de itens, serviços
+  e equipamento.
+- **Numeração**: `ORC` e `DIM` na library `Numeracao`.
+- **Regras**: `docs/09-regras-orcamentos.md`.
 
 ---
 

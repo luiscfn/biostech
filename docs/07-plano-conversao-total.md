@@ -36,7 +36,7 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 | 1 | Chamados / OS | 30 | 35.803 | **concluído (piloto)** | F2 |
 | 2 | Clientes / Escolas | 9 | 7.363 | parcial (clientes migrados; contratos/escolas/municípios pendentes) | F1 |
 | 3 | Estoque / Produtos | 40 | 24.650 | **concluído (núcleo)**: saldos, entradas, saídas, inventário, estorno, catálogos e fornecedores | F4 |
-| 4 | Orçamentos | 18 | 93.618 | pendente | F3 |
+| 4 | Orçamentos | 18 | 93.618 | **concluído**: orçamento comercial (itens, desconto/acréscimo em massa, serviços, contatos, histórico, status, impressão, geração de chamado) e dimensionamento (levantamento, cronograma, itens, serviços, geração de orçamento) | F3 |
 | 5 | Financeiro | 32 | 141.663 | parcial (contas a receber do encerramento; contas a pagar, baixas, bancos e caixa pendentes) | F5 |
 | 6 | Compras | 8 | 19.203 | **concluído**: pedidos, itens, parcelas, fechamento/recebimento, cotações (3 fornecedores), solicitações internas, prazos e contas a pagar | F4/F6 |
 | 7 | Faturamento / NF | 9 | 4.019 | pendente | F6 |
@@ -91,13 +91,29 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 - **Pendências:** transferência entre locais, reserva, custo médio ponderado, kits e
   ferramentas (`KIT_FERRAMENTA_01..04`), mínimo/máximo automático e relatórios.
 
-### 3.4 Orçamentos
+### 3.4 Orçamentos — concluído
 
-- **Tabelas:** `ORCAMENTO_01..05`, `ORCAM_DIMEN_01..07`, `SIT_ORCAMENTO_01/02`.
-- **Telas:** orçamento comum, orçamento de dimensionamento, itens, serviços, situação,
-  aprovação/recusa, impressão, conversão em Chamado/OS.
-- **Regras:** totais, desconto, impostos, validade, aprovação do cliente, vínculo com
-  Chamado (já existe a tabela `biostech_orcamentos` e `biostech_orcamento_itens`).
+- **Tabelas:** `ORCAMENTO_01/01A/01B/01C` (unificadas em `biostech_orcamentos`),
+  `ORCAMENTO_02` (itens), `ORCAMENTO_03` (serviços com valor),
+  `ORCAMENTO_04` (contatos), `ORCAMENTO_05` (serviços a executar),
+  `ORCAMENTO_LOG_01`; `ORCAM_DIMEN_01/02/03` (cabeçalho + levantamento +
+  cronograma), `ORCAM_DIMEN_04` (cotações, vazia no legado),
+  `ORCAM_DIMEN_06` (serviços), `ORCAM_DIMEN_07` (materiais, vazia no legado) e
+  `ORCAM_DIMEN_LOG_01`. `ORCAMENTO_02_AM` e `ORCAM_DIMEN_05` estavam vazias e
+  não foram criadas.
+- **Telas:** lista com filtros/paginação; formulário do cabeçalho; ficha em abas
+  (dados, itens, serviços, serviços com valor, contatos, histórico); desconto e
+  acréscimo em massa com restauração; status; impressão; geração de chamado/OS.
+  Dimensionamento: formulário de levantamento e cronograma, abas de itens,
+  serviços, materiais e cotações, impressão e geração de orçamento.
+- **Cálculos:** cascata `AC_MO → AC_MO_MF → AC_MO_MF_CT → AC_MO_MF_CT_NF →
+  SUBTOTAL → VALTOTAL`; percentuais prevalecem sobre valores digitados;
+  `total = quantidade × valor unitário` nos itens; originais preservados para o
+  desconto/acréscimo em massa.
+- **Integração:** dimensionamento → orçamento (itens com `valor_venda`) e
+  orçamento → chamado (cópia de itens, serviços e equipamento, com bloqueio de
+  duplicidade).
+- **Regras:** `docs/09-regras-orcamentos.md`.
 - **Dependências:** Clientes, Produtos, Chamados.
 
 ### 3.5 Financeiro
@@ -250,7 +266,7 @@ Checklist obrigatório (repetir para cada um dos 14 módulos):
 |---|---|---|
 | F1 | Acessos/Permissões, Clientes/Escolas, Equipamentos | cadastros completos e permissões |
 | F2 | Chamados/OS | **concluído** |
-| F3 | Orçamentos | orçamento comum e dimensionamento |
+| F3 | Orçamentos | **concluído** — orçamento comercial e dimensionamento |
 | F4 | Estoque/Produtos, Compras | **Estoque concluído (núcleo)**; **Compras concluído** |
 | F5 | Financeiro | CR/CP, caixa, banco, baixas e relatórios |
 | F6 | Faturamento/NF, Compras (recebimento) | NF, recibos, faturamento em lote |
@@ -281,6 +297,10 @@ relatórios serão levantados na extração de cada um (o front-end tem ~300 rel
 No módulo Compras foram levantados **20 relatórios**; já convertidos: pedido de compra,
 cotação (mapa comparativo) e solicitação interna. Faltam os relatórios por período,
 fornecedor, produto e curva de preços.
+
+No módulo Orçamentos já foram convertidas as duas impressões (orçamento comercial e
+dimensionamento). Os relatórios `REL_ORCAMENTO_03*` do Chamados/OS reaproveitam os
+mesmos dados e entram no lote de relatórios gerais (F8).
 
 ---
 
@@ -315,11 +335,11 @@ fornecedor, produto e curva de preços.
 
 ## 10. Próximos passos imediatos
 
-1. **Commit local** do módulo Compras (sem push).
-2. **Orçamentos (F3)**: orçamento comum e de dimensionamento, itens/serviços, situação,
-   aprovação e conversão em Chamado/OS.
-3. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios (inclui a baixa dos
+1. **Commit local** do módulo Orçamentos (sem push).
+2. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios (inclui a baixa dos
    títulos gerados por Compras e Chamados).
-4. **Compras — complementos**: gerar pedido da cotação aprovada, recebimento parcial
+3. **Compras — complementos**: gerar pedido da cotação aprovada, recebimento parcial
    por NF e os relatórios restantes do módulo.
+4. **Orçamentos — complementos**: cotações de fornecedor do dimensionamento e
+   relatórios gerais (`REL_ORCAMENTO_03*`) no lote de F8.
 5. Pendências do Estoque: transferência, reserva, custo médio, kits/ferramentas e relatórios.

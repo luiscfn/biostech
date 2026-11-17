@@ -1,0 +1,121 @@
+<?php
+$pode_editar = in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE);
+$tem_orcamento = ! empty($registro['orcamento_numero']);
+
+$total_venda = 0.0;
+foreach ($itens as $item) { $total_venda += (float) $item['total_venda']; }
+
+$abas_rotulos = array(
+    'dados'        => 'Dados',
+    'itens'        => 'Itens (' . count($itens) . ')',
+    'servicos'     => 'Servicos (' . count($servicos) . ')',
+    'levantamento' => 'Levantamento',
+    'cronograma'   => 'Cronograma',
+    'materiais'    => 'Materiais (' . count($materiais) . ')',
+    'cotacoes'     => 'Cotacoes (' . count($cotacoes) . ')',
+    'log'          => 'Historico (' . count($log) . ')',
+);
+?>
+<div class="painel">
+    <div class="painel-cabecalho">
+        <h3>
+            Dimensionamento <?= (int) $registro['numero'] ?>
+            <?php if ($tem_orcamento): ?>
+                <span class="badge ok">Orcamento <?= (int) $registro['orcamento_numero'] ?></span>
+            <?php else: ?>
+                <span class="badge alerta">Sem orcamento</span>
+            <?php endif; ?>
+        </h3>
+
+        <div class="acoes-ficha">
+            <?php if ($pode_editar): ?>
+                <a class="botao secundario pequeno" href="<?= site_url('orcamentos/dimensionamento_editar/' . $registro['numero']) ?>">Editar</a>
+
+                <?php if ( ! $tem_orcamento): ?>
+                    <?= form_open('orcamentos/dimensionamento_gerar_orcamento/' . $registro['numero'], array('style' => 'display:inline')) ?>
+                        <button type="submit" class="botao pequeno"
+                                title="Gera um orcamento comercial com os itens e servicos deste dimensionamento">Gerar orcamento</button>
+                    <?= form_close() ?>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <a class="botao secundario pequeno" href="<?= site_url('orcamentos/dimensionamento_imprimir/' . $registro['numero']) ?>" target="_blank">Imprimir</a>
+            <a class="botao secundario pequeno" href="<?= site_url('orcamentos/dimensionamentos') ?>">Voltar</a>
+        </div>
+    </div>
+
+    <div class="painel-corpo">
+        <div class="detalhes">
+            <div class="detalhe">
+                <div class="rotulo">Cliente</div>
+                <div class="valor">
+                    <?php if ( ! empty($registro['cliente_id'])): ?>
+                        <a href="<?= site_url('clientes/ver/' . $registro['cliente_id']) ?>"><?= html_escape($registro['cliente_nome']) ?></a>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Data</div>
+                <div class="valor"><?= data_br($registro['data']) ?></div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Contato</div>
+                <div class="valor"><?= html_escape($registro['contato'] ? $registro['contato'] : '-') ?></div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Tecnico</div>
+                <div class="valor"><?= html_escape($registro['tecnico_nome'] ? $registro['tecnico_nome'] : '-') ?></div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Chamado / OS</div>
+                <div class="valor">
+                    <?php if ( ! empty($registro['chamado_numero'])): ?>
+                        <a href="<?= site_url('chamados/ver/' . $registro['chamado_numero']) ?>"><?= html_escape($registro['chamado_numero']) ?></a>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Total de venda</div>
+                <div class="valor"><strong><?= moeda_br($total_venda) ?></strong></div>
+            </div>
+            <div class="detalhe">
+                <div class="rotulo">Orcamento gerado</div>
+                <div class="valor">
+                    <?php if ($tem_orcamento): ?>
+                        <a href="<?= site_url('orcamentos/ver/' . $registro['orcamento_numero']) ?>"><?= (int) $registro['orcamento_numero'] ?></a>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="abas">
+        <?php foreach ($abas_rotulos as $chave => $rotulo): ?>
+            <a class="aba <?= $aba === $chave ? 'ativa' : '' ?>" href="<?= site_url('orcamentos/dimensionamento/' . $registro['numero']) ?>?aba=<?= $chave ?>">
+                <?= html_escape($rotulo) ?>
+            </a>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="aba-conteudo">
+        <?php $this->load->view('orcamentos/_dim_' . $aba, array(
+            'registro'    => $registro,
+            'itens'       => $itens,
+            'servicos'    => $servicos,
+            'materiais'   => $materiais,
+            'cotacoes'    => $cotacoes,
+            'log'         => $log,
+            'pode_editar' => $pode_editar,
+            'total_venda' => $total_venda,
+        )); ?>
+    </div>
+</div>
+
+<script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
+<script src="<?= base_url('assets/js/orcamentos.js') ?>"></script>
