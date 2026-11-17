@@ -28,7 +28,7 @@
             <a class="item <?= $menu_ativo === 'orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('orcamentos') ?>">Orcamentos</a>
             <a class="item <?= $menu_ativo === 'estoque' ? 'ativo' : '' ?>" href="<?= site_url('estoque') ?>">Estoque</a>
             <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
-            <span class="item">Financeiro <span class="tag">em breve</span></span>
+            <a class="item <?= $menu_ativo === 'financeiro' ? 'ativo' : '' ?>" href="<?= site_url('financeiro') ?>">Financeiro</a>
 
             <div class="grupo">Cadastros</div>
             <a class="item <?= $menu_ativo === 'clientes' ? 'ativo' : '' ?>" href="<?= site_url('clientes') ?>">Clientes</a>

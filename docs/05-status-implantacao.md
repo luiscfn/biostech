@@ -40,7 +40,8 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 | Compras (pedidos, itens, parcelas, fechamento/recebimento, cotações, solicitações internas, prazos, contas a pagar, impressão) | `/compras` | **pronto** |
 | Orçamentos (comercial: cabeçalho, itens, desconto/acréscimo em massa, serviços, contatos, histórico, status, impressão, geração de chamado) | `/orcamentos` | **pronto** |
 | Dimensionamento (levantamento, itens, serviços, cronograma, cotações, geração de orçamento, impressão) | `/orcamentos/dimensionamentos` | **pronto** |
-| Financeiro, Faturamento, RH, Frota | — | "em breve" no menu |
+| Financeiro (contas a pagar/receber, baixas, movimentos bancários, caixa, cheques, balanço, cadastros e relatórios) | `/financeiro` | **pronto** |
+| Faturamento/NF, RH, Frota | — | "em breve" no menu |
 
 ---
 
@@ -159,6 +160,39 @@ Criado por `scripts/sql/06-orcamentos.sql` e carregado por
 - **Numeração**: `ORC` e `DIM` na library `Numeracao`.
 - **Regras**: `docs/09-regras-orcamentos.md`.
 
+### 2.5 Módulo Financeiro
+
+Criado por `scripts/sql/07-financeiro.sql` e carregado por
+`scripts/etl/financeiro.php` (export `export-financeiro.ps1`):
+
+- **Tabelas** (19): `biostech_contas_pagar`, `_baixas` e `_log`;
+  `biostech_contas_receber` e `_baixas`; `biostech_fin_bancos`, `_agencias`,
+  `_contas`, `_cartoes`, `_centros_custo`, `_naturezas_operacao`,
+  `_status_pagamento`, `_periodicidades`, `_despesas_fixas`, `_cheques`,
+  `_movimentos_bancarios`, `_caixa_diario`, `_caixa_movimentos` e `_balanco`.
+- **Dados migrados**: 14.465 contas a pagar, 13.959 baixas de CP, 5.484 logs,
+  2.328 contas a receber, 2.309 baixas de CR, 73.971 movimentos bancários,
+  791 dias de caixa, 6.411 movimentos de caixa e 97 balanços.
+- **Normalizações**: CP com `situacao` 1/2/3 derivada de baixa/cancelamento;
+  CR ativas (`CONTAS_RECEBER_01`) e arquivadas (`_03`) unificadas, com 6 códigos
+  duplicados renumerados a partir de 33.719 e baixas remapeadas por
+  `(codigo, parcela)`; movimentos têm base `MOV_BANCARIA_02` + 414 exclusivos de
+  `MOV_BANCARIA_01` renumerados de 131.083 a 131.496; caixa com fechamento
+  recalculado pela regra da linha "SALDO ANTERIOR". `PAGTO_CHEQUES_01` e
+  `MOVICAIXA3` não tinham dados/uso necessários.
+- **Telas**: painel com indicadores; CP e CR com filtros, paginação, ficha,
+  criação parcelada, edição, baixa (multa/juros/desconto, geração de movimento
+  bancário e de caixa), estorno, cancelamento, exclusão e comprovante;
+  movimentos bancários; caixa diário com fechamento/reabertura; cheques com
+  compensação; balanço; cadastros de apoio; relatórios de CP, CR, fluxo,
+  posição bancária e balanço.
+- **Numeração**: `CP`, `CR` (um código por parcela) e `MB` na library
+  `Numeracao`; após o ETL `CP = 33.722`, `CR = 33.724`, `MB = 131.496`.
+- **Permissões**: operador baixa títulos, lança/fecha caixa e consulta;
+  admin/gestor criam/editam/excluem títulos, estornam, cancelam, reabrem caixa,
+  mantêm cheques/balanço/cadastros e movimentos bancários.
+- **Regras**: `docs/10-regras-financeiro.md`.
+
 ---
 
 ## 3. ETL
@@ -255,6 +289,26 @@ Verificações complementares:
 - Paginação real: 4.773 clientes e 4.522 produtos (25 por página).
 - Busca sem acento/caixa: `cabeca` retorna 30 produtos (`CABEÇA ...`).
 
+### 4.4 Teste end-to-end do Financeiro
+
+Executado por `php scripts/test/financeiro.php` (PHP + `curl` + `PDO`) contra
+`http://127.0.0.1:8090`:
+
+1. login e perfil; 2. listas, buscas, filtros e paginação de CP/CR; 3. criação de
+CP com 2 parcelas (total 100,00), edição, baixa, comprovante, estorno,
+cancelamento e exclusão; 4. criação de CR com 2 parcelas e **códigos distintos**,
+baixa da parcela 1, comprovante, estorno, cancelamento e exclusão das duas
+parcelas; 5. banco, agência e conta bancária; 6. movimentos bancários de crédito
+e débito com edição/exclusão; 7. caixa (lançamento, edição, fechamento,
+reabertura e exclusão); 8. cheque (emissão, compensação e exclusão); 9. geração e
+exclusão de balanço; 10. cadastros de bancos, centros de custo, naturezas,
+status, periodicidades, cartões, agências e despesas fixas; 11. limpeza dos dados
+de teste.
+
+Resultado: **201 verificações ok, 0 falhas**. O teste remove títulos, baixas,
+movimentos, caixa, cheques, balanços e cadastros criados e restaura a numeração
+consumida.
+
 ---
 
 ## 5. Correções feitas nesta etapa
@@ -283,6 +337,15 @@ Verificações complementares:
 | Itens apontando para produto inexistente sumiam das listagens | `_produtos_existem()` valida os ids antes de gravar |
 | Estorno de compra falhava com `value too long for varchar(80)` no `motivo` | `Estoque_model::estornar()` trunca o motivo em 80 caracteres |
 | Teste funcional escolhia produto de código `0` | seleção restrita a `id > 0` |
+| CP consultava `cl.fone` em clientes (coluna inexistente) | trocado para `cl.telefone` |
+| Baixas de CP consultavam `fin_contas.nome` (coluna inexistente) | `COALESCE(titular, banco/agência/conta)` |
+| Tela de CP usava `valor_recebido` em vez de `valor_pago` | corrigido no total e na coluna |
+| Cadastro de banco enviava `codigo` numérico e o banco é textual | campo texto, `codigo::text` e lista sem cast |
+| Conta bancária recusava `valor_limite`/`valor_real` em pt-BR | conversão decimal no `salvar_cadastro` |
+| Cadastro de despesa fixa gravava valor/ativo/códigos como texto | conversão por tipo antes do INSERT |
+| Exclusão de CP só aparecia para título aberto | liberada também para cancelado (mantido bloqueio com baixa) |
+| CR com N parcelas repetia o mesmo `codigo` (violava a PK) | gera um código CR por parcela e retorna a lista `codigos` |
+| Teste de CR usava valor de 200,00 na baixa da parcela de 100,00 | baixa e comprovante ajustados para 100,00 |
 
 ---
 
@@ -292,8 +355,8 @@ Verificações complementares:
 2. **Staging 1:1 do legado** (`biostech_legacy`) — o DDL completo está em
    `docs/04-schema-legacy-postgresql.sql` (243 tabelas).
 3. **Próximos módulos** — matriz completa em `docs/07-plano-conversao-total.md`.
-   Chamados/OS, o núcleo do Estoque e Compras estão prontos. Ordem sugerida:
-   Orçamentos, Financeiro, Faturamento/NF, Clientes/Escolas (complementos),
+   Chamados/OS, o núcleo do Estoque, Compras, Orçamentos e Financeiro estão
+   prontos. Ordem sugerida: Faturamento/NF, Clientes/Escolas (complementos),
    Equipamentos, RH, Frota, Acessos/Permissões.
 4. **Normalização de dados sujos** — datas herdadas inválidas (1899, 0202, 0209, 1976,
    2106, 7201, 7202) precisam de quarentena antes de relatórios.

@@ -1,0 +1,144 @@
+{
+  "tabelas": [
+    {
+      "tabela": "BANCOS",
+      "arquivo": "fin_bancos",
+      "colunas": ["CODBANCO", "NOMBANCO"]
+    },
+    {
+      "tabela": "AGENCIA",
+      "arquivo": "fin_agencias",
+      "colunas": ["CODBANCO", "AGENCIA", "NOME_AG", "ENDER_AG", "BAIRRO_AG", "NUMCEP_AG", "CIDADE_AG", "ESTADO_AG", "TELEF1_AG", "TELEF2_AG", "TELFAX_AG", "CONTAT_AG"]
+    },
+    {
+      "tabela": "CONTA_BANCARIA",
+      "arquivo": "fin_contas_bancarias",
+      "colunas": ["CODBANCO", "AGENCIA", "CONTA", "TIT_CONTA", "VALOR_LIMITE", "VALOR_REAL"]
+    },
+    {
+      "tabela": "CARTOES",
+      "arquivo": "fin_cartoes",
+      "colunas": ["CODCARTAO", "NOMCARTAO"]
+    },
+    {
+      "tabela": "CENTRO_CUSTOS",
+      "arquivo": "fin_centros_custo",
+      "colunas": ["COD_CUSTO", "NOM_CUSTO"]
+    },
+    {
+      "tabela": "NAT_OPERACAO",
+      "arquivo": "fin_naturezas_operacao",
+      "colunas": ["CODOPER", "NOMOPER"]
+    },
+    {
+      "tabela": "STATUS_PAGAMENTO",
+      "arquivo": "fin_status_pagamento",
+      "colunas": ["COD_STATUS", "NOM_STATUS"]
+    },
+    {
+      "tabela": "FORMA_RECEBIMENTO_01",
+      "arquivo": "fin_formas_recebimento",
+      "colunas": ["COD_RECEB", "NOM_RECEB"]
+    },
+    {
+      "tabela": "FORMA_RECEBIMENTO_02",
+      "arquivo": "fin_documentos_recebimento",
+      "colunas": ["COD_FORM_REC", "COD_DOC_REC", "NOM_DOC_REC"]
+    },
+    {
+      "tabela": "TIPO_PAGTO",
+      "arquivo": "fin_tipos_pagamento",
+      "colunas": ["CODPAGTO", "NOMPAGTO"]
+    },
+    {
+      "tabela": "GRAUPAR",
+      "arquivo": "fin_graupar",
+      "colunas": ["CODATEN", "DESATEN"]
+    },
+    {
+      "tabela": "DESPESAS_FIXAS",
+      "arquivo": "fin_despesas_fixas",
+      "colunas": ["CODDESPESA", "NOMEDESPESA"]
+    },
+    {
+      "tabela": "CP_01",
+      "arquivo": "fin_cp_01",
+      "colunas": ["CODPAGTO", "NOMPAGTO"]
+    },
+    {
+      "tabela": "MES_ANO",
+      "arquivo": "fin_mes_ano",
+      "colunas": ["ID", "ANO", "MES"]
+    },
+    {
+      "tabela": "CONTAS_PAGAR_01",
+      "arquivo": "fin_contas_pagar",
+      "colunas": ["CODIGO", "PARCELA", "DATAEMI", "NUMDOC", "TIPO", "FORMA_REC", "DOC_REC", "DATALANC", "DATAVENC", "RET_CAIXA", "DAT_CAIXA", "VALOR", "BANCO", "AGENCIA", "CONTA", "FORNECEDOR", "PORTADOR", "NUMPARC", "POSICAO", "HISTORICO", "COD_CC", "SALDO_CAIXA", "SALDO_CONTA", "SELEC_FATURAMENTO", "FATURADO", "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO", "USUARIO_BAIXA", "DATA_BAIXA", "USUARIO_CANCELAMENTO", "DATA_CANCELAMENTO"]
+    },
+    {
+      "tabela": "CONTAS_PAGAR_02",
+      "arquivo": "fin_contas_pagar_baixas",
+      "colunas": ["CODIGO", "PARCELA", "DATA_PAGTO", "MULTA", "JUROS", "DESCONTO", "VALOR_ATUALIZADO", "VALOR_RECEBIDO", "SALDO_CAIXA", "SALDO_CONTA", "COD_CONTA", "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO", "USUARIO_BAIXA", "DATA_BAIXA", "USUARIO_CANCELAMENTO", "DATA_CANCELAMENTO"]
+    },
+    {
+      "tabela": "CONTAS_PAGAR_LOG_01",
+      "arquivo": "fin_contas_pagar_log",
+      "colunas": ["ID", "DATA", "USUARIO", "TIPOMOV", "CODIGO", "PARCELA", "DATAEMI", "DATAEMI_OLD", "NUMDOC", "NUMDOC_OLD", "FORMA_REC", "FORMA_REC_OLD", "DOC_REC", "DOC_REC_OLD", "DATALANC", "DATALANC_OLD", "DATAVENC", "DATAVENC_OLD", "RET_CAIXA", "RET_CAIXA_OLD", "VALOR", "VALOR_OLD", "BANCO", "BANCO_OLD", "AGENCIA", "AGENCIA_OLD", "CONTA", "CONTA_OLD", "FORNECEDOR", "FORNECEDOR_OLD", "PORTADOR", "PORTADOR_OLD", "NUMPARC", "NUMPARC_OLD", "POSICAO", "POSICAO_OLD", "HISTORICO", "HISTORICO_OLD", "COD_CC", "COD_CC_OLD", "USUARIO_CADASTRO", "USUARIO_CADASTRO_OLD", "DATA_CADASTRO", "DATA_CADASTRO_OLD", "USUARIO_ULTIMA_ALTERACAO", "USUARIO_ULTIMA_ALTERACAO_OLD", "DATA_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO_OLD", "USUARIO_BAIXA", "USUARIO_BAIXA_OLD", "DATA_BAIXA", "DATA_BAIXA_OLD", "USUARIO_CANCELAMENTO", "USUARIO_CANCELAMENTO_OLD", "DATA_CANCELAMENTO", "DATA_CANCELAMENTO_OLD"]
+    },
+    {
+      "tabela": "CONTAS_RECEBER_01",
+      "arquivo": "fin_contas_receber",
+      "colunas": ["CODIGO", "PARCELA", "DATAEMI", "NUM_OS", "NUMDOC", "TIPO", "FORMA_REC", "DOC_REC", "QTDIAS", "DATAVENC", "VALOR", "DESC_ESP", "VDESP", "ALIQ_ISSQN", "VISS", "VLIQ", "BANCO", "AGENCIA", "CONTA", "CLIENTE", "PORTADOR", "NUMPARC", "POSICAO", "HISTORICO", "COD_CC", "RET_CAIXA", "SELEC_FATURAMENTO", "FATURADO", "NUM_NOTA_FISCAL", "FECHAFIN", "BAIXA_CONTA", "ARQUIVADA", "TOT_ARQ", "CLIENTE_NOTA", "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO", "USUARIO_BAIXA", "DATA_BAIXA", "USUARIO_CANCELAMENTO", "DATA_CANCELAMENTO"]
+    },
+    {
+      "tabela": "CONTAS_RECEBER_02",
+      "arquivo": "fin_contas_receber_baixas",
+      "colunas": ["CODIGO", "PARCELA", "DATA_PAGTO", "MULTA", "JUROS", "DESCONTO", "VALOR_ATUALIZADO", "VALOR_RECEBIDO", "ARQUIVADA"]
+    },
+    {
+      "tabela": "CONTAS_RECEBER_03",
+      "arquivo": "fin_contas_receber_arq",
+      "colunas": ["CODIGO", "PARCELA", "DATAEMI", "NUM_OS", "NUMDOC", "TIPO", "QTDIAS", "DATAVENC", "VALOR", "DESC_ESP", "VDESP", "ALIQ_ISSQN", "VISS", "VLIQ", "BANCO", "AGENCIA", "CONTA", "CLIENTE", "PORTADOR", "NUMPARC", "POSICAO", "HISTORICO", "COD_CC", "RET_CAIXA", "SELEC_FATURAMENTO", "FATURADO", "NUM_NOTA_FISCAL", "FECHAFIN", "BAIXA_CONTA", "ARQUIVADA", "CLIENTE_NOTA"]
+    },
+    {
+      "tabela": "CONTAS_RECEBER_04",
+      "arquivo": "fin_contas_receber_baixas_arq",
+      "colunas": ["CODIGO", "PARCELA", "DATA_PAGTO", "MULTA", "JUROS", "DESCONTO", "VALOR_ATUALIZADO", "VALOR_RECEBIDO", "ARQUIVADA"]
+    },
+    {
+      "tabela": "MOV_BANCARIA_01",
+      "arquivo": "fin_mov_bancario",
+      "colunas": ["NUM_MOV", "DATA", "CODBANCO", "AGENCIA", "CONTA", "TIPO", "VALOR", "HISTORICO", "COD_CP", "PARCELA_CP", "COD_CR", "PARCELA_CR", "SALDO_ANTERIOR", "SALDO_ATUAL", "USUARIO_CADASTRO", "DATA_CADASTRO"]
+    },
+    {
+      "tabela": "MOV_BANCARIA_02",
+      "arquivo": "fin_mov_bancario_02",
+      "colunas": ["NUM_MOV", "DATA", "CODBANCO", "AGENCIA", "CONTA", "TIPO", "VALOR", "HISTORICO", "COD_CP", "PARCELA_CP", "COD_CR", "PARCELA_CR", "SALDO_ANTERIOR", "SALDO_ATUAL", "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO"]
+    },
+    {
+      "tabela": "MOVICAIXA1",
+      "arquivo": "fin_caixa_diario",
+      "colunas": ["DATA", "DATANUM", "SALDOATUAL", "FECHADO", "CHEQUE", "DINHEIRO"]
+    },
+    {
+      "tabela": "MOVICAIXA2",
+      "arquivo": "fin_caixa_movimentos",
+      "colunas": ["DATA", "NUMOV", "DATANUM", "SETOR", "DOCUMENTO", "HISTÓRICO", "VALOR_ENTRADA", "VALOR_SAIDA", "NUM_OS", "FORMA_REC", "DOC_REC", "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO", "DATA_ULTIMA_ALTERACAO"]
+    },
+    {
+      "tabela": "MOVICAIXA3",
+      "arquivo": "fin_caixa_anterior",
+      "colunas": ["DATA", "DATNUM", "SALDOANTERIOR"]
+    },
+    {
+      "tabela": "PAGTO_CHEQUES_01",
+      "arquivo": "fin_cheques",
+      "colunas": ["NUMCHEQUE", "NUMBANCO", "AGENCIA", "CONTA", "VALOR", "FAVORECIDO", "DATAEMISSAO", "DATAVENCIMENTO", "DATACOMPESACAO", "OBSERV"]
+    },
+    {
+      "tabela": "TB_BALANCO_FINANC_01",
+      "arquivo": "fin_balanco",
+      "colunas": ["DATA_INICIO", "DATA_FIM", "MES_ANO", "BRUTO_FATURADO", "ISS_FATURADO", "MULTA_FATURADO", "JUROS_FATURADO", "DESCONTO_FATURADO", "LIQUIDO_FATURADO", "BRUTO_FATURAR", "ISS_FATURAR", "LIQUIDO_FATURAR", "VALOR_PRINC_PAGO", "JUROS_PAGO", "MULTA_PAGO", "DESCONTO_PAGO", "BRUTO_PAGO", "VALOR_PRINC_PAGAR", "JUROS_PAGAR", "MULTA_PAGAR", "BRUTO_PAGAR"]
+    }
+  ]
+}

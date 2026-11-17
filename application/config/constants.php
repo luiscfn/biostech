@@ -71,6 +71,24 @@ define('T_FORNECEDOR_PRAZOS',         DB_SCHEMA . '.biostech_fornecedor_prazos')
 define('T_CONTAS_PAGAR',              DB_SCHEMA . '.biostech_contas_pagar');
 define('T_COMPRAS_LOG',               DB_SCHEMA . '.biostech_compras_log');
 
+// Modulo Financeiro
+define('T_FIN_BANCOS',             DB_SCHEMA . '.biostech_fin_bancos');
+define('T_FIN_AGENCIAS',           DB_SCHEMA . '.biostech_fin_agencias');
+define('T_FIN_CONTAS',             DB_SCHEMA . '.biostech_fin_contas');
+define('T_FIN_CARTOES',            DB_SCHEMA . '.biostech_fin_cartoes');
+define('T_FIN_CENTROS_CUSTO',      DB_SCHEMA . '.biostech_fin_centros_custo');
+define('T_FIN_NATUREZAS',          DB_SCHEMA . '.biostech_fin_naturezas_operacao');
+define('T_FIN_STATUS_PAGAMENTO',   DB_SCHEMA . '.biostech_fin_status_pagamento');
+define('T_FIN_PERIODICIDADES',     DB_SCHEMA . '.biostech_fin_periodicidades');
+define('T_FIN_DESPESAS_FIXAS',     DB_SCHEMA . '.biostech_fin_despesas_fixas');
+define('T_FIN_CHEQUES',            DB_SCHEMA . '.biostech_fin_cheques');
+define('T_FIN_MOVIMENTOS',         DB_SCHEMA . '.biostech_fin_movimentos_bancarios');
+define('T_FIN_CAIXA_DIARIO',       DB_SCHEMA . '.biostech_fin_caixa_diario');
+define('T_FIN_CAIXA_MOVIMENTOS',   DB_SCHEMA . '.biostech_fin_caixa_movimentos');
+define('T_FIN_BALANCO',            DB_SCHEMA . '.biostech_fin_balanco');
+define('T_CONTAS_PAGAR_BAIXAS',    DB_SCHEMA . '.biostech_contas_pagar_baixas');
+define('T_CONTAS_PAGAR_LOG',       DB_SCHEMA . '.biostech_contas_pagar_log');
+
 // Nome do sistema
 define('APP_NOME', 'BIOSTECH');
 define('APP_VERSAO', '1.0.0');

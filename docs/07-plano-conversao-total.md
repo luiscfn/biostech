@@ -15,7 +15,8 @@ com paridade funcional e dados migrados do back-end `SISBIOSD_01.mdb`.
 | Base web (login, dashboard, clientes, produtos, setores, usuários, auditoria) | pronto |
 | Módulo piloto Chamados / OS | **pronto** (fluxo completo testado) |
 | Módulo Estoque / Produtos | **pronto (núcleo)** (entradas, saídas, inventário, estorno, catálogos, fornecedores) |
-| Tabelas criadas | 27 de Chamados/OS/Estoque + 11 tabelas próprias do Estoque + 5 base + domínios |
+| Módulo Financeiro | **pronto** (CP/CR, baixas, movimentos, caixa, cheques, balanço, cadastros e relatórios) |
+| Tabelas criadas | 27 de Chamados/OS/Estoque + 11 tabelas próprias do Estoque + 5 base + 19 financeiras + domínios |
 | Dados migrados | setores, usuários, clientes, produtos, saldos, fornecedores e catálogos |
 | Regras documentadas | `docs/06-regras-chamados-os.md` (RN-001..283, VD-01..72, AC-01..24, D-01..D-10) |
 | Extração VBA | 107 forms e 25 relatórios **do módulo Chamados/OS** (filtro de nome) |
@@ -37,7 +38,7 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 | 2 | Clientes / Escolas | 9 | 7.363 | parcial (clientes migrados; contratos/escolas/municípios pendentes) | F1 |
 | 3 | Estoque / Produtos | 40 | 24.650 | **concluído (núcleo)**: saldos, entradas, saídas, inventário, estorno, catálogos e fornecedores | F4 |
 | 4 | Orçamentos | 18 | 93.618 | **concluído**: orçamento comercial (itens, desconto/acréscimo em massa, serviços, contatos, histórico, status, impressão, geração de chamado) e dimensionamento (levantamento, cronograma, itens, serviços, geração de orçamento) | F3 |
-| 5 | Financeiro | 32 | 141.663 | parcial (contas a receber do encerramento; contas a pagar, baixas, bancos e caixa pendentes) | F5 |
+| 5 | Financeiro | 32 | 141.663 | **concluído**: contas a pagar/receber, baixas, estornos, movimentos bancários, caixa, cheques, balanço, cadastros e relatórios | F5 |
 | 6 | Compras | 8 | 19.203 | **concluído**: pedidos, itens, parcelas, fechamento/recebimento, cotações (3 fornecedores), solicitações internas, prazos e contas a pagar | F4/F6 |
 | 7 | Faturamento / NF | 9 | 4.019 | pendente | F6 |
 | 8 | Equipamentos | 6 | 12.076 | pendente (só a ficha usada pelo Chamado) | F1/F2 |
@@ -116,19 +117,28 @@ Fonte: `docs/03-mapa-tabelas-modulos.csv` (243 tabelas, 425.471 registros no bac
 - **Regras:** `docs/09-regras-orcamentos.md`.
 - **Dependências:** Clientes, Produtos, Chamados.
 
-### 3.5 Financeiro
+### 3.5 Financeiro — concluído
 
-- **Tabelas:** `CONTAS_RECEBER_01..04`, `CONTAS_PAGAR_01/02`, `MOV_BANCARIA_01/02`,
-  `MOVICAIXA1..3`, `BANCOS`, `AGENCIA`, `CONTA_BANCARIA`, `CARTOES`, `CENTRO_CUSTOS`,
-  `NAT_OPERACAO`, `CODICAO_PAGTO`, `FORMA_RECEBIMENTO_01/02`, `TIPO_PAGTO`,
-  `STATUS_PAGAMENTO`, `GRAUPAR`, `TB_*`.
-- **Telas:** contas a receber (baixa, estorno, cancelamento), contas a pagar, movimento
-  de caixa, movimento bancário, conciliação, centros de custo, naturezas, portadores,
-  relatórios de inadimplência e fluxo de caixa.
-- **Já pronto:** emissão de contas a receber no encerramento do Chamado, cancelamento
-  lógico ao cancelar encerramento.
-- **Regras:** baixa parcial/total, juros/multa/desconto, `VLIQ`, ISS, retenções,
-  fechamento de caixa, numeração de documentos.
+- **Tabelas:** `CONTAS_RECEBER_01..04` (unificadas), `CONTAS_PAGAR_01/02`,
+  `CONTAS_PAGAR_LOG_01`, `MOV_BANCARIA_01/02`, `MOVICAIXA1/2`,
+  `BANCOS`, `AGENCIA`, `CONTA_BANCARIA`, `CARTOES`, `CENTRO_CUSTOS`,
+  `NAT_OPERACAO`, `STATUS_PAGAMENTO`, `DESPESAS_FIXAS`,
+  `PAGTO_CHEQUES_01` e `TB_BALANCO_FINANC_01`.
+- **Telas:** painel; contas a pagar e a receber (listas, filtros, fichas,
+  criação parcelada, edição, baixa com multa/juros/desconto, estorno,
+  cancelamento, exclusão e comprovante); movimentos bancários; caixa diário com
+  fechamento e reabertura; cheques com compensação; balanço; cadastros de apoio;
+  relatórios de CP, CR, fluxo de caixa, posição bancária e balanço.
+- **Cálculos:** rateio de parcelas com ajuste na última; `valor_atualizado =
+  valor + multa + juros`; `valor_pago/recebido = valor + multa + juros -
+  desconto`; saldo bancário `C` soma e `D` subtrai; fechamento do caixa
+  `abertura + entradas - saídas` (ou `entradas - saídas` quando a abertura está
+  lançada como "SALDO ANTERIOR").
+- **Integração:** baixas de CP/CR podem gerar movimento bancário e lançamento de
+  caixa; títulos de Compras e Chamados/OS são baixados nas mesmas telas.
+- **Normalizações:** CP com situação 1/2/3; CR arquivadas unificadas com 6
+  códigos renumerados; movimentos com 414 inclusões e numeração até 131.496.
+- **Regras:** `docs/10-regras-financeiro.md`.
 
 ### 3.6 Compras — concluído
 
@@ -268,7 +278,7 @@ Checklist obrigatório (repetir para cada um dos 14 módulos):
 | F2 | Chamados/OS | **concluído** |
 | F3 | Orçamentos | **concluído** — orçamento comercial e dimensionamento |
 | F4 | Estoque/Produtos, Compras | **Estoque concluído (núcleo)**; **Compras concluído** |
-| F5 | Financeiro | CR/CP, caixa, banco, baixas e relatórios |
+| F5 | Financeiro | **concluído** — CP/CR, baixas, caixa, banco, cheques, balanço e relatórios |
 | F6 | Faturamento/NF, Compras (recebimento) | NF, recibos, faturamento em lote |
 | F7 | RH, Frota | fichas, férias, benefícios, veículos e abastecimentos |
 | F8 | Relatórios gerais, limpeza e corte | paridade final e desligamento do Access |
@@ -335,11 +345,9 @@ mesmos dados e entram no lote de relatórios gerais (F8).
 
 ## 10. Próximos passos imediatos
 
-1. **Commit local** do módulo Orçamentos (sem push).
-2. **Financeiro (F5)**: CR/CP, baixas, caixa, banco e relatórios (inclui a baixa dos
-   títulos gerados por Compras e Chamados).
-3. **Compras — complementos**: gerar pedido da cotação aprovada, recebimento parcial
+1. **Commit local** do módulo Financeiro (sem push).
+2. **Compras — complementos**: gerar pedido da cotação aprovada, recebimento parcial
    por NF e os relatórios restantes do módulo.
-4. **Orçamentos — complementos**: cotações de fornecedor do dimensionamento e
+3. **Orçamentos — complementos**: cotações de fornecedor do dimensionamento e
    relatórios gerais (`REL_ORCAMENTO_03*`) no lote de F8.
-5. Pendências do Estoque: transferência, reserva, custo médio, kits/ferramentas e relatórios.
+4. Pendências do Estoque: transferência, reserva, custo médio, kits/ferramentas e relatórios.

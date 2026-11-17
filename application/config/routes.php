@@ -149,3 +149,57 @@ $route['orcamentos/dim_excluir_item/(:num)/(:num)']    = 'orcamentos/dim_excluir
 $route['orcamentos/dim_adicionar_servico/(:num)']      = 'orcamentos/dim_adicionar_servico/$1';
 $route['orcamentos/dim_atualizar_servico/(:num)/(:num)'] = 'orcamentos/dim_atualizar_servico/$1/$2';
 $route['orcamentos/dim_excluir_servico/(:num)/(:num)'] = 'orcamentos/dim_excluir_servico/$1/$2';
+
+// Financeiro
+$route['financeiro'] = 'financeiro/index';
+
+$route['financeiro/contas_pagar']                     = 'financeiro/contas_pagar';
+$route['financeiro/conta_pagar_novo']                 = 'financeiro/conta_pagar_novo';
+$route['financeiro/conta_pagar_editar/(:num)']        = 'financeiro/conta_pagar_editar/$1';
+$route['financeiro/conta_pagar_ver/(:num)']           = 'financeiro/conta_pagar_ver/$1';
+$route['financeiro/conta_pagar_baixar/(:num)']        = 'financeiro/conta_pagar_baixar/$1';
+$route['financeiro/conta_pagar_estornar/(:num)']      = 'financeiro/conta_pagar_estornar/$1';
+$route['financeiro/conta_pagar_cancelar/(:num)']      = 'financeiro/conta_pagar_cancelar/$1';
+$route['financeiro/conta_pagar_excluir/(:num)']       = 'financeiro/conta_pagar_excluir/$1';
+$route['financeiro/conta_pagar_comprovante/(:num)']   = 'financeiro/conta_pagar_comprovante/$1';
+
+$route['financeiro/contas_receber']                   = 'financeiro/contas_receber';
+$route['financeiro/conta_receber_novo']               = 'financeiro/conta_receber_novo';
+$route['financeiro/conta_receber_editar/(:num)']      = 'financeiro/conta_receber_editar/$1';
+$route['financeiro/conta_receber_ver/(:num)']         = 'financeiro/conta_receber_ver/$1';
+$route['financeiro/conta_receber_baixar/(:num)']      = 'financeiro/conta_receber_baixar/$1';
+$route['financeiro/conta_receber_estornar/(:num)']    = 'financeiro/conta_receber_estornar/$1';
+$route['financeiro/conta_receber_cancelar/(:num)']    = 'financeiro/conta_receber_cancelar/$1';
+$route['financeiro/conta_receber_excluir/(:num)']     = 'financeiro/conta_receber_excluir/$1';
+$route['financeiro/conta_receber_comprovante/(:num)'] = 'financeiro/conta_receber_comprovante/$1';
+
+$route['financeiro/movimentos']                       = 'financeiro/movimentos';
+$route['financeiro/movimento_novo']                   = 'financeiro/movimento_novo';
+$route['financeiro/movimento_editar/(:num)']          = 'financeiro/movimento_editar/$1';
+$route['financeiro/movimento_excluir/(:num)']         = 'financeiro/movimento_excluir/$1';
+
+$route['financeiro/caixa']                            = 'financeiro/caixa';
+$route['financeiro/caixa_dia/(:any)']                 = 'financeiro/caixa_dia/$1';
+$route['financeiro/caixa_movimento_salvar']           = 'financeiro/caixa_movimento_salvar';
+$route['financeiro/caixa_movimento_excluir/(:num)']   = 'financeiro/caixa_movimento_excluir/$1';
+$route['financeiro/caixa_fechar/(:any)']              = 'financeiro/caixa_fechar/$1';
+$route['financeiro/caixa_reabrir/(:any)']             = 'financeiro/caixa_reabrir/$1';
+
+$route['financeiro/cheques']                          = 'financeiro/cheques';
+$route['financeiro/cheque_novo']                      = 'financeiro/cheque_novo';
+$route['financeiro/cheque_editar/(:num)']             = 'financeiro/cheque_editar/$1';
+$route['financeiro/cheque_excluir/(:num)']            = 'financeiro/cheque_excluir/$1';
+$route['financeiro/cheque_compensar/(:num)']          = 'financeiro/cheque_compensar/$1';
+
+$route['financeiro/balanco']                          = 'financeiro/balanco';
+$route['financeiro/balanco_gerar']                    = 'financeiro/balanco_gerar';
+$route['financeiro/balanco_excluir/(:num)']           = 'financeiro/balanco_excluir/$1';
+
+$route['financeiro/cadastros']                        = 'financeiro/cadastros';
+$route['financeiro/cadastro/(:any)']                  = 'financeiro/cadastro/$1';
+$route['financeiro/cadastro/(:any)/(:any)']           = 'financeiro/cadastro/$1/$2';
+$route['financeiro/cadastro_excluir/(:any)/(:any)']   = 'financeiro/cadastro_excluir/$1/$2';
+
+$route['financeiro/relatorios']                       = 'financeiro/relatorios';
+$route['financeiro/buscar_fornecedores']              = 'financeiro/buscar_fornecedores';
+$route['financeiro/buscar_clientes']                  = 'financeiro/buscar_clientes';
