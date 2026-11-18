@@ -19,9 +19,8 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
         </h3>
 
         <div class="acoes-ficha">
-            <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/permissoes') ?>">Modulos</a>
-            <?php if ($edicao): ?>
-                <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/programas/' . (int) $modulo['codigo']) ?>">Novo</a>
+            <?php if ( ! $pode_editar): ?>
+                <a class="botao pequeno" href="<?= site_url('tabelas_basicas/permissoes') ?>">Retornar aos Modulos</a>
             <?php endif; ?>
         </div>
     </div>
@@ -70,8 +69,10 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                 <div class="form-acoes">
                     <button type="submit" class="botao"><?= $edicao ? 'Gravar alteracoes' : 'Incluir programa' ?></button>
                     <?php if ($edicao): ?>
-                        <a class="botao secundario" href="<?= site_url('tabelas_basicas/programas/' . (int) $modulo['codigo']) ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/programas/' . (int) $modulo['codigo']) ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/programas/' . (int) $modulo['codigo']) ?>">Novo</a>
                     <?php endif; ?>
+                    <a class="botao" href="<?= site_url('tabelas_basicas/permissoes') ?>">Retornar aos Modulos</a>
                 </div>
             <?= form_close() ?>
         <?php else: ?>
@@ -82,7 +83,7 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
 
 <div class="painel">
     <div class="painel-cabecalho">
-        <h3>Programas cadastrados (<?= numero_br(count($programas)) ?>)</h3>
+        <h3>Programas cadastrados (<?= numero_br($pag['total']) ?>)</h3>
     </div>
 
     <div class="tabela-wrap">
@@ -108,6 +109,7 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                     </tr>
                 <?php else: ?>
                     <?php foreach ($programas as $p): ?>
+                        <?php $uso = isset($p['uso']) ? (int) $p['uso'] : 0; ?>
                         <tr>
                             <td><strong><?= html_escape($p['codigo']) ?></strong></td>
                             <td><?= html_escape($p['nome']) ?></td>
@@ -123,12 +125,17 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
 
                             <?php if ($pode_editar): ?>
                                 <td class="centro">
-                                    <a class="botao secundario pequeno"
+                                    <a class="botao pequeno"
                                        href="<?= site_url('tabelas_basicas/programas/' . (int) $modulo['codigo'] . '?editar=' . (int) $p['codigo']) ?>">Editar</a>
 
                                     <?= form_open('tabelas_basicas/programa_excluir/' . (int) $modulo['codigo'] . '/' . (int) $p['codigo'], array('style' => 'display:inline')) ?>
-                                        <button type="submit" class="botao perigo pequeno"
-                                            onclick="return confirm('Excluir este programa?')">Excluir</button>
+                                        <?php if ($uso > 0): ?>
+                                            <button type="submit" class="botao perigo pequeno" disabled
+                                                title="Nao e possivel excluir: existem <?= numero_br($uso) ?> registro(s) vinculados.">Excluir</button>
+                                        <?php else: ?>
+                                            <button type="submit" class="botao perigo pequeno"
+                                                onclick="return confirm('Excluir este programa?')">Excluir</button>
+                                        <?php endif; ?>
                                     <?= form_close() ?>
                                 </td>
                             <?php endif; ?>
@@ -138,4 +145,9 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
             </tbody>
         </table>
     </div>
+
+    <?php $this->load->view('layouts/paginacao', array(
+        'pag'   => $pag,
+        'base'  => site_url('tabelas_basicas/programas/' . (int) $modulo['codigo']),
+    )); ?>
 </div>

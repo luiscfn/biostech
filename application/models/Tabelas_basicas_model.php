@@ -210,7 +210,7 @@ class Tabelas_basicas_model extends MY_Model
     // Lista / formulario dos itens simples
     // ==================================================================
 
-    public function registros($chave, $busca = '')
+    public function registros($chave, $busca = '', $limit = NULL, $offset = NULL)
     {
         $cfg = $this->tipo($chave);
 
@@ -237,7 +237,14 @@ class Tabelas_basicas_model extends MY_Model
                 $params[] = $busca;
             }
 
-            return $this->db->query($sql . " ORDER BY s.id", $params)->result_array();
+            $sql .= " ORDER BY s.id";
+
+            if ($limit !== NULL)
+            {
+                $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+            }
+
+            return $this->db->query($sql, $params)->result_array();
         }
 
         $sql = "SELECT d.codigo, d.nome, d.valor, d.ordem, d.ativo";
@@ -259,7 +266,56 @@ class Tabelas_basicas_model extends MY_Model
 
         $sql .= " ORDER BY d.ordem NULLS LAST, d.codigo";
 
+        if ($limit !== NULL)
+        {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
         return $this->db->query($sql, $params)->result_array();
+    }
+
+    public function total_registros($chave, $busca = '')
+    {
+        $cfg = $this->tipo($chave);
+
+        if ($cfg === NULL)
+        {
+            return 0;
+        }
+
+        $busca = trim((string) $busca);
+
+        if ($cfg['fonte'] === 'setores')
+        {
+            $sql = "SELECT count(*) FROM " . T_SETORES . " s";
+            $params = array();
+
+            if ($busca !== '')
+            {
+                $sql .= " WHERE (s.nome ILIKE ? OR s.id::text = ?)";
+                $params[] = '%' . $busca . '%';
+                $params[] = $busca;
+            }
+
+            return (int) $this->_valor($sql, $params);
+        }
+
+        if ($cfg['fonte'] !== 'dominio')
+        {
+            return 0;
+        }
+
+        $sql = "SELECT count(*) FROM " . T_DOMINIOS . " d WHERE d.tipo = ?";
+        $params = array($cfg['dominio']);
+
+        if ($busca !== '')
+        {
+            $sql .= " AND (d.nome ILIKE ? OR d.codigo::text = ?)";
+            $params[] = '%' . $busca . '%';
+            $params[] = $busca;
+        }
+
+        return (int) $this->_valor($sql, $params);
     }
 
     public function registro($chave, $codigo)
@@ -560,7 +616,7 @@ class Tabelas_basicas_model extends MY_Model
     // Permissoes de acesso (modulos e programas)
     // ==================================================================
 
-    public function modulos($busca = '')
+    public function modulos($busca = '', $limit = NULL, $offset = NULL)
     {
         $sql = "SELECT m.codigo, m.nome, m.ordem, m.ativo,
                        (SELECT count(*) FROM " . T_BASICO_PROGRAMAS . " p
@@ -575,7 +631,29 @@ class Tabelas_basicas_model extends MY_Model
             $params[] = trim($busca);
         }
 
-        return $this->db->query($sql . " ORDER BY m.ordem NULLS LAST, m.codigo", $params)->result_array();
+        $sql .= " ORDER BY m.ordem NULLS LAST, m.codigo";
+
+        if ($limit !== NULL)
+        {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
+        return $this->db->query($sql, $params)->result_array();
+    }
+
+    public function total_modulos($busca = '')
+    {
+        $sql = "SELECT count(*) FROM " . T_BASICO_MODULOS . " m";
+        $params = array();
+
+        if (trim((string) $busca) !== '')
+        {
+            $sql .= " WHERE (m.nome ILIKE ? OR m.codigo::text = ?)";
+            $params[] = '%' . trim($busca) . '%';
+            $params[] = trim($busca);
+        }
+
+        return (int) $this->_valor($sql, $params);
     }
 
     public function modulo($codigo)
@@ -669,15 +747,27 @@ class Tabelas_basicas_model extends MY_Model
         return array('ok' => TRUE, 'erro' => NULL, 'mensagem' => 'Modulo excluido.');
     }
 
-    public function programas($modulo)
+    public function programas($modulo, $limit = NULL, $offset = NULL)
     {
-        return $this->db->query(
-            "SELECT codigo, nome, formulario, ordem, ativo
-               FROM " . T_BASICO_PROGRAMAS . "
-              WHERE modulo_codigo = ?
-              ORDER BY ordem NULLS LAST, codigo",
+        $sql = "SELECT codigo, nome, formulario, ordem, ativo, 0 AS uso
+                  FROM " . T_BASICO_PROGRAMAS . "
+                 WHERE modulo_codigo = ?
+                 ORDER BY ordem NULLS LAST, codigo";
+
+        if ($limit !== NULL)
+        {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
+        return $this->db->query($sql, array((int) $modulo))->result_array();
+    }
+
+    public function total_programas($modulo)
+    {
+        return (int) $this->_valor(
+            "SELECT count(*) FROM " . T_BASICO_PROGRAMAS . " WHERE modulo_codigo = ?",
             array((int) $modulo)
-        )->result_array();
+        );
     }
 
     public function proximo_codigo_programa($modulo)

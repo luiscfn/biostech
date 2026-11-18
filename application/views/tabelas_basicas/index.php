@@ -3,7 +3,7 @@
         <h3>Tabelas Basicas</h3>
 
         <div class="acoes-ficha">
-            <a class="botao secundario pequeno" href="<?= site_url('dashboard') ?>">Retorna ao Menu</a>
+            <a class="botao pequeno" href="<?= site_url('dashboard') ?>">Retornar ao Menu</a>
         </div>
     </div>
 
@@ -32,9 +32,6 @@
                 ?>
                 <a class="cartao" href="<?= site_url($destino) ?>" style="text-decoration:none;color:inherit">
                     <div class="rotulo">
-                        <?php if ( ! empty($cfg['letra'])): ?>
-                            <span class="badge info"><?= html_escape($cfg['letra']) ?></span>
-                        <?php endif; ?>
                         <?= html_escape($cfg['rotulo']) ?>
                     </div>
                     <div class="valor"><?= numero_br(isset($contagens[$chave]) ? $contagens[$chave] : 0) ?></div>

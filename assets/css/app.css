@@ -192,7 +192,8 @@ a:hover { text-decoration: underline; }
 }
 
 .sidebar a.item,
-.sidebar span.item {
+.sidebar span.item,
+.sidebar button.item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -205,16 +206,42 @@ a:hover { text-decoration: underline; }
     margin-bottom: 2px;
 }
 
-.sidebar a.item:hover { background: rgba(255, 255, 255, .08); text-decoration: none; }
-.sidebar a.item.ativo { background: rgba(255, 255, 255, .14); color: #fff; font-weight: 600; }
+.sidebar button.item {
+    width: 100%;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar a.item:hover,
+.sidebar button.item:hover { background: rgba(255, 255, 255, .08); text-decoration: none; }
+.sidebar a.item.ativo,
+.sidebar button.item.ativo { background: rgba(255, 255, 255, .14); color: #fff; font-weight: 600; }
 .sidebar span.item { color: #7fa2c6; cursor: default; }
 .sidebar span.item .tag { font-size: 9px; background: rgba(255, 255, 255, .08); padding: 2px 6px; border-radius: 20px; }
 
+.sidebar .submenu-toggle .seta {
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid #7fa2c6;
+    transition: transform .15s ease;
+}
+
+.sidebar .submenu-toggle.aberto .seta { transform: rotate(90deg); }
+
 .sidebar .submenu {
+    display: none;
     margin: 2px 0 6px 10px;
     padding-left: 8px;
     border-left: 1px solid rgba(255, 255, 255, .14);
 }
+
+.sidebar .submenu.aberto { display: block; }
 
 .sidebar a.item.sub {
     padding: 6px 8px;
@@ -469,6 +496,19 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .campo { grid-column: span 6; }
 .campo.full { grid-column: span 12; }
 .campo.terco { grid-column: span 4; }
+.campo.codigo,
+.campo.ordem,
+.campo.valor { grid-column: span 2; }
+
+.campo.nome { grid-column: span 8; }
+.campo.nome.com-ordem { grid-column: span 6; }
+.campo.nome.com-ordem.com-valor { grid-column: span 4; }
+
+.campo.ativo {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+}
 
 .campo label {
     display: block;
@@ -820,9 +860,14 @@ form.inline {
     .sidebar { width: 100%; min-width: 0; height: auto; position: relative; }
     .sidebar nav { display: flex; flex-wrap: wrap; gap: 4px; }
     .sidebar .grupo { width: 100%; padding-top: 8px; }
+    .sidebar button.item { width: auto; }
+    .sidebar .submenu { width: 100%; }
     .sidebar .rodape { display: none; }
     .pagina { padding: 18px 16px 40px; }
     .topbar { padding: 12px 16px; }
-    .campo, .campo.terco { grid-column: span 12; }
+    .campo, .campo.terco, .campo.codigo, .campo.ordem, .campo.valor,
+    .campo.nome, .campo.nome.com-ordem, .campo.nome.com-ordem.com-valor,
+    .campo.ativo { grid-column: span 12; }
+    .campo.ativo { justify-content: flex-start; }
     .filtros input[type=text], .filtros select { min-width: 0; width: 100%; }
 }

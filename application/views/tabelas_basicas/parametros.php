@@ -18,9 +18,11 @@ $dis = $pode_editar ? '' : 'disabled';
     <div class="painel-cabecalho">
         <h3>Valor Orcamento Nao Aprovado</h3>
 
-        <div class="acoes-ficha">
-            <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas') ?>">Tabelas Basicas</a>
-        </div>
+        <?php if ( ! $pode_editar): ?>
+            <div class="acoes-ficha">
+                <a class="botao pequeno" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="painel-corpo">
@@ -80,6 +82,7 @@ $dis = $pode_editar ? '' : 'disabled';
             <?php if ($pode_editar): ?>
                 <div class="form-acoes">
                     <button type="submit" class="botao">Gravar parametros</button>
+                    <a class="botao" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
                 </div>
             <?php endif; ?>
         <?= form_close() ?>

@@ -14,12 +14,11 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
     <div class="painel-cabecalho">
         <h3>Permissoes de Acesso</h3>
 
-        <div class="acoes-ficha">
-            <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas') ?>">Tabelas Basicas</a>
-            <?php if ($edicao): ?>
-                <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/permissoes') ?>">Novo</a>
-            <?php endif; ?>
-        </div>
+        <?php if ( ! $pode_editar): ?>
+            <div class="acoes-ficha">
+                <a class="botao pequeno" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="painel-corpo">
@@ -49,7 +48,7 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                     </div>
 
                     <div class="campo terco">
-                        <label for="ordem">Ordem</label>
+                        <label for="ordem">Ordem teste</label>
                         <input type="number" name="ordem" id="ordem" min="0" step="1"
                                value="<?= html_escape($campo('ordem')) ?>">
                     </div>
@@ -66,8 +65,10 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                 <div class="form-acoes">
                     <button type="submit" class="botao"><?= $edicao ? 'Gravar alteracoes' : 'Incluir modulo' ?></button>
                     <?php if ($edicao): ?>
-                        <a class="botao secundario" href="<?= site_url('tabelas_basicas/permissoes') ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/permissoes') ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/permissoes') ?>">Novo</a>
                     <?php endif; ?>
+                    <a class="botao" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
                 </div>
             <?= form_close() ?>
         <?php else: ?>
@@ -78,12 +79,12 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
 
 <div class="painel">
     <div class="painel-cabecalho">
-        <h3>Modulos cadastrados (<?= numero_br(count($modulos)) ?>)</h3>
+        <h3>Modulos cadastrados (<?= numero_br($pag['total']) ?>)</h3>
 
         <form method="get" action="<?= site_url('tabelas_basicas/permissoes') ?>" class="acoes-ficha">
-            <input type="text" name="busca" placeholder="Pesquisar modulo"
-                   value="<?= html_escape($busca) ?>" style="padding:6px 10px;border:1px solid var(--borda);border-radius:8px">
-            <button type="submit" class="botao secundario pequeno">Pesquisar</button>
+            <input type="text" name="busca" placeholder="Informe o Nome ou Codigo a Pesquisar"
+                   value="<?= html_escape($busca) ?>" style="width:360px;max-width:100%;padding:6px 10px;border:1px solid var(--borda);border-radius:8px">
+            <button type="submit" class="botao pequeno">Pesquisar</button>
             <?php if ($busca !== ''): ?>
                 <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/permissoes') ?>">Limpar</a>
             <?php endif; ?>
@@ -106,6 +107,7 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                     <tr><td colspan="5" class="vazio">Nenhum modulo encontrado.</td></tr>
                 <?php else: ?>
                     <?php foreach ($modulos as $m): ?>
+                        <?php $qtd_programas = (int) $m['qtd_programas']; ?>
                         <tr>
                             <td><strong><?= html_escape($m['codigo']) ?></strong></td>
                             <td><?= html_escape($m['nome']) ?></td>
@@ -122,12 +124,17 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
                                    href="<?= site_url('tabelas_basicas/programas/' . (int) $m['codigo']) ?>">Programas</a>
 
                                 <?php if ($pode_editar): ?>
-                                    <a class="botao secundario pequeno"
+                                    <a class="botao pequeno"
                                        href="<?= site_url('tabelas_basicas/permissoes?editar=' . (int) $m['codigo']) ?>">Editar</a>
 
                                     <?= form_open('tabelas_basicas/modulo_excluir/' . (int) $m['codigo'], array('style' => 'display:inline')) ?>
-                                        <button type="submit" class="botao perigo pequeno"
-                                            onclick="return confirm('Excluir este modulo?')">Excluir</button>
+                                        <?php if ($qtd_programas > 0): ?>
+                                            <button type="submit" class="botao perigo pequeno" disabled
+                                                title="Nao e possivel excluir: existem <?= numero_br($qtd_programas) ?> programa(s) vinculados.">Excluir</button>
+                                        <?php else: ?>
+                                            <button type="submit" class="botao perigo pequeno"
+                                                onclick="return confirm('Excluir este modulo?')">Excluir</button>
+                                        <?php endif; ?>
                                     <?= form_close() ?>
                                 <?php endif; ?>
                             </td>
@@ -137,4 +144,10 @@ $campo = function ($nome, $default = '') use ($registro, $edicao) {
             </tbody>
         </table>
     </div>
+
+    <?php $this->load->view('layouts/paginacao', array(
+        'pag'   => $pag,
+        'base'  => site_url('tabelas_basicas/permissoes'),
+        'busca' => $busca,
+    )); ?>
 </div>

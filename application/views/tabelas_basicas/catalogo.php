@@ -26,18 +26,14 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
 <div class="painel">
     <div class="painel-cabecalho">
         <h3>
-            <?php if ( ! empty($cfg['letra'])): ?>
-                <span class="badge info"><?= html_escape($cfg['letra']) ?></span>
-            <?php endif; ?>
             <?= html_escape($cfg['rotulo']) ?>
         </h3>
 
-        <div class="acoes-ficha">
-            <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas') ?>">Tabelas Basicas</a>
-            <?php if ($edicao): ?>
-                <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>">Novo</a>
-            <?php endif; ?>
-        </div>
+        <?php if ( ! $pode_editar): ?>
+            <div class="acoes-ficha">
+                <a class="botao pequeno" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="painel-corpo">
@@ -48,41 +44,38 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
                 <input type="hidden" name="editar" value="<?= $edicao ? (int) $registro['codigo'] : 0 ?>">
 
                 <div class="form-grid">
-                    <div class="campo terco">
+                    <div class="campo codigo">
                         <label for="codigo">Codigo *</label>
                         <input type="number" name="codigo" id="codigo" min="1" step="1" required
                                value="<?= html_escape($edicao ? $registro['codigo'] : $proximo_codigo) ?>"
                                <?= $edicao ? 'readonly' : '' ?>>
-                        <?php if ($edicao): ?>
-                            <div class="ajuda">O codigo herdado do Access nao pode ser alterado.</div>
-                        <?php endif; ?>
                     </div>
 
-                    <div class="campo <?= $mostra_valor ? 'terco' : 'full' ?>">
-                        <label for="nome">Nome *</label>
-                        <input type="text" name="nome" id="nome" maxlength="120" required
-                               value="<?= html_escape($campo('nome')) ?>">
-                    </div>
+                    <?php if ( ! $eh_setor): ?>
+                        <div class="campo ordem">
+                            <label for="ordem">Ordem</label>
+                            <input type="number" name="ordem" id="ordem" min="0" step="1"
+                                   value="<?= html_escape($campo('ordem', '')) ?>">
+                            <div class="ajuda">Deixe em branco para usar o código</div>
+                        </div>
+                    <?php endif; ?>
 
                     <?php if ($mostra_valor): ?>
-                        <div class="campo terco">
+                        <div class="campo valor">
                             <label for="valor"><?= html_escape($cfg['rotulo_valor']) ?></label>
                             <input type="text" name="valor" id="valor" inputmode="decimal"
                                    value="<?= html_escape($valor_decimal($campo('valor'))) ?>">
                         </div>
                     <?php endif; ?>
 
-                    <?php if ( ! $eh_setor): ?>
-                        <div class="campo terco">
-                            <label for="ordem">Ordem</label>
-                            <input type="number" name="ordem" id="ordem" min="0" step="1"
-                                   value="<?= html_escape($campo('ordem', '')) ?>">
-                            <div class="ajuda">Deixe em branco para usar o proprio codigo.</div>
-                        </div>
-                    <?php endif; ?>
+                    <div class="campo nome<?= $eh_setor ? '' : ' com-ordem' ?><?= $mostra_valor ? ' com-valor' : '' ?>">
+                        <label for="nome">Nome *</label>
+                        <input type="text" name="nome" id="nome" maxlength="120" required
+                               value="<?= html_escape($campo('nome')) ?>">
+                    </div>
 
-                    <div class="campo terco">
-                        <label class="check" style="margin-top:26px">
+                    <div class="campo ativo">
+                        <label class="check">
                             <input type="checkbox" name="ativo" value="1"
                                 <?= ( ! $edicao || bd_bool($registro['ativo'])) ? 'checked' : '' ?>>
                             Ativo
@@ -93,8 +86,10 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
                 <div class="form-acoes">
                     <button type="submit" class="botao"><?= $edicao ? 'Gravar alteracoes' : 'Incluir' ?></button>
                     <?php if ($edicao): ?>
-                        <a class="botao secundario" href="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>">Cancelar</a>
+                        <a class="botao" href="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>">Novo</a>
                     <?php endif; ?>
+                    <a class="botao" href="<?= site_url('tabelas_basicas') ?>">Retornar as Tabelas Basicas</a>
                 </div>
             <?= form_close() ?>
         <?php else: ?>
@@ -105,12 +100,12 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
 
 <div class="painel">
     <div class="painel-cabecalho">
-        <h3>Itens cadastrados (<?= numero_br(count($registros)) ?>)</h3>
+        <h3>Itens cadastrados (<?= numero_br($pag['total']) ?>)</h3>
 
         <form method="get" action="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>" class="acoes-ficha">
-            <input type="text" name="busca" placeholder="Pesquisar nome ou codigo"
-                   value="<?= html_escape($busca) ?>" style="padding:6px 10px;border:1px solid var(--borda);border-radius:8px">
-            <button type="submit" class="botao secundario pequeno">Pesquisar</button>
+            <input type="text" name="busca" placeholder="Informe o Nome ou Codigo a Pesquisar"
+                   value="<?= html_escape($busca) ?>" style="width:360px;max-width:100%;padding:6px 10px;border:1px solid var(--borda);border-radius:8px">
+            <button type="submit" class="botao pequeno">Pesquisar</button>
             <?php if ($busca !== ''): ?>
                 <a class="botao secundario pequeno" href="<?= site_url('tabelas_basicas/categoria/' . $chave) ?>">Limpar</a>
             <?php endif; ?>
@@ -127,7 +122,7 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
                         <th class="num" style="width:120px"><?= html_escape($cfg['rotulo_valor']) ?></th>
                     <?php endif; ?>
                     <?php if ($mostra_uso): ?>
-                        <th class="num" style="width:110px"><?= html_escape($cfg['rotulo_uso']) ?></th>
+                        <th class="centro" style="width:110px"><?= html_escape($cfg['rotulo_uso']) ?></th>
                     <?php endif; ?>
                     <th style="width:100px">Situacao</th>
                     <?php if ($pode_editar): ?>
@@ -144,6 +139,7 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
                     </tr>
                 <?php else: ?>
                     <?php foreach ($registros as $r): ?>
+                        <?php $uso = isset($r['uso']) ? (int) $r['uso'] : 0; ?>
                         <tr>
                             <td><strong><?= html_escape($r['codigo']) ?></strong></td>
                             <td><?= html_escape($r['nome']) ?></td>
@@ -155,7 +151,7 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
                             <?php endif; ?>
 
                             <?php if ($mostra_uso): ?>
-                                <td class="num"><?= numero_br(isset($r['uso']) ? $r['uso'] : 0) ?></td>
+                                <td class="centro"><?= numero_br(isset($r['uso']) ? $r['uso'] : 0) ?></td>
                             <?php endif; ?>
 
                             <td>
@@ -168,12 +164,17 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
 
                             <?php if ($pode_editar): ?>
                                 <td class="centro">
-                                    <a class="botao secundario pequeno"
+                                    <a class="botao pequeno"
                                        href="<?= site_url('tabelas_basicas/categoria/' . $chave . '?editar=' . rawurlencode($r['codigo'])) ?>">Editar</a>
 
                                     <?= form_open('tabelas_basicas/excluir/' . $chave . '/' . rawurlencode($r['codigo']), array('style' => 'display:inline')) ?>
-                                        <button type="submit" class="botao perigo pequeno"
-                                            onclick="return confirm('Excluir este item?')">Excluir</button>
+                                        <?php if ($uso > 0): ?>
+                                            <button type="submit" class="botao perigo pequeno" disabled
+                                                title="Nao e possivel excluir: existem <?= numero_br($uso) ?> registro(s) vinculados.">Excluir</button>
+                                        <?php else: ?>
+                                            <button type="submit" class="botao perigo pequeno"
+                                                onclick="return confirm('Excluir este item?')">Excluir</button>
+                                        <?php endif; ?>
                                     <?= form_close() ?>
                                 </td>
                             <?php endif; ?>
@@ -183,4 +184,10 @@ $eh_setor     = ($cfg['fonte'] === 'setores');
             </tbody>
         </table>
     </div>
+
+    <?php $this->load->view('layouts/paginacao', array(
+        'pag'   => $pag,
+        'base'  => site_url('tabelas_basicas/categoria/' . $chave),
+        'busca' => $busca,
+    )); ?>
 </div>

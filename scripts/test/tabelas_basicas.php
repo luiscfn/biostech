@@ -206,7 +206,7 @@ paginar('/tabelas_basicas', array(
     'Cargos e Funcoes',
     'Permissoes de Acesso',
     'Tipos de Pagamentos',
-    'Retorna ao Menu',
+    'Retornar ao Menu',
 ));
 
 paginar('/tabelas_basicas/categoria/setores', array('GERENCIA', 'Setores e Filiais'));

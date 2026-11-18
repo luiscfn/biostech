@@ -30,26 +30,32 @@
             <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
             <a class="item <?= $menu_ativo === 'financeiro' ? 'ativo' : '' ?>" href="<?= site_url('financeiro') ?>">Financeiro</a>
 
-            <div class="grupo">Tabelas Basicas</div>
-            <a class="item <?= $menu_ativo === 'tabelas_basicas' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas') ?>">Tabelas Basicas</a>
+            <?php $tb_aberto = ($menu_ativo === 'tabelas_basicas'); ?>
 
-            <?php if ($menu_ativo === 'tabelas_basicas'): ?>
-                <div class="submenu">
-                    <a class="item sub <?= $menu_sub === 'setores' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/setores') ?>">A · Setores e Filiais</a>
-                    <a class="item sub <?= $menu_sub === 'tipos_equipamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/tipos_equipamento') ?>">B · Tipos de Equipamentos</a>
-                    <a class="item sub <?= $menu_sub === 'status_os' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/status_os') ?>">C · Status da OS</a>
-                    <a class="item sub <?= $menu_sub === 'status_equipamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/status_equipamento') ?>">D · Status do Equipamento</a>
-                    <a class="item sub <?= $menu_sub === 'condicoes_pagamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/condicoes_pagamento') ?>">E · Condicoes de Pagamento</a>
-                    <a class="item sub <?= $menu_sub === 'situacoes_orcamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/situacoes_orcamento') ?>">· Status do Orcamento</a>
-                    <a class="item sub <?= $menu_sub === 'locais_atendimento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/locais_atendimento') ?>">· Locais de Atendimento</a>
-                    <a class="item sub <?= $menu_sub === 'valor_orcamento_nao_aprovado' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/parametros') ?>">· Valor Orc. Nao Aprovado</a>
-                    <a class="item sub <?= $menu_sub === 'finalidades' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/finalidades') ?>">F · Finalidade do Orcamento</a>
-                    <a class="item sub <?= $menu_sub === 'naturezas_nota' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/naturezas_nota') ?>">G · Natureza das Notas Fiscais</a>
-                    <a class="item sub <?= $menu_sub === 'funcoes' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/funcoes') ?>">H · Cargos e Funcoes</a>
-                    <a class="item sub <?= $menu_sub === 'permissoes' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/permissoes') ?>">I · Permissoes de Acesso</a>
-                    <a class="item sub <?= $menu_sub === 'tipos_pagamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/tipos_pagamento') ?>">K · Tipos de Pagamentos</a>
-                </div>
-            <?php endif; ?>
+            <div class="grupo">Tabelas Basicas</div>
+            <button type="button" class="item submenu-toggle <?= $tb_aberto ? 'ativo aberto' : '' ?>"
+                    aria-expanded="<?= $tb_aberto ? 'true' : 'false' ?>"
+                    aria-controls="submenu-tabelas-basicas">
+                <span>Tabelas Basicas</span>
+                <span class="seta" aria-hidden="true"></span>
+            </button>
+
+            <div class="submenu <?= $tb_aberto ? 'aberto' : '' ?>" id="submenu-tabelas-basicas">
+                <a class="item sub <?= ($tb_aberto && $menu_sub === '') ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas') ?>">Visao Geral</a>
+                <a class="item sub <?= $menu_sub === 'setores' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/setores') ?>">Setores e Filiais</a>
+                <a class="item sub <?= $menu_sub === 'tipos_equipamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/tipos_equipamento') ?>">Tipos de Equipamentos</a>
+                <a class="item sub <?= $menu_sub === 'status_os' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/status_os') ?>">Status da OS</a>
+                <a class="item sub <?= $menu_sub === 'status_equipamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/status_equipamento') ?>">Status do Equipamento</a>
+                <a class="item sub <?= $menu_sub === 'condicoes_pagamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/condicoes_pagamento') ?>">Condicoes de Pagamento</a>
+                <a class="item sub <?= $menu_sub === 'situacoes_orcamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/situacoes_orcamento') ?>">Status do Orcamento</a>
+                <a class="item sub <?= $menu_sub === 'locais_atendimento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/locais_atendimento') ?>">Locais de Atendimento</a>
+                <a class="item sub <?= $menu_sub === 'valor_orcamento_nao_aprovado' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/parametros') ?>">Valor Orc. Nao Aprovado</a>
+                <a class="item sub <?= $menu_sub === 'finalidades' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/finalidades') ?>">Finalidade do Orcamento</a>
+                <a class="item sub <?= $menu_sub === 'naturezas_nota' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/naturezas_nota') ?>">Natureza das Notas Fiscais</a>
+                <a class="item sub <?= $menu_sub === 'funcoes' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/funcoes') ?>">Cargos e Funcoes</a>
+                <a class="item sub <?= $menu_sub === 'permissoes' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/permissoes') ?>">Permissoes de Acesso</a>
+                <a class="item sub <?= $menu_sub === 'tipos_pagamento' ? 'ativo' : '' ?>" href="<?= site_url('tabelas_basicas/categoria/tipos_pagamento') ?>">Tipos de Pagamentos</a>
+            </div>
 
             <div class="grupo">Cadastros</div>
             <a class="item <?= $menu_ativo === 'clientes' ? 'ativo' : '' ?>" href="<?= site_url('clientes') ?>">Clientes</a>
@@ -95,5 +101,28 @@
     </div>
 
 </div>
+
+<script>
+(function () {
+    var botao = document.querySelector('.sidebar .submenu-toggle');
+
+    if ( ! botao) {
+        return;
+    }
+
+    var submenu = document.getElementById(botao.getAttribute('aria-controls'));
+
+    if ( ! submenu) {
+        return;
+    }
+
+    botao.addEventListener('click', function () {
+        var aberto = botao.classList.toggle('aberto');
+
+        submenu.classList.toggle('aberto', aberto);
+        botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    });
+})();
+</script>
 </body>
 </html>

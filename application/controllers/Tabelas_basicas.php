@@ -67,6 +67,7 @@ class Tabelas_basicas extends MY_Controller
         $this->titulo   = 'Tabelas Basicas - ' . $cfg['rotulo'];
 
         $busca  = trim((string) $this->input->get('busca'));
+        $pagina = (int) $this->input->get('pagina');
         $editar = (int) $this->input->get('editar');
         $registro = $editar > 0
             ? $this->tabelas_basicas_model->registro($chave, $editar)
@@ -77,11 +78,15 @@ class Tabelas_basicas extends MY_Controller
             show_404();
         }
 
+        $total = $this->tabelas_basicas_model->total_registros($chave, $busca);
+        $pag   = $this->paginar($total, 7, $pagina);
+
         $this->render('tabelas_basicas/catalogo', array(
             'chave'         => $chave,
             'cfg'           => $cfg,
-            'registros'     => $this->tabelas_basicas_model->registros($chave, $busca),
+            'registros'     => $this->tabelas_basicas_model->registros($chave, $busca, $pag['por_pagina'], $pag['offset']),
             'busca'         => $busca,
+            'pag'           => $pag,
             'registro'      => $registro,
             'pode_editar'   => $this->pode_editar,
             'proximo_codigo'=> $this->tabelas_basicas_model->proximo_codigo($chave),
@@ -205,6 +210,7 @@ class Tabelas_basicas extends MY_Controller
         $this->titulo   = 'Tabelas Basicas - Permissoes de Acesso';
 
         $busca  = trim((string) $this->input->get('busca'));
+        $pagina = (int) $this->input->get('pagina');
         $editar = (int) $this->input->get('editar');
         $registro = $editar > 0 ? $this->tabelas_basicas_model->modulo($editar) : array();
 
@@ -213,9 +219,13 @@ class Tabelas_basicas extends MY_Controller
             show_404();
         }
 
+        $total = $this->tabelas_basicas_model->total_modulos($busca);
+        $pag   = $this->paginar($total, 7, $pagina);
+
         $this->render('tabelas_basicas/permissoes', array(
-            'modulos'     => $this->tabelas_basicas_model->modulos($busca),
+            'modulos'     => $this->tabelas_basicas_model->modulos($busca, $pag['por_pagina'], $pag['offset']),
             'busca'       => $busca,
+            'pag'         => $pag,
             'registro'    => $registro,
             'pode_editar' => $this->pode_editar,
             'proximo_codigo' => $this->tabelas_basicas_model->proximo_codigo_modulo(),
@@ -280,6 +290,7 @@ class Tabelas_basicas extends MY_Controller
         $this->titulo   = 'Tabelas Basicas - Programas de ' . $registro_modulo['nome'];
 
         $editar = (int) $this->input->get('editar');
+        $pagina = (int) $this->input->get('pagina');
         $registro = $editar > 0
             ? $this->tabelas_basicas_model->programa($modulo, $editar)
             : array();
@@ -289,9 +300,13 @@ class Tabelas_basicas extends MY_Controller
             show_404();
         }
 
+        $total = $this->tabelas_basicas_model->total_programas($modulo);
+        $pag   = $this->paginar($total, 7, $pagina);
+
         $this->render('tabelas_basicas/programas', array(
             'modulo'      => $registro_modulo,
-            'programas'   => $this->tabelas_basicas_model->programas($modulo),
+            'programas'   => $this->tabelas_basicas_model->programas($modulo, $pag['por_pagina'], $pag['offset']),
+            'pag'         => $pag,
             'registro'    => $registro,
             'pode_editar' => $this->pode_editar,
             'proximo_codigo' => $this->tabelas_basicas_model->proximo_codigo_programa($modulo),
