@@ -198,7 +198,7 @@
         var alvo = document.getElementById('pedido-total');
 
         if (alvo) {
-            alvo.textContent = 'R$ ' + formatar(total);
+            alvo.textContent = formatar(total);
         }
     }
 
@@ -437,7 +437,7 @@
             }
 
             if (celula) {
-                celula.textContent = 'R$ ' + formatar(valores[j] || 0);
+                celula.textContent = formatar(valores[j] || 0);
             }
         }
     }

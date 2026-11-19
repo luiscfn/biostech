@@ -72,7 +72,7 @@ foreach ($pecas as $p)
             <div class="form-grid">
                 <div class="campo full">
                     <label for="produto_busca">Produto *</label>
-                    <div class="autocomplete" data-url="<?= site_url('chamados/buscar_produtos') ?>" data-preco="valor_unitario">
+                    <div class="autocomplete" data-url="<?= site_url('chamados/buscar_produtos' . ( ! empty($registro['cliente_id']) ? '?cliente=' . (int) $registro['cliente_id'] : '')) ?>" data-preco="valor_unitario">
                         <input type="text" id="produto_busca" class="autocomplete-busca" placeholder="Digite o codigo ou a descricao do produto..." autocomplete="off">
                         <input type="hidden" name="produto_id" id="produto_id">
                         <div class="autocomplete-lista"></div>

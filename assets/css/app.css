@@ -369,7 +369,7 @@ a:hover { text-decoration: underline; }
 
 .painel-cabecalho {
     padding: 14px 18px;
-    border-bottom: 1px solid var(--borda);
+    border-bottom: 2px solid var(--azul);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -377,7 +377,12 @@ a:hover { text-decoration: underline; }
     flex-wrap: wrap;
 }
 
-.painel-cabecalho h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.painel-cabecalho h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--azul);
+}
 .painel-corpo { padding: 18px; }
 
 /* --------------------------------------------------------------- botoes */
@@ -400,8 +405,10 @@ a:hover { text-decoration: underline; }
 }
 
 .botao:hover { background: var(--azul-2); text-decoration: none; color: #fff; }
-.botao.secundario { background: #fff; color: var(--texto); border-color: var(--borda); }
-.botao.secundario:hover { background: #f6f8fb; color: var(--texto); }
+/* Padrao unico: botoes de acao usam o mesmo azul em todas as telas;
+   apenas as acoes destrutivas (.botao.perigo) continuam em vermelho. */
+.botao.secundario { background: var(--azul); color: #fff; border-color: transparent; }
+.botao.secundario:hover { background: var(--azul-2); color: #fff; }
 .botao.perigo { background: var(--vermelho); }
 .botao.perigo:hover { background: #921d13; }
 .botao.pequeno { padding: 6px 10px; font-size: 12px; }
@@ -439,7 +446,149 @@ table.tabela tbody tr:hover { background: #fafcff; }
 table.tabela tbody tr:last-child td { border-bottom: none; }
 table.tabela .num { text-align: right; white-space: nowrap; }
 table.tabela .centro { text-align: center; }
+table.tabela .compacta { font-size: 11.5px; padding: 10px 8px; }
 table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
+
+/* Botoes de acao lado a lado dentro das tabelas (Salvar / Excluir) */
+.acoes-tabela {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.acoes-tabela form { margin: 0; }
+
+/* Tabela com rolagem vertical e rodape fixo (Total do material) */
+.tabela-rolagem { overflow-y: auto; }
+.tabela-rolagem thead th { position: sticky; top: 0; z-index: 2; }
+.tabela-rolagem tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #f8fafc;
+    border-top: 1px solid var(--borda);
+    border-bottom: none;
+}
+
+/* Bloco destacado para incluir registros acima da tabela */
+.bloco-inclusao {
+    background: #f8fafc;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+}
+
+/* ---------------------------------------------------------- financeiro */
+
+.fin-grade {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.fin-bloco {
+    background: #f8fafc;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+
+.fin-grade > .fin-composicao { flex: 1 1 620px; min-width: 0; }
+.fin-grade > .fin-totais { flex: 1 1 330px; min-width: 0; }
+
+.fin-tabela { margin-top: 4px; }
+.fin-tabela th { font-size: 12px; }
+.fin-tabela td { vertical-align: middle; }
+
+.fin-campo {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    text-align: right;
+    background: var(--branco);
+    color: var(--texto);
+}
+
+.fin-campo:focus {
+    outline: none;
+    border-color: var(--azul-2);
+    box-shadow: 0 0 0 3px rgba(20, 85, 143, .10);
+}
+
+.fin-campo:disabled {
+    background: var(--fundo);
+    color: var(--muted);
+}
+
+.fin-destaque {
+    background: var(--azul-claro);
+    color: var(--azul);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.fin-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--borda);
+    font-size: 13px;
+}
+
+.fin-total strong {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.fin-desconto {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.fin-desconto > span { flex: 1 1 100%; }
+
+.fin-desconto-campos {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fin-desconto-campos .fin-campo { width: 84px; }
+.fin-desconto-campos .fin-campo.fin-valor { width: 118px; }
+.fin-unidade { color: var(--muted); font-size: 12px; }
+
+.fin-total-final {
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 2px solid var(--borda);
+    border-bottom: none;
+}
+
+.fin-total-final strong {
+    font-size: 18px;
+    color: var(--azul);
+}
+
+.fin-diluicao { margin-top: 16px; }
+.fin-diluicao .form-grid { margin-top: 12px; }
+
+.fin-caixa {
+    padding: 10px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    background: var(--azul-claro);
+    color: var(--azul);
+    font-weight: 600;
+    font-size: 13.5px;
+}
 
 /* --------------------------------------------------------------- badges */
 
@@ -485,6 +634,19 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     box-shadow: 0 0 0 3px rgba(20, 85, 143, .10);
 }
 
+/* Listagens com poucos filtros: a busca ocupa o espaco livre do cabecalho */
+.filtros.filtros-largos { flex: 1; }
+.filtros-largos input[type=text] { flex: 1 1 250px; max-width: 640px; }
+.filtros-largos select { min-width: 190px; }
+
+/* Quebra de linha forcada dentro de .filtros */
+.quebra-filtros { flex-basis: 100%; height: 0; }
+
+@media (max-width: 1100px) {
+    /* Em telas menores os filtros ganham a linha inteira, abaixo do titulo */
+    .filtros.filtros-largos { order: 3; flex: 1 1 100%; }
+}
+
 /* ------------------------------------------------------------ formularios */
 
 .form-grid {
@@ -496,6 +658,9 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .campo { grid-column: span 6; }
 .campo.full { grid-column: span 12; }
 .campo.terco { grid-column: span 4; }
+.campo.quarto { grid-column: span 3; }
+.campo.longo { grid-column: span 5; }
+.campo.curto { grid-column: span 2; }
 .campo.codigo,
 .campo.ordem,
 .campo.valor { grid-column: span 2; }
@@ -537,6 +702,71 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 }
 
 .campo textarea { min-height: 92px; resize: vertical; }
+
+/* Data e hora dentro dos blocos de inclusao (mesmo visual dos demais campos) */
+.bloco-inclusao input[type=date],
+.bloco-inclusao input[type=time] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--texto);
+}
+
+/* Campo curto com botoes de acao na mesma linha */
+.campo-linha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.campo-linha input[type=text] {
+    flex: 0 0 150px;
+    max-width: 150px;
+}
+
+.campo-linha > label {
+    margin: 0;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+/* Linha do percentual em massa: os dois percentuais dividem o espaco
+   restante e o bloco de restaurar fica com a largura do titulo + botao */
+.percentual-massa {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.percentual-massa > .campo {
+    flex: 1 1 360px;
+    min-width: 0;
+}
+
+.percentual-massa > .campo.originais {
+    flex: 0 1 290px;
+    min-width: 0;
+}
+
+/* Duas datas lado a lado com espacamento reduzido */
+.campos-data {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+}
+
+.campos-data .campo-data { flex: 1 1 0; min-width: 0; }
+.campos-data input[type=date] { width: 100%; }
+
+/* Data e hora dentro do mesmo campo (ex.: proximo contato) */
+.campos-data > input[type=date] { flex: 1 1 0; min-width: 0; }
+.campos-data > input[type=time] { flex: 0 0 100px; }
 
 .campo input:focus,
 .campo select:focus,
@@ -687,6 +917,18 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     letter-spacing: .4px;
 }
 
+/* Titulos de bloco em destaque (faixa clara + barra azul) */
+.secao-titulo.destaque {
+    margin: 0 0 16px;
+    padding: 8px 12px;
+    background: #eef4fa;
+    border-left: 3px solid var(--azul);
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
 .divisor {
     border: none;
     border-top: 1px solid var(--borda);
@@ -834,6 +1076,9 @@ form.inline {
     gap: 12px 22px;
 }
 
+/* Quebra de linha forcada dentro de .ficha-grade */
+.quebra-grade { grid-column: 1 / -1; height: 0; }
+
 .ficha-grade .rotulo {
     font-size: 11px;
     color: var(--muted);
@@ -865,9 +1110,11 @@ form.inline {
     .sidebar .rodape { display: none; }
     .pagina { padding: 18px 16px 40px; }
     .topbar { padding: 12px 16px; }
-    .campo, .campo.terco, .campo.codigo, .campo.ordem, .campo.valor,
+    .campo, .campo.terco, .campo.quarto, .campo.longo, .campo.curto,
+    .campo.codigo, .campo.ordem, .campo.valor,
     .campo.nome, .campo.nome.com-ordem, .campo.nome.com-ordem.com-valor,
     .campo.ativo { grid-column: span 12; }
     .campo.ativo { justify-content: flex-start; }
     .filtros input[type=text], .filtros select { min-width: 0; width: 100%; }
+    .filtros-largos input[type=text] { max-width: none; }
 }

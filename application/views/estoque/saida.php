@@ -66,7 +66,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="6" class="num"><strong>Custo total da saida</strong></td>
-                            <td class="num"><strong>R$ <span id="total-saida">0,00</span></strong></td>
+                            <td class="num"><strong><span id="total-saida">0,00</span></strong></td>
                             <td></td>
                         </tr>
                     </tfoot>

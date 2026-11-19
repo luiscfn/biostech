@@ -356,6 +356,23 @@ foreach ($pdo->query("SELECT id FROM $schema.biostech_clientes") as $r)
 }
 
 $chamados = array();
+
+// A tabela de chamados pode estar vazia (ordem de carga: orcamentos antes dos
+// chamados). Nesse caso usa-se a exportacao CHAMADO_01, que e a fonte original
+// do NUM_OS dos orcamentos.
+$arquivoChamados = $dir . '/chamado_01.json';
+if (is_file($arquivoChamados))
+{
+    foreach (ler_json($arquivoChamados) as $r)
+    {
+        $numero = texto(c($r, 'NUM_OS'), 16);
+        if ($numero !== NULL)
+        {
+            $chamados[$numero] = TRUE;
+        }
+    }
+}
+
 foreach ($pdo->query("SELECT numero FROM $schema.biostech_chamados") as $r)
 {
     $chamados[(string) $r['numero']] = TRUE;
@@ -430,7 +447,8 @@ foreach ($dados as $r)
         return array_key_exists($campo, $z) ? $z[$campo] : NULL;
     };
 
-    $chamado = texto(c($r, 'NUM_OS'), 16);
+    $chamadoLegado = texto(c($r, 'NUM_OS'), 16);
+    $chamado = $chamadoLegado;
     if ($chamado !== NULL && ! isset($chamados[$chamado]))
     {
         $chamado = NULL;
@@ -448,6 +466,7 @@ foreach ($dados as $r)
     $linhas[] = array(
         $numero,
         $chamado,
+        $chamadoLegado,
         data(c($r, 'DATA')) ?: (data(c($r, 'DATA_CADASTRO')) ?: '1901-01-01'),
         $situacao,
         $resultado,
@@ -498,7 +517,8 @@ foreach ($dados as $r)
 }
 
 $n = gravar_lote($pdo, "$schema.biostech_orcamentos", array(
-    'numero', 'chamado_numero', 'data', 'situacao', 'resultado', 'aprovado',
+    'numero', 'chamado_numero', 'chamado_numero_legado', 'data', 'situacao',
+    'resultado', 'aprovado',
     'nao_aprovado', 'atencao', 'data_aprovacao', 'data_envio',
     'dimensionamento_numero', 'cliente_id', 'equipamento_serie',
     'nota_fiscal_chegada', 'finalidade', 'observacao', 'condicao_pagamento',

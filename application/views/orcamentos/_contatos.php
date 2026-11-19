@@ -1,5 +1,58 @@
 <div class="painel-corpo">
-    <div class="tabela-wrap">
+    <?php if ($pode_editar): ?>
+        <div class="bloco-inclusao">
+            <h4 class="secao-titulo destaque">Registrar contato</h4>
+
+            <?= form_open('orcamentos/adicionar_contato/' . $registro['numero']) ?>
+                <div class="form-grid">
+                    <div class="campo terco">
+                        <label for="contato_data">Data</label>
+                        <input type="date" name="data_mov" id="contato_data" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div class="campo terco">
+                        <label for="contato_hora">Hora</label>
+                        <input type="time" name="hora_mov" id="contato_hora" value="<?= date('H:i') ?>">
+                    </div>
+                    <div class="campo terco">
+                        <label for="contato_assunto">Assunto</label>
+                        <input type="text" name="assunto" id="contato_assunto" maxlength="80">
+                    </div>
+
+                    <div class="campo terco">
+                        <label for="contato_funcionario">Funcionario</label>
+                        <select name="funcionario_id" id="contato_funcionario">
+                            <option value="">-</option>
+                            <?php foreach ($funcionarios as $f): ?>
+                                <option value="<?= (int) $f['funcionario_id'] ?>"><?= html_escape($f['nome']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="campo terco">
+                        <label for="contato_nome">Pessoa de contato</label>
+                        <input type="text" name="contato" id="contato_nome" maxlength="50">
+                    </div>
+                    <div class="campo terco">
+                        <label for="contato_proximo">Proximo contato</label>
+                        <div class="campos-data">
+                            <input type="date" name="data_proximo_contato" id="contato_proximo">
+                            <input type="time" name="hora_proximo_contato" id="contato_proximo_hora">
+                        </div>
+                    </div>
+
+                    <div class="campo full">
+                        <label for="contato_descricao">Descricao</label>
+                        <textarea name="descricao" id="contato_descricao" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-acoes">
+                    <button type="submit" class="botao">Registrar contato</button>
+                </div>
+            <?= form_close() ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="tabela-wrap tabela-rolagem" id="tabela-contatos">
         <table class="tabela">
             <thead>
                 <tr>
@@ -49,58 +102,38 @@
             </tbody>
         </table>
     </div>
-
-    <?php if ($pode_editar): ?>
-        <hr class="divisor">
-        <h4 class="secao-titulo">Registrar contato</h4>
-
-        <?= form_open('orcamentos/adicionar_contato/' . $registro['numero']) ?>
-            <div class="form-grid">
-                <div class="campo terco">
-                    <label for="contato_data">Data</label>
-                    <input type="date" name="data_mov" id="contato_data" value="<?= date('Y-m-d') ?>">
-                </div>
-                <div class="campo terco">
-                    <label for="contato_hora">Hora</label>
-                    <input type="time" name="hora_mov" id="contato_hora" value="<?= date('H:i') ?>">
-                </div>
-                <div class="campo terco">
-                    <label for="contato_funcionario">Funcionario</label>
-                    <select name="funcionario_id" id="contato_funcionario">
-                        <option value="">-</option>
-                        <?php foreach ($funcionarios as $f): ?>
-                            <option value="<?= (int) $f['funcionario_id'] ?>"><?= html_escape($f['nome']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="campo terco">
-                    <label for="contato_assunto">Assunto</label>
-                    <input type="text" name="assunto" id="contato_assunto" maxlength="80">
-                </div>
-                <div class="campo terco">
-                    <label for="contato_nome">Pessoa de contato</label>
-                    <input type="text" name="contato" id="contato_nome" maxlength="50">
-                </div>
-                <div class="campo terco">
-                    <label for="contato_proximo">Proximo contato</label>
-                    <input type="date" name="data_proximo_contato" id="contato_proximo">
-                </div>
-
-                <div class="campo terco">
-                    <label for="contato_proximo_hora">Hora do proximo contato</label>
-                    <input type="time" name="hora_proximo_contato" id="contato_proximo_hora">
-                </div>
-
-                <div class="campo full">
-                    <label for="contato_descricao">Descricao</label>
-                    <textarea name="descricao" id="contato_descricao" rows="3"></textarea>
-                </div>
-            </div>
-
-            <div class="form-acoes">
-                <button type="submit" class="botao">Registrar contato</button>
-            </div>
-        <?= form_close() ?>
-    <?php endif; ?>
 </div>
+
+<script>
+(function () {
+    // Mostra 6 contatos por vez; o restante fica na barra de rolagem vertical.
+    var VISIVEIS = 6;
+    var wrap = document.getElementById('tabela-contatos');
+    if ( ! wrap) { return; }
+
+    var linhas = wrap.querySelectorAll('tbody tr');
+    if (linhas.length <= VISIVEIS) { return; }
+
+    function ajustar() {
+        wrap.style.maxHeight = '';
+
+        var topo = wrap.getBoundingClientRect().top;
+        var fim  = linhas[VISIVEIS - 1].getBoundingClientRect().bottom;
+
+        var alvo = Math.ceil(fim - topo + 1);
+        wrap.style.maxHeight = alvo + 'px';
+
+        // A barra de rolagem horizontal reduz a altura util: compensa para a
+        // ultima linha nao ficar cortada.
+        var sobra = linhas[VISIVEIS - 1].getBoundingClientRect().bottom
+                  - (wrap.getBoundingClientRect().top + wrap.clientHeight);
+
+        if (sobra > 0) {
+            wrap.style.maxHeight = (alvo + Math.ceil(sobra) + 1) + 'px';
+        }
+    }
+
+    ajustar();
+    window.addEventListener('load', ajustar);
+})();
+</script>

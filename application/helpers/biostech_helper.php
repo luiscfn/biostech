@@ -52,7 +52,7 @@ if ( ! function_exists('moeda_br'))
 {
     function moeda_br($valor)
     {
-        return 'R$ ' . number_format((float) $valor, 2, ',', '.');
+        return number_format((float) $valor, 2, ',', '.');
     }
 }
 

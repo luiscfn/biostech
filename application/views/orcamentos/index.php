@@ -78,8 +78,13 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                 <?php endforeach; ?>
             </select>
 
-            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial">
-            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final">
+            <button type="submit" class="botao secundario">Pesquisar</button>
+
+            <?php if ($tem_filtro): ?>
+                <a class="botao secundario" href="<?= site_url('orcamentos') ?>">Limpar</a>
+            <?php endif; ?>
+
+            <span class="quebra-filtros"></span>
 
             <select name="com_os">
                 <option value="">OS</option>
@@ -93,11 +98,8 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                 <option value="N" <?= $filtros['com_dim'] === 'N' ? 'selected' : '' ?>>Sem dimensionamento</option>
             </select>
 
-            <button type="submit" class="botao secundario">Pesquisar</button>
-
-            <?php if ($tem_filtro): ?>
-                <a class="botao secundario" href="<?= site_url('orcamentos') ?>">Limpar</a>
-            <?php endif; ?>
+            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial">
+            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final">
         </form>
     </div>
 
@@ -109,7 +111,7 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                     <th style="width:95px">Data</th>
                     <th>Cliente / atencao</th>
                     <th class="centro" style="width:95px">OS</th>
-                    <th class="num" style="width:55px">Itens</th>
+                    <th class="centro" style="width:85px">Orc dim</th>
                     <th class="num" style="width:110px">Total</th>
                     <th class="centro" style="width:105px">Situacao</th>
                     <th class="centro" style="width:150px">Resultado</th>
@@ -135,11 +137,19 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                             <td class="centro">
                                 <?php if ( ! empty($r['chamado_numero'])): ?>
                                     <a href="<?= site_url('chamados/ver/' . $r['chamado_numero']) ?>"><?= html_escape($r['chamado_numero']) ?></a>
+                                <?php elseif ( ! empty($r['chamado_numero_legado'])): ?>
+                                    <span title="OS nao existente na base de chamados"><?= html_escape($r['chamado_numero_legado']) ?></span>
                                 <?php else: ?>
                                     -
                                 <?php endif; ?>
                             </td>
-                            <td class="num"><?= numero_br($r['qtd_itens']) ?></td>
+                            <td class="centro">
+                                <?php if ( ! empty($r['dimensionamento_numero'])): ?>
+                                    <a href="<?= site_url('orcamentos/dimensionamento/' . (int) $r['dimensionamento_numero']) ?>"><?= (int) $r['dimensionamento_numero'] ?></a>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
                             <td class="num"><strong><?= moeda_br($r['valor_total']) ?></strong></td>
                             <td class="centro">
                                 <?php if ($r['situacao'] === NULL): ?>

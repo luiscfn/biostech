@@ -128,7 +128,8 @@ class Chamado_model extends MY_Model
     {
         return "FROM " . T_CHAMADOS . " c
                 LEFT JOIN " . T_CLIENTES . " cl ON cl.id = c.cliente_id
-                LEFT JOIN " . T_CHAMADO_EQUIPAMENTO . " eq ON eq.chamado_numero = c.numero";
+                LEFT JOIN " . T_CHAMADO_EQUIPAMENTO . " eq ON eq.chamado_numero = c.numero
+                LEFT JOIN " . T_CHAMADO_ATENDIMENTO . " at ON at.chamado_numero = c.numero";
     }
 
     // ------------------------------------------------------------------
@@ -140,8 +141,10 @@ class Chamado_model extends MY_Model
         $sql = "SELECT c.numero, c.categoria, c.data_abertura, c.status_codigo,
                        c.situacao_codigo, c.encerrado, c.valor_material,
                        c.valor_servico, c.valor_mao_obra, c.valor_desconto,
+                       COALESCE(c.data_encerramento, c.data_fechamento, at.devolucao_data) AS data_fechamento,
                        cl.nome AS cliente_nome,
                        eq.equipamento_serie,
+                       at.atendimento_data,
                        ds.nome AS status_nome,
                        di.nome AS situacao_nome
                 " . $this->_from() . "
@@ -1464,18 +1467,24 @@ class Chamado_model extends MY_Model
         return $this->db->query($sql, array($t, $t))->result_array();
     }
 
-    public function buscar_produtos($termo, $limite = 20)
+    public function buscar_produtos($termo, $limite = 20, $cliente_id = NULL)
     {
-        $sql = "SELECT p.id, p.descricao, p.codigo, p.valor_venda,
+        $sql = "SELECT p.id, p.descricao, p.codigo, p.unidade,
+                       COALESCE(e.valor_venda, p.valor_venda) AS valor_venda,
+                       p.valor_venda AS valor_tabela,
+                       p.valor_compra,
+                       CASE WHEN e.produto_id IS NULL THEN 0 ELSE 1 END AS especial,
                        COALESCE(es.quantidade, 0) AS saldo
                   FROM " . T_PRODUTOS . " p
+                  LEFT JOIN " . T_CLIENTES_ESPECIAIS . " e
+                         ON e.produto_id = p.id AND e.cliente_id = ?
                   LEFT JOIN " . T_ESTOQUE_SALDOS . " es ON es.produto_id = p.id
                  WHERE p.descricao ILIKE ? OR p.codigo ILIKE ?
                  ORDER BY p.descricao
                  LIMIT " . (int) $limite;
 
         $t = '%' . $termo . '%';
-        return $this->db->query($sql, array($t, $t))->result_array();
+        return $this->db->query($sql, array((int) $cliente_id, $t, $t))->result_array();
     }
 
     // ==================================================================

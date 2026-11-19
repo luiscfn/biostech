@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS {schema}.biostech_clientes (
     nome         varchar(120) NOT NULL,
     fantasia     varchar(120),
     tipo         smallint,
+    fornecedor_codigo integer,
     cpf_cnpj     varchar(20),
     ie           varchar(20),
     rg           varchar(20),
@@ -71,6 +72,18 @@ CREATE TABLE IF NOT EXISTS {schema}.biostech_clientes (
 
 CREATE INDEX IF NOT EXISTS biostech_clientes_nome_idx ON {schema}.biostech_clientes (nome);
 CREATE INDEX IF NOT EXISTS biostech_clientes_doc_idx  ON {schema}.biostech_clientes (cpf_cnpj);
+
+-- Vinculo "fornecedor copiado para cliente" (tela Fornecedores).
+-- O ALTER mantem compatibilidade com bancos criados antes desta coluna.
+ALTER TABLE {schema}.biostech_clientes
+    ADD COLUMN IF NOT EXISTS fornecedor_codigo integer;
+
+CREATE INDEX IF NOT EXISTS biostech_clientes_fornecedor_idx
+    ON {schema}.biostech_clientes (fornecedor_codigo);
+
+CREATE UNIQUE INDEX IF NOT EXISTS biostech_clientes_fornecedor_uk
+    ON {schema}.biostech_clientes (fornecedor_codigo)
+    WHERE fornecedor_codigo IS NOT NULL;
 
 -- -----------------------------------------------------------------------------
 -- Produtos (origem: PRODUTO)
@@ -97,6 +110,28 @@ CREATE TABLE IF NOT EXISTS {schema}.biostech_produtos (
 
 CREATE INDEX IF NOT EXISTS biostech_produtos_descricao_idx ON {schema}.biostech_produtos (descricao);
 CREATE INDEX IF NOT EXISTS biostech_produtos_grupo_idx     ON {schema}.biostech_produtos (grupo, subgrupo);
+
+-- -----------------------------------------------------------------------------
+-- Clientes especiais (origem: PRODUTO_CLIENTES_ESPECIAIS_01)
+--
+-- Tabela de precos por cliente. A existencia de pelo menos uma linha e o que
+-- marca o cliente como "cliente especial" (o Access nao tem flag em CLIENTES).
+-- perc_lucro e o markup aplicado sobre o custo; valor_venda e o preco fechado.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS {schema}.biostech_produto_clientes_especiais (
+    cliente_id   integer       NOT NULL
+                 REFERENCES {schema}.biostech_clientes (id) ON DELETE CASCADE,
+    produto_id   integer       NOT NULL
+                 REFERENCES {schema}.biostech_produtos (id) ON DELETE CASCADE,
+    perc_lucro   numeric(7,2),
+    valor_venda  numeric(15,2),
+    created_at   timestamptz   NOT NULL DEFAULT now(),
+    updated_at   timestamptz,
+    PRIMARY KEY (cliente_id, produto_id)
+);
+
+CREATE INDEX IF NOT EXISTS biostech_produto_clientes_especiais_produto_idx
+    ON {schema}.biostech_produto_clientes_especiais (produto_id);
 
 -- -----------------------------------------------------------------------------
 -- Auditoria

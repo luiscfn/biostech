@@ -210,7 +210,7 @@ $total    = $edicao ? (float) $registro['total'] : $bruto;
                     <tfoot>
                         <tr>
                             <td colspan="9" class="num"><strong>Total bruto</strong></td>
-                            <td class="num"><strong>R$ <span id="pedido-bruto"><?= number_format($bruto, 2, ',', '.') ?></span></strong></td>
+                            <td class="num"><strong><span id="pedido-bruto"><?= number_format($bruto, 2, ',', '.') ?></span></strong></td>
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>

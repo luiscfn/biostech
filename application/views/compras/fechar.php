@@ -183,7 +183,7 @@ $n_itens = count($itens);
             <td class="num numero-item">1</td>
             <td><input type="number" name="parcela_dias[]" class="dias" value="0" min="0" step="1" style="text-align:right"></td>
             <td><input type="date" name="parcela_vencimento[]"></td>
-            <td class="num valor-parcela">R$ 0,00</td>
+            <td class="num valor-parcela">0,00</td>
             <td class="centro"><button type="button" class="botao perigo pequeno remover-item" title="Remover parcela">&times;</button></td>
         </tr>
     </tbody></table>

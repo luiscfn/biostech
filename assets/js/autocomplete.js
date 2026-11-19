@@ -47,10 +47,13 @@
             partes.push(item.unidade);
         }
         if (item.valor_venda !== undefined && item.valor_venda !== null) {
-            partes.push('venda R$ ' + Number(item.valor_venda).toFixed(2).replace('.', ','));
+            partes.push('venda ' + Number(item.valor_venda).toFixed(2).replace('.', ','));
+            if (Number(item.especial) === 1) {
+                partes.push('preco especial');
+            }
         }
         if (item.valor_compra !== undefined && item.valor_compra !== null) {
-            partes.push('custo R$ ' + Number(item.valor_compra).toFixed(2).replace('.', ','));
+            partes.push('custo ' + Number(item.valor_compra).toFixed(2).replace('.', ','));
         }
         if (item.saldo !== undefined && item.saldo !== null) {
             partes.push('estoque ' + item.saldo);

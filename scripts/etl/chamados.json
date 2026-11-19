@@ -1,0 +1,149 @@
+{
+  "tabelas": [
+    {
+      "tabela": "EQUIPAMENTO",
+      "arquivo": "chamado_equipamentos",
+      "colunas": [
+        "NUS_EQUIP", "TIPO_EQUIP", "DES_EQUIP", "CONFIGURACAO", "FABRICANTE",
+        "NUM_NF", "DATA_NF", "DT_FIM_GARANTIA", "ULT_OS", "DT_ULT_OS",
+        "DATA_EMPRESTIMO", "DATA_DEVOLUCAO", "NUM_OS_EMPRESTIMO", "NUMPAT"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_01",
+      "arquivo": "chamado_01",
+      "colunas": [
+        "NUM_OS", "NUM_OS_PARC", "ORC", "DAT_CHA", "HOR_CHA", "VALMAT", "VALSERV",
+        "VALIMPOSTO", "VALMOBRA", "VALDESC", "VALFATUG", "STATUS", "SIT_ATUAL_01",
+        "SIT_ATUAL_02", "FECHATOT", "APAGA", "CATEGORIA", "FECHAFIN", "OS_GERADA",
+        "DATADA", "QTDE_PARC", "BAIXA_AUTOMATICA", "MAT_FIXACAO", "ACRESCIMO_CUSTO",
+        "USUARIO_CADASTRO", "DATA_CADASTRO", "USUARIO_ULTIMA_ALTERACAO",
+        "DATA_ULTIMA_ALTERACAO", "USUARIO_FECHAMENTO", "DATA_FECHAMENTO",
+        "USUARIO_ENCERRAMENTO", "DATA_ENCERRAMENTO"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_02",
+      "arquivo": "chamado_02",
+      "colunas": ["NUM_OS", "COD_CLI", "COD_ESC"]
+    },
+    {
+      "tabela": "CHAMADO_03",
+      "arquivo": "chamado_03",
+      "colunas": [
+        "NUM_OS", "COD_EQUIP", "VOLTAGEM", "TIPO_GARANTIA", "AUTORIZADA",
+        "ACESSORIOS", "LISTA_EQUIP", "NUMPAT", "SOLICITANTE", "LOCAL_ATEND",
+        "VOLTSAIDA", "NF_CHEGADA", "RECOLHIDO", "CONTATO"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_03A",
+      "arquivo": "chamado_03a",
+      "colunas": ["NUM_OS", "DEF_RELATADO", "DEF_CONSTATADO", "SERVICO_EXECUTADO", "OBSERVACAO"]
+    },
+    {
+      "tabela": "CHAMADO_04",
+      "arquivo": "chamado_04",
+      "colunas": [
+        "NUM_OS", "DT_PREV_ATEND", "HR_PREV_ATEND", "DT_REAL_ATEND", "HR_REAL_ATEND",
+        "HR_REAL_ATEND_FIM", "DT_REAL_SOLUCAO", "HR_REAL_SOLUCAO", "DATA_DEVOLUCAO",
+        "HORA_DEVOLUCAO", "TECNICO_RESP_ATEND", "RESP_ENTREGA_EQUIP",
+        "RESP_RECEBIM_EQUIP", "TEC_ABRIU_OS", "QUEM_DEVOLVEU", "QUEM_RECEBEU",
+        "PRIORIDADE", "TEC_CONCLUIU", "RESP_ENCERRAMENTO", "SEGMENTO",
+        "VALOR_RECOLHIMENTO", "VALOR_ENTREGA", "PAGO_RECOLHIMENTO", "PAGO_ENTREGA",
+        "RESP_DEVOLUCAO", "AUTORIZADA", "GARANTIA", "RECOLHIDO", "CONTATO",
+        "FONE_CONTATO", "SOLICITANTE", "FONE_SOLICITANTE", "LOCAL_ATEND"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_05A",
+      "arquivo": "chamado_05a",
+      "colunas": [
+        "NUMOV", "NUM_OS", "DATAMOV", "HORAMOV", "CODIFUNC", "DESCMOV",
+        "TECNICO", "HORA_INI", "HORA_FIM", "RESOLVEU"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_06",
+      "arquivo": "chamado_06",
+      "colunas": [
+        "NUM_OS", "NUMREQ", "CODPROD", "DESPROD", "QTDE", "VALUNIT", "VALTOT",
+        "VALMOBRA", "VALDESC", "VALFATUG", "QTDE_PARC", "QTDE_ATENDIDA",
+        "QTDE_EXCESSIVA", "QTDE_EXCESSIVA_ATEND", "SAIU_ESTOQUE", "DATA_BAIXA"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_09",
+      "arquivo": "chamado_09",
+      "colunas": [
+        "NUM_OS", "NUM_ORDEM", "TECNICO", "DATA_INICIAL", "DATA_FINAL", "HORA_INICIAL"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_10",
+      "arquivo": "chamado_10",
+      "colunas": [
+        "NUM_OS", "DATAPAG", "DATAVENC", "TIPOPAG", "CODIFUNC", "NRECPAG", "COD_CC",
+        "COND_PAGTO", "FORMA_REC", "DOC_REC", "CLIENTE_NOTA", "QTDIAS", "TOTPARC",
+        "VALTOT", "TEM_MAT_TRABALHO", "MATERIAL_DEVOLVIDO",
+        "NPARC1", "VPARC1", "QTDIAS1", "DVENC1",
+        "NPARC2", "VPARC2", "QTDIAS2", "DVENC2",
+        "NPARC3", "VPARC3", "QTDIAS3", "DVENC3",
+        "NPARC4", "VPARC4", "QTDIAS4", "DVENC4",
+        "NPARC5", "VPARC5", "QTDIAS5", "DVENC5",
+        "NPARC6", "VPARC6", "QTDIAS6", "DVENC6",
+        "NPARC7", "VPARC7", "QTDIAS7", "DVENC7",
+        "NPARC8", "VPARC8", "QTDIAS8", "DVENC8",
+        "NPARC9", "VPARC9", "QTDIAS9", "DVENC9",
+        "NPARC10", "VPARC10", "QTDIAS10", "DVENC10",
+        "NPARC11", "VPARC11", "QTDIAS11", "DVENC11",
+        "NPARC12", "VPARC12", "QTDIAS12", "DVENC12"
+      ]
+    },
+    {
+      "tabela": "CHAMADO_44",
+      "arquivo": "chamado_44",
+      "colunas": ["NUM_OS", "NUMITEM", "DESC_SERV", "CONCLUIDO", "DATA", "TECNICO"]
+    },
+    {
+      "tabela": "CHAMADO_55",
+      "arquivo": "chamado_55",
+      "colunas": ["NUM_OS", "NUMITEM", "DESC_SERV", "CONCLUIDO"]
+    },
+    {
+      "tabela": "CHAMADO_99",
+      "arquivo": "chamado_99",
+      "colunas": ["NUM_OS", "NUM_FILHO", "FECHADA"]
+    },
+    {
+      "tabela": "CHAMADO_LOG_01",
+      "arquivo": "chamado_log_01",
+      "colunas": [
+        "ID", "DATAMOV", "USUARIO", "TIPOMOV", "NUM_OS", "CATEGORIA",
+        "CATEGORIA_OLD", "DAT_CHA", "DAT_CHA_OLD", "HOR_CHA", "HOR_CHA_OLD",
+        "SIT_ATUAL_01", "STATUS", "STATUS_OLD", "SIT_ATUAL_02", "SIT_ATUAL_02_OLD",
+        "QTDE_PARC", "QTDE_PARC_OLD", "VALMAT", "VALMAT_OLD", "VALSERV",
+        "VALSERV_OLD", "VALIMPOSTO", "VALIMPOSTO_OLD", "VALMOBRA", "VALMOBRA_OLD",
+        "VALDESC", "VALDESC_OLD", "VALFATUG", "VALFATUG_OLD", "MAT_FIXACAO",
+        "MAT_FIXACAO_OLD", "ACRESCIMO_CUSTO", "ACRESCIMO_CUSTO_OLD", "DEF_RELATADO",
+        "DEF_RELATADO_OLD", "DEF_CONSTATADO", "DEF_CONSTATADO_OLD",
+        "SERVICO_EXECUTADO", "SERVICO_EXECUTADO_OLD", "OBSERVACAO",
+        "OBSERVACAO_OLD", "DT_PREV_ATEND", "DT_PREV_ATEND_OLD", "HR_PREV_ATEND",
+        "HR_PREV_ATEND_OLD", "DT_REAL_ATEND", "DT_REAL_ATEND_OLD", "HR_REAL_ATEND",
+        "HR_REAL_ATEND_OLD", "DT_REAL_ATEND_FIM", "DT_REAL_ATEND_FIM_OLD",
+        "HR_REAL_ATEND_FIM", "HR_REAL_ATEND_FIM_OLD", "DT_REAL_SOLUCAO",
+        "DT_REAL_SOLUCAO_OLD", "HR_REAL_SOLUCAO", "HR_REAL_SOLUCAO_OLD",
+        "SIT_ATUAL_01_OLD", "DATA_DEVOLUCAO", "DATA_DEVOLUCAO_OLD",
+        "HORA_DEVOLUCAO", "HORA_DEVOLUCAO_OLD", "TECNICO_RESP_ATEND",
+        "TECNICO_RESP_ATEND_OLD", "RESP_ENTREGA_EQUIP", "RESP_ENTREGA_EQUIP_OLD",
+        "RESP_RECEBIM_EQUIP", "RESP_RECEBIM_EQUIP_OLD", "TEC_ABRIU_OS",
+        "TEC_ABRIU_OS_OLD", "QUEM_DEVOLVEU", "QUEM_DEVOLVEU_OLD", "QUEM_RECEBEU",
+        "QUEM_RECEBEU_OLD", "TEC_CONCLUIU", "TEC_CONCLUIU_OLD", "CONTATO",
+        "CONTATO_OLD", "SOLICITANTE", "SOLICITANTE_OLD", "LOCAL_ATEND",
+        "LOCAL_ATEND_OLD", "USUARIO_ULTIMA_ALTERACAO",
+        "USUARIO_ULTIMA_ALTERACAO_OLD", "DATA_ULTIMA_ALTERACAO",
+        "DATA_ULTIMA_ALTERACAO_OLD"
+      ]
+    }
+  ]
+}

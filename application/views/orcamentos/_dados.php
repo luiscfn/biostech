@@ -4,10 +4,6 @@ $tem_os = ! empty($registro['chamado_numero']);
 <div class="painel-corpo">
     <div class="ficha-grade">
         <div class="dado">
-            <div class="rotulo">Atencao</div>
-            <?= html_escape($registro['atencao'] ? $registro['atencao'] : '-') ?>
-        </div>
-        <div class="dado">
             <div class="rotulo">Equipamento / serie</div>
             <?= html_escape($registro['equipamento_serie'] ? $registro['equipamento_serie'] : '-') ?>
         </div>
@@ -77,7 +73,7 @@ $tem_os = ! empty($registro['chamado_numero']);
 
     <hr class="divisor">
 
-    <h4 class="secao-titulo">Composicao de valores</h4>
+    <h4 class="secao-titulo destaque">Composicao de valores</h4>
 
     <div class="ficha-grade">
         <div class="dado">
@@ -99,7 +95,7 @@ $tem_os = ! empty($registro['chamado_numero']);
             <?php endif; ?>
         </div>
         <div class="dado">
-            <div class="rotulo">Acrescimo de custo</div>
+            <div class="rotulo">Acrescimo de custos</div>
             <?= moeda_br($registro['acrescimo_custo']) ?>
             <?php if ($registro['percentual_acrescimo_custo'] !== NULL): ?>
                 <div class="ajuda"><?= numero_br($registro['percentual_acrescimo_custo'], 2) ?>%</div>
@@ -112,12 +108,19 @@ $tem_os = ! empty($registro['chamado_numero']);
                 <div class="ajuda"><?= numero_br($registro['percentual_nota_fiscal'], 2) ?>%</div>
             <?php endif; ?>
         </div>
+
+        <div class="quebra-grade"></div>
+
         <div class="dado">
             <div class="rotulo">Servicos com valor</div>
             <?= moeda_br($registro['valor_servico']) ?>
             <?php if ($registro['percentual_servico'] !== NULL): ?>
                 <div class="ajuda"><?= numero_br($registro['percentual_servico'], 2) ?>%</div>
             <?php endif; ?>
+        </div>
+        <div class="dado">
+            <div class="rotulo">Custos indiretos</div>
+            <?= moeda_br($registro['valor_custos_indiretos']) ?>
         </div>
         <div class="dado">
             <div class="rotulo">Desconto</div>
@@ -127,23 +130,19 @@ $tem_os = ! empty($registro['chamado_numero']);
             <?php endif; ?>
         </div>
         <div class="dado">
-            <div class="rotulo">Custos indiretos</div>
-            <?= moeda_br($registro['valor_custos_indiretos']) ?>
-        </div>
-        <div class="dado">
             <div class="rotulo">Valor maximo do cliente</div>
             <?= moeda_br($registro['valor_maximo_cliente']) ?>
         </div>
         <div class="dado">
-            <div class="rotulo">Total</div>
+            <div class="rotulo">Valor total</div>
             <strong><?= moeda_br($registro['valor_total']) ?></strong>
         </div>
     </div>
 
     <hr class="divisor">
 
+    <h4 class="secao-titulo destaque">Observacoes</h4>
     <div class="dado">
-        <div class="rotulo">Observacoes</div>
         <div class="texto-longo"><?= nl2br(html_escape($registro['observacao'] ? $registro['observacao'] : '-')) ?></div>
     </div>
 
@@ -155,7 +154,7 @@ $tem_os = ! empty($registro['chamado_numero']);
 
     <?php if ($pode_editar): ?>
         <hr class="divisor">
-        <h4 class="secao-titulo">Acoes</h4>
+        <h4 class="secao-titulo destaque">Acoes</h4>
 
         <div class="form-grid">
             <div class="campo" style="grid-column:span 6">
@@ -182,7 +181,7 @@ $tem_os = ! empty($registro['chamado_numero']);
             </div>
 
             <div class="campo" style="grid-column:span 6">
-                <label>Gerar chamado</label>
+                <label style="font-weight:700">Gerar chamado</label>
                 <div class="ajuda">
                     Requisitos: sem OS vinculada, situacao Concluido ou Encerrado, resultado Aprovado,
                     data de envio e data de aprovacao preenchidas e cliente definido.

@@ -37,6 +37,16 @@
     <hr class="divisor">
 
     <div class="detalhes">
+        <div class="detalhe">
+            <div class="rotulo">Orcamento</div>
+            <div class="valor">
+                <?php if ( ! empty($registro['orcamento_numero'])): ?>
+                    <a href="<?= site_url('orcamentos/ver/' . (int) $registro['orcamento_numero']) ?>"><?= (int) $registro['orcamento_numero'] ?></a>
+                <?php else: ?>
+                    -
+                <?php endif; ?>
+            </div>
+        </div>
         <div class="detalhe"><div class="rotulo">Cadastrado por</div><div class="valor"><?= html_escape($registro['usuario_cadastro'] ? $registro['usuario_cadastro'] : '-') ?></div></div>
         <div class="detalhe"><div class="rotulo">Data do cadastro</div><div class="valor"><?= data_hora_br($registro['data_cadastro']) ?></div></div>
         <div class="detalhe"><div class="rotulo">Alterado por</div><div class="valor"><?= html_escape($registro['usuario_alteracao'] ? $registro['usuario_alteracao'] : '-') ?></div></div>

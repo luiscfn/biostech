@@ -32,7 +32,7 @@ else { $pode_gerar[] = 'ERRO: o orcamento nao possui cliente'; }
         <?= form_open('orcamentos/status/' . $registro['numero']) ?>
 
             <div class="form-grid">
-                <div class="campo terco">
+                <div class="campo" style="grid-column:span 3">
                     <label for="situacao">Situacao</label>
                     <select name="situacao" id="situacao">
                         <option value="">-</option>
@@ -46,7 +46,7 @@ else { $pode_gerar[] = 'ERRO: o orcamento nao possui cliente'; }
                     <div class="ajuda">1 Aberto, 2 Enviado, 3 Pendente, 4 Concluido, 5 Encerrado.</div>
                 </div>
 
-                <div class="campo terco">
+                <div class="campo" style="grid-column:span 4">
                     <label for="resultado">Resultado</label>
                     <select name="resultado" id="resultado">
                         <option value="">-</option>
@@ -60,14 +60,17 @@ else { $pode_gerar[] = 'ERRO: o orcamento nao possui cliente'; }
                     <div class="ajuda">Ao marcar Aprovado a data de aprovacao e preenchida se estiver vazia.</div>
                 </div>
 
-                <div class="campo terco">
-                    <label for="data_envio">Data de envio</label>
-                    <input type="date" name="data_envio" id="data_envio" value="<?= html_escape($registro['data_envio']) ?>">
-                </div>
-
-                <div class="campo terco">
-                    <label for="data_aprovacao">Data de aprovacao</label>
-                    <input type="date" name="data_aprovacao" id="data_aprovacao" value="<?= html_escape($registro['data_aprovacao']) ?>">
+                <div class="campo" style="grid-column:span 5">
+                    <div class="campos-data">
+                        <div class="campo-data">
+                            <label for="data_envio">Data de envio</label>
+                            <input type="date" name="data_envio" id="data_envio" value="<?= html_escape($registro['data_envio']) ?>">
+                        </div>
+                        <div class="campo-data">
+                            <label for="data_aprovacao">Data de aprovacao</label>
+                            <input type="date" name="data_aprovacao" id="data_aprovacao" value="<?= html_escape($registro['data_aprovacao']) ?>">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="campo full" id="bloco-motivo" style="display:none">

@@ -669,8 +669,9 @@ class Chamados extends MY_Controller
 
     public function buscar_produtos()
     {
-        $termo = trim((string) $this->input->get('termo'));
-        $lista = $termo === '' ? array() : $this->chamado_model->buscar_produtos($termo);
+        $termo   = trim((string) $this->input->get('termo'));
+        $cliente = (int) $this->input->get('cliente');
+        $lista   = $termo === '' ? array() : $this->chamado_model->buscar_produtos($termo, 20, $cliente);
 
         $this->_json($lista);
     }

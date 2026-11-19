@@ -188,7 +188,7 @@ if ( ! function_exists('_estoque_tipo_badge'))
                             <div class="ajuda">
                                 <?= $f['fone'] ? html_escape($f['fone']) : '' ?>
                                 <?= $f['contato'] ? ' · ' . html_escape($f['contato']) : '' ?>
-                                <?= $f['preco_venda'] !== NULL ? ' · R$ ' . number_format((float) $f['preco_venda'], 2, ',', '.') : '' ?>
+                                <?= $f['preco_venda'] !== NULL ? ' · ' . number_format((float) $f['preco_venda'], 2, ',', '.') : '' ?>
                             </div>
                         </div>
                     <?php endforeach; ?>

@@ -3,11 +3,48 @@ $total = 0.0;
 foreach ($servicos_valores as $servico) { $total += (float) $servico['valor_total']; }
 ?>
 <div class="painel-corpo">
-    <div class="tabela-wrap">
+    <?php if ($pode_editar): ?>
+        <div class="bloco-inclusao">
+            <h4 class="secao-titulo destaque">Incluir servico com valor</h4>
+
+            <?= form_open('orcamentos/adicionar_servico_valor/' . $registro['numero']) ?>
+                <div class="form-grid">
+                    <div class="campo" style="grid-column:span 12">
+                        <label for="sv_descricao">Descricao</label>
+                        <input type="text" name="descricao" id="sv_descricao" maxlength="200" required>
+                        <div class="ajuda">Estes servicos entram em VALSERV e sao somados ao total do orcamento.</div>
+                    </div>
+
+                    <div class="campo" style="grid-column:span 2">
+                        <label for="sv_quantidade">Quantidade</label>
+                        <input type="number" name="quantidade" id="sv_quantidade" min="1" step="1" value="1">
+                    </div>
+
+                    <div class="campo" style="grid-column:span 4">
+                        <label for="sv_unitario">Valor unitario</label>
+                        <input type="text" name="valor_unitario" id="sv_unitario" inputmode="decimal" placeholder="0,00">
+                    </div>
+
+                    <div class="campo" style="grid-column:span 4">
+                        <label for="sv_total">Total</label>
+                        <input type="text" name="valor_total" id="sv_total" inputmode="decimal" placeholder="calculado">
+                        <div class="ajuda">Em branco: quantidade x valor unitario.</div>
+                    </div>
+
+                    <div class="campo" style="grid-column:span 2">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="botao" style="width:100%">Incluir servico</button>
+                    </div>
+                </div>
+            <?= form_close() ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="tabela-wrap tabela-rolagem" id="tabela-servicos-valores">
         <table class="tabela">
             <thead>
                 <tr>
-                    <th class="num" style="width:40px">#</th>
+                    <th class="num" style="width:55px">Item</th>
                     <th>Servico</th>
                     <th class="num" style="width:80px">Qtd</th>
                     <th class="num" style="width:110px">Valor unit.</th>
@@ -61,15 +98,17 @@ foreach ($servicos_valores as $servico) { $total += (float) $servico['valor_tota
                             </td>
                             <?php if ($pode_editar): ?>
                                 <td class="centro">
-                                    <?= form_open('orcamentos/atualizar_servico_valor/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('id' => $form_id)) ?>
-                                        <button type="submit" class="botao secundario pequeno">Salvar</button>
-                                    <?= form_close() ?>
+                                    <div class="acoes-tabela">
+                                        <?= form_open('orcamentos/atualizar_servico_valor/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('id' => $form_id)) ?>
+                                            <button type="submit" class="botao secundario pequeno">Salvar</button>
+                                        <?= form_close() ?>
 
-                                    <?= form_open('orcamentos/excluir_servico_valor/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('style' => 'margin-top:4px', 'onsubmit' => "return confirm('Excluir o servico?')")) ?>
-                                        <button type="submit" class="botao perigo pequeno">Excluir</button>
-                                    <?= form_close() ?>
+                                        <?= form_open('orcamentos/excluir_servico_valor/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('onsubmit' => "return confirm('Excluir o servico?')")) ?>
+                                            <button type="submit" class="botao perigo pequeno">Excluir</button>
+                                        <?= form_close() ?>
+                                    </div>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -85,36 +124,39 @@ foreach ($servicos_valores as $servico) { $total += (float) $servico['valor_tota
             </tfoot>
         </table>
     </div>
-
-    <?php if ($pode_editar): ?>
-        <hr class="divisor">
-        <h4 class="secao-titulo">Incluir servico com valor</h4>
-        <p class="ajuda" style="margin-top:-4px">
-            Estes servicos entram em VALSERV e sao somados ao total do orcamento.
-        </p>
-
-        <?= form_open('orcamentos/adicionar_servico_valor/' . $registro['numero']) ?>
-            <div class="form-grid">
-                <div class="campo metade">
-                    <label for="sv_descricao">Descricao</label>
-                    <input type="text" name="descricao" id="sv_descricao" maxlength="200" required>
-                </div>
-                <div class="campo terco">
-                    <label for="sv_quantidade">Quantidade</label>
-                    <input type="number" name="quantidade" id="sv_quantidade" min="1" step="1" value="1">
-                </div>
-                <div class="campo terco">
-                    <label for="sv_unitario">Valor unitario</label>
-                    <input type="text" name="valor_unitario" id="sv_unitario" inputmode="decimal" placeholder="0,00">
-                </div>
-                <div class="campo terco">
-                    <label for="sv_total">Total</label>
-                    <input type="text" name="valor_total" id="sv_total" inputmode="decimal" placeholder="calculado">
-                </div>
-                <div class="campo terco" style="align-self:end">
-                    <button type="submit" class="botao">Incluir servico</button>
-                </div>
-            </div>
-        <?= form_close() ?>
-    <?php endif; ?>
 </div>
+
+<script>
+(function () {
+    // Mostra 6 servicos por vez, com o rodape "Total dos servicos" sempre visivel.
+    var VISIVEIS = 6;
+    var wrap = document.getElementById('tabela-servicos-valores');
+    if ( ! wrap) { return; }
+
+    var linhas = wrap.querySelectorAll('tbody tr');
+    if (linhas.length <= VISIVEIS) { return; }
+
+    function ajustar() {
+        wrap.style.maxHeight = '';
+
+        var topo   = wrap.getBoundingClientRect().top;
+        var fim    = linhas[VISIVEIS - 1].getBoundingClientRect().bottom;
+        var rodape = wrap.querySelector('tfoot').getBoundingClientRect().height;
+
+        var alvo = Math.ceil(fim - topo + rodape + 1);
+        wrap.style.maxHeight = alvo + 'px';
+
+        // A barra de rolagem horizontal reduz a altura util: compensa para a
+        // ultima linha nao ficar sob o rodape.
+        var celula = wrap.querySelector('tfoot td');
+        var sobra  = linhas[VISIVEIS - 1].getBoundingClientRect().bottom - celula.getBoundingClientRect().top;
+
+        if (sobra > 0) {
+            wrap.style.maxHeight = (alvo + Math.ceil(sobra) + 1) + 'px';
+        }
+    }
+
+    ajustar();
+    window.addEventListener('load', ajustar);
+})();
+</script>

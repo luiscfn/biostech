@@ -38,7 +38,8 @@ class Cliente_model extends MY_Model
     {
         list($where, $params) = $this->_filtro($busca);
 
-        $sql = "SELECT id, nome, fantasia, cpf_cnpj, cidade, uf, telefone, celular, email, ativo
+        $sql = "SELECT id, nome, fantasia, cpf_cnpj, cidade, uf, telefone, celular, email, ativo,
+                       fornecedor_codigo
                   FROM {$this->tabela}
                   {$where}
                  ORDER BY {$ordem}";
@@ -61,14 +62,42 @@ class Cliente_model extends MY_Model
 
     // ------------------------------------------------------------------
 
+    public function buscar($termo, $limite = 25)
+    {
+        $termo = trim((string) $termo);
+
+        if ($termo === '')
+        {
+            return array();
+        }
+
+        $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
+        $like       = '%' . strtolower($termo) . '%';
+
+        return $this->db->query(
+            "SELECT id, nome, fantasia, cpf_cnpj, cidade, uf
+               FROM {$this->tabela}
+              WHERE ativo IS NOT FALSE
+                AND (" . sprintf($sem_acento, 'nome') . " LIKE ?
+                     OR " . sprintf($sem_acento, 'fantasia') . " LIKE ?
+                     OR cpf_cnpj LIKE ?)
+              ORDER BY nome
+              LIMIT " . (int) $limite,
+            array($like, $like, $like)
+        )->result_array();
+    }
+
+    // ------------------------------------------------------------------
+
     public function criar($dados)
     {
         $id = $this->proximo_id();
 
         $sql = "INSERT INTO {$this->tabela}
                     (id, nome, fantasia, tipo, cpf_cnpj, ie, rg, endereco, numero, complemento,
-                     bairro, cidade, uf, cep, telefone, celular, fax, contato, email, observacao, ativo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     bairro, cidade, uf, cep, telefone, celular, fax, contato, email, observacao,
+                     fornecedor_codigo, ativo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $this->db->query($sql, array(
             $id,
@@ -91,6 +120,7 @@ class Cliente_model extends MY_Model
             $dados['contato'],
             $dados['email'],
             $dados['observacao'],
+            isset($dados['fornecedor_codigo']) ? (int) $dados['fornecedor_codigo'] : NULL,
             $dados['ativo'] ? 'true' : 'false',
         ));
 
@@ -130,6 +160,52 @@ class Cliente_model extends MY_Model
             (int) $id,
         ));
     }
+
+    /**
+     * Localiza um cliente pelo CPF/CNPJ, ignorando pontuacao.
+     */
+    public function por_documento($documento)
+    {
+        $digitos = preg_replace('/\D+/', '', (string) $documento);
+
+        if ($digitos === '')
+        {
+            return array();
+        }
+
+        return $this->db->query(
+            "SELECT * FROM {$this->tabela}
+              WHERE regexp_replace(coalesce(cpf_cnpj, ''), '[^0-9]', '', 'g') = ?
+              ORDER BY id LIMIT 1",
+            array($digitos)
+        )->row_array();
+    }
+
+    // ------------------------------------------------------------------
+
+    public function por_fornecedor($fornecedor_codigo)
+    {
+        return $this->db->query(
+            "SELECT * FROM {$this->tabela} WHERE fornecedor_codigo = ? ORDER BY id LIMIT 1",
+            array((int) $fornecedor_codigo)
+        )->row_array();
+    }
+
+    // ------------------------------------------------------------------
+
+    public function definir_fornecedor($id, $fornecedor_codigo)
+    {
+        $this->db->query(
+            "UPDATE {$this->tabela}
+                SET fornecedor_codigo = ?, updated_at = now()
+              WHERE id = ?",
+            array((int) $fornecedor_codigo, (int) $id)
+        );
+
+        return TRUE;
+    }
+
+    // ------------------------------------------------------------------
 
     public function stats()
     {

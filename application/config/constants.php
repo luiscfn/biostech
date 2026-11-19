@@ -12,6 +12,7 @@ define('T_SETORES',   DB_SCHEMA . '.biostech_setores');
 define('T_USUARIOS',  DB_SCHEMA . '.biostech_usuarios');
 define('T_CLIENTES',  DB_SCHEMA . '.biostech_clientes');
 define('T_PRODUTOS',  DB_SCHEMA . '.biostech_produtos');
+define('T_CLIENTES_ESPECIAIS', DB_SCHEMA . '.biostech_produto_clientes_especiais');
 define('T_AUDITORIA', DB_SCHEMA . '.biostech_auditoria');
 
 // Modulo Chamados / OS

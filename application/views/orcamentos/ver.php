@@ -4,11 +4,12 @@ $tem_os      = ! empty($registro['chamado_numero']);
 
 $abas_rotulos = array(
     'dados'            => 'Dados',
-    'itens'            => 'Itens (' . count($itens) . ')',
-    'servicos'         => 'Servicos a executar (' . count($servicos) . ')',
-    'servicos_valores' => 'Servicos com valor (' . count($servicos_valores) . ')',
-    'contatos'         => 'Contatos (' . count($contatos) . ')',
-    'log'              => 'Historico (' . count($log) . ')',
+    'servicos'         => 'Servicos a executar',
+    'itens'            => 'Pecas e Materiais',
+    'servicos_valores' => 'Servicos com valor',
+    'financeiro'       => 'Financeiro',
+    'contatos'         => 'Contatos',
+    'log'              => 'Historico',
 );
 ?>
 <div class="painel">
@@ -67,6 +68,11 @@ $abas_rotulos = array(
             </div>
 
             <div class="detalhe">
+                <div class="rotulo">Atencao</div>
+                <div class="valor"><?= html_escape($registro['atencao'] ? $registro['atencao'] : '-') ?></div>
+            </div>
+
+            <div class="detalhe">
                 <div class="rotulo">Data</div>
                 <div class="valor"><?= data_br($registro['data']) ?></div>
             </div>
@@ -76,6 +82,8 @@ $abas_rotulos = array(
                 <div class="valor">
                     <?php if ($tem_os): ?>
                         <a href="<?= site_url('chamados/ver/' . $registro['chamado_numero']) ?>"><?= html_escape($registro['chamado_numero']) ?></a>
+                    <?php elseif ( ! empty($registro['chamado_numero_legado'])): ?>
+                        <span title="OS nao existente na base de chamados"><?= html_escape($registro['chamado_numero_legado']) ?></span>
                     <?php else: ?>
                         -
                     <?php endif; ?>
@@ -83,7 +91,7 @@ $abas_rotulos = array(
             </div>
 
             <div class="detalhe">
-                <div class="rotulo">Dimensionamento</div>
+                <div class="rotulo">Orc. Dim</div>
                 <div class="valor">
                     <?php if ( ! empty($registro['dimensionamento_numero'])): ?>
                         <a href="<?= site_url('orcamentos/dimensionamento/' . $registro['dimensionamento_numero']) ?>"><?= (int) $registro['dimensionamento_numero'] ?></a>
@@ -144,3 +152,4 @@ $abas_rotulos = array(
 
 <script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
 <script src="<?= base_url('assets/js/orcamentos.js') ?>"></script>
+<script src="<?= base_url('assets/js/orcamentos_financeiro.js') ?>"></script>

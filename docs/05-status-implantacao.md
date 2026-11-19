@@ -31,7 +31,8 @@ Servidor de desenvolvimento: `php -S 127.0.0.1:8090 router.php`
 |---|---|---|
 | Login / logout | `/login`, `/logout` | pronto |
 | Painel com indicadores e auditoria | `/dashboard` | pronto |
-| Clientes (lista, busca, filtro, paginação, ficha, CRUD) | `/clientes` | pronto |
+| Clientes (lista, busca, filtro, paginação, ficha, CRUD, ordens de serviço, orçamentos e notas fiscais do cliente) | `/clientes` | pronto |
+| Fornecedores (lista, busca, CRUD, prazos, produtos, copiar para cliente) | `/fornecedores` | pronto |
 | Produtos (lista, busca, ficha) | `/produtos` | pronto |
 | Setores (lista, busca, CRUD) | `/setores` | pronto |
 | Usuários (lista, CRUD, senha, ativar/desativar) | `/usuarios` | pronto |
@@ -86,6 +87,48 @@ Criado por `scripts/sql/02-chamados-os.sql` e `scripts/sql/03-dominios-financeir
   (alteração por campo, com JSONB antes/depois).
 - **Regras**: `docs/06-regras-chamados-os.md` (RN-001..RN-283, VD-01..VD-72,
   AC-01..AC-24 e decisões D-01..D-10).
+
+**Carga do legado (Access → BIOSTECH).** `scripts/etl/export-chamados.ps1` exporta
+14 tabelas para `scripts/etl/dados/chamado_*.json` e `scripts/etl/chamados.php`
+carrega no schema:
+
+| Destino | Origem | Registros |
+|---|---|---:|
+| `biostech_equipamentos` | `EQUIPAMENTO` | 11.866 |
+| `biostech_chamados` | `CHAMADO_01` + `02` + `03A` | 2.004 (2.006 com os nativos) |
+| `biostech_chamado_equipamento` | `CHAMADO_03` | 1.892 (1.894) |
+| `biostech_chamado_atendimento` | `CHAMADO_04` | 1.916 (1.918) |
+| `biostech_chamado_intervencoes` | `CHAMADO_05A` | 2.973 |
+| `biostech_chamado_pecas` | `CHAMADO_06` | 8.778 (8.797) |
+| `biostech_chamado_servicos` | `CHAMADO_55` (previsto) + `CHAMADO_44` (executado) | 8.217 (8.227) |
+| `biostech_chamado_horas` | `CHAMADO_09` | 56 |
+| `biostech_chamado_planos_pagamento` / `_parcelas` | `CHAMADO_10` | 1.331 / 711 |
+| `biostech_chamado_vinculos` | `CHAMADO_99` | 0 |
+| `biostech_chamado_eventos` / `_log` | `CHAMADO_LOG_01` | 1.593 / 20.449 campos |
+
+- **Clientes**: `COD_CLI` de `CHAMADO_02` casa direto com `biostech_clientes.id`
+  (1.899 dos 2.004). Os 105 sem cliente válido usam o cliente de apoio
+  `CLIENTE NAO IDENTIFICADO (IMPORTACAO ACCESS)` (`id` 4.907, criado pela carga).
+- **Equipamento**: `CHAMADO_03.COD_EQUIP` casa com `EQUIPAMENTO.NUS_EQUIP`; o
+  `cliente_id` de `biostech_equipamentos` fica `NULL` (o Access não tem esse
+  vínculo — `CLIENTES_EQUIP` está vazia).
+- **Técnicos**: `CODFUN`/`CODIFUNC` mapeados para `biostech_usuarios.id` por
+  `funcionario_id` (menor `id`); códigos sem usuário viram `NULL` (intervenções
+  usam `0`, exigido pela tabela).
+- **Normalizações**: datas inválidas/negativas descartadas (abertura sem data usa
+  `aaaa-mm-01` do número); devolução anterior ao atendimento vira `NULL`;
+  `QTDE_PARC` fora de 1..12 vira `NULL`; valores negativos viram `0`; itens de peça
+  repetidos são renumerados (`numero_item`); `produto_id` repetido no mesmo chamado
+  vira `NULL`; intervenções com `(OS, data, hora)` repetida recebem +1s.
+- **Idempotência**: *upsert* em chamados, equipamentos, atendimento, planos e
+  parcelas; `ON CONFLICT DO NOTHING` em peças, serviços, intervenções e vínculos
+  (a tabela de intervenções tem *trigger* que bloqueia `UPDATE`/`DELETE`);
+  eventos/log `log_%` são apagados e recriados.
+- **Fora do escopo**: `CHAMADO_031`, `03B`, `04A`, `05`, `06_AM`, `06_LAB`, `07`,
+  `08`, `10A`, `11`, `66`, `77`, `88` estão vazias; 4.953 intervenções de
+  `CHAMADO_05A` (OS de 2017–2020 que não existem em `CHAMADO_01`), 11 vínculos e
+  10 logs órfãos foram ignorados; 1 chamado sem `NUM_OS` e 2 séries de equipamento
+  duplicadas após limpeza de espaços/CRLF foram descartados.
 
 ### 2.2 Módulo Estoque
 
@@ -193,6 +236,62 @@ Criado por `scripts/sql/07-financeiro.sql` e carregado por
   mantêm cheques/balanço/cadastros e movimentos bancários.
 - **Regras**: `docs/10-regras-financeiro.md`.
 
+### 2.6 Módulo Fornecedores
+
+Tela migrada de `FORNECEDOR` (Access), em `/fornecedores`:
+
+- **Tabelas**: `biostech_fornecedores` (2.188), `biostech_fornecedor_prazos`
+  (44) e `biostech_produto_fornecedor` (16).
+- **Vínculo com clientes**: coluna `biostech_clientes.fornecedor_codigo`
+  (índice único parcial), criada por `scripts/sql/01-schema.sql`.
+- **Telas**: lista com busca/ordenação/paginação; cadastro com dados
+  cadastrais, situação, prazos oferecidos e produtos fornecidos.
+- **Copiar para cliente**: cria o cliente a partir do fornecedor; se já existir
+  cliente vinculado, atualiza; se já existir cliente com o mesmo CNPJ, apenas
+  vincula (sem duplicar). O cliente passa a exibir o selo "Também fornecedor" e
+  o fornecedor "Também cliente".
+- **Exclusão**: bloqueada quando há pedidos de compra, cotações, contas a pagar
+  ou cotações de dimensionamento; prazos e produtos são removidos em transação
+  e o cliente vinculado permanece (apenas perde o vínculo).
+- **Permissões**: leitura livre para usuários logados; gravação restrita a
+  admin/gestor.
+
+### 2.7 Consultas do cliente
+
+Reproduzem as opções do `F_MODULO_CLIENTES` do Access em dois acessos:
+
+- **Menu** (grupo *Consultas*): `OS do Cliente`, `Orcamentos do Cliente` e
+  `Notas Fiscais do Cliente` abrem `/clientes/ordens`, `/clientes/orcamentos` e
+  `/clientes/notas`, cada uma com busca de cliente por autocomplete
+  (`/clientes/buscar_clientes`) e campo de pesquisa próprio.
+- **Ficha do cliente** (`/clientes/ver/{id}`): abas *Dados*, *Ordens de servico*,
+  *Orcamentos* e *Notas fiscais*.
+
+Telas:
+
+- **Ordens de serviço** (`/clientes/ordens/{id}`): chamados e OS do cliente com as
+  colunas Numero, Abertura, **Atendimento**, **Fechamento**, Tipo, Equipamento,
+  Status, Situacao atual, Total e Acoes; busca por número/série/defeito; link
+  para a ficha em `/chamados/ver/{numero}`. As colunas Status/Situacao usam a
+  classe `.compacta` (fonte e padding menores) e Tipo é centralizado.
+  *Atendimento* vem de `biostech_chamado_atendimento.atendimento_data`;
+  *Fechamento* usa `COALESCE(data_encerramento, data_fechamento, devolucao_data)`
+  porque o Access só preencheu `DATA_ENCERRAMENTO` em parte dos registros.
+- **Orçamentos** (`/clientes/orcamentos/{id}`): orçamentos do cliente com data,
+  atenção, OS, itens, total, situação e resultado. A coluna OS aponta para a ficha
+  do chamado quando ele existe; quando o Access registrou o `NUM_OS` mas o chamado
+  foi apagado na origem, o número aparece como texto (sem link) na cor normal,
+  vindo de `chamado_numero_legado`.
+- **Notas fiscais** (`/clientes/notas/{id}`): notas agrupadas por
+  `biostech_contas_receber.numero_nota_fiscal` (não existe tabela de NF no
+  Access), com emissão, intervalo de vencimentos, parcelas, valor total,
+  valor baixado e situação (aberta/parcial/baixada/cancelada). Cada nota abre a
+  ficha `/clientes/nota/{id}?numero=...` com as parcelas e o acesso ao título no
+  financeiro.
+
+As três listas usam o partial `layouts/paginacao.php` (10 registros por página)
+e a mesma busca das telas equivalentes do sistema.
+
 ---
 
 ## 3. ETL
@@ -203,6 +302,21 @@ Criado por `scripts/sql/07-financeiro.sql` e carregado por
 2. `scripts/etl/instalar.php` — aplica `scripts/sql/01-schema.sql` (placeholder
    `{schema}`) e carrega os JSON via PDO. Idempotente: setores por *upsert*, demais
    tabelas truncadas e recarregadas.
+3. `scripts/etl/export-chamados.ps1` + `scripts/etl/chamados.php` — exporta e carrega
+   as 14 tabelas de Chamados/OS (`CHAMADO_*`, `EQUIPAMENTO`) descritas em 2.1.
+4. `export-financeiro.ps1`/`financeiro.php`, `export-orcamentos.ps1`/`orcamentos.php`,
+   `export-compras.ps1`/`compras.php`, `export-estoque.ps1`/`estoque.php` — demais
+   módulos, no mesmo padrão (export em PowerShell 32 bits → JSON → PHP/PDO).
+5. `scripts/etl/vincular-orcamentos-os.php` — completa o vínculo Orçamento ↔ OS
+   depois da carga de chamados. Lê `dados/orcamentos.json` e
+   `dados/dimensionamentos.json` e grava `chamado_numero` (quando a OS existe em
+   `biostech_chamados`) e `chamado_numero_legado` (número original do Access, mesmo
+   quando a OS foi apagada na origem). Idempotente; rodar após `chamados.php`.
+6. `scripts/etl/export.ps1 -Config scripts/etl/clientes-especiais.json` +
+   `scripts/etl/clientes-especiais.php` — carrega `PRODUTO_CLIENTES_ESPECIAIS_01`
+   (preços especiais por cliente). Idempotente por `(cliente_id, produto_id)`;
+   1.214 registros gravados (13 produtos da origem não existem na base nova e foram
+   ignorados).
 
 Conversões aplicadas na carga:
 
@@ -346,6 +460,28 @@ consumida.
 | Exclusão de CP só aparecia para título aberto | liberada também para cancelado (mantido bloqueio com baixa) |
 | CR com N parcelas repetia o mesmo `codigo` (violava a PK) | gera um código CR por parcela e retorna a lista `codigos` |
 | Teste de CR usava valor de 200,00 na baixa da parcela de 100,00 | baixa e comprovante ajustados para 100,00 |
+| Carga de chamados gerava milhares de `mb_strtolower(): Unknown encoding "26"` | limite de 26 caracteres aplicado em `texto()` antes do `mb_strtolower(..., 'UTF-8')` |
+| `printf(): Too few arguments` no resumo do log | formato do resumo ajustado aos argumentos |
+| Peças renumeradas caíam em conflito e 18 linhas sumiam | `max(array_keys(...))` em vez de `max(...)` sobre os valores booleanos |
+| Carga do log fazia um `INSERT` por evento/campo e travava | eventos e log gravados em lote (`jsonb` por cast, ids via `nextval`) |
+| Consulta de OS do cliente não tinha data de atendimento nem de fechamento | join em `biostech_chamado_atendimento` e `COALESCE(data_encerramento, data_fechamento, devolucao_data)` na listagem (`Chamado_model::listar`) |
+| Prefixo `R$` repetido em todos os valores da interface | removido do helper `moeda_br()`, do helper local do dashboard, dos totais em JS (`compras.js`, `autocomplete.js`) e dos spans de total em compras/estoque. Mantido apenas em textos históricos importados do Access (observações) e nos labels de formulário como unidade |
+| Coluna OS da consulta de orçamentos sempre vazia | `orcamentos.php` rodou antes da carga de chamados e anulava o `NUM_OS` por integridade; `$chamados` passou a ser lido também de `dados/chamado_01.json` e o script `vincular-orcamentos-os.php` refez os vínculos (872 OS existentes; 287 apontavam para chamados apagados na origem) |
+| OS apagada na origem sumia do orçamento | nova coluna `chamado_numero_legado` guarda o número original do Access e a tela o exibe como texto; `chamado_numero` continua com FK para `biostech_chamados` |
+| Ficha da OS não mostrava o orçamento de origem | card "Orcamento" na aba Dados de `/chamados/ver`, usando `biostech_chamados.orcamento_numero` (já carregado do campo `ORC` do Access) |
+| Formulário de cliente com campos em 2 colunas e Fax | reorganizado em linhas: nome/fantasia; tipo, CPF/CNPJ, IE, RG; endereço, número, complemento; bairro, cidade, UF, CEP; telefone, celular, e-mail, contato. Campo Fax removido da tela; o valor legado continua preservado por um `input hidden` |
+| Botões com cores diferentes (Voltar/Cancelar brancos) | padrão único em `app.css`: `.botao` e `.botao.secundario` usam o mesmo azul `#0b3d6b` (hover `#14558f`) com texto branco; somente as ações destrutivas (`Excluir`, `Remover`, `Estornar`, `Cancelar`…) mantêm o vermelho `#b42318` via `.botao.perigo`. Os botões dos relatórios de impressão (`.acoes button`) também foram padronizados |
+| Botão "Inserir/Excluir como Cliente Especial" do Access não existia | nova tabela `biostech_produto_clientes_especiais` (cliente × produto, `perc_lucro` e `valor_venda`); a ficha do cliente ganhou os botões **Inserir como cliente especial** (cria preços para todos os produtos ativos com 15% sobre o custo) e **Excluir como cliente especial**, além da aba **Preços especiais** para incluir/editar/remover produto por produto. O autocomplete de itens de orçamento, dimensionamento e peças de OS passou a devolver o preço especial do cliente quando existir (mostra "preço especial" na lista) |
+| Listagem de orçamentos com 25 registros e filtros espalhados | paginação em **8 registros**; filtros em duas linhas: busca, cliente, situação, resultado e **Pesquisar** na primeira; OS, **Dimensionamento** e as duas datas na segunda. Coluna "Itens" trocada por **Orc dim**, com link para o dimensionamento de origem |
+| Ficha do orçamento com campos fora de ordem | "Dimensionamento" renomeado para **Orc. Dim**; **Atenção** incluída na mesma linha do cliente; **Material** movido para a linha de **Mão de obra**. Na aba Dados, **Atenção** foi removida e **Data de envio** e **Data de aprovação** ficaram na linha de **Cadastro**, antes dele |
+| Composição de valores espalhada em 6 colunas e títulos discretos | valores em duas linhas de 5: material, mão de obra, material de fixação, acréscimo de custos e imposto/nota fiscal; serviços com valor, custos indiretos, desconto, valor máximo do cliente e valor total. Títulos **Composição de valores**, **Observações** e **Ações** com faixa destacada (`.secao-titulo.destaque`), **Gerar chamado** apenas em negrito, e 16px entre o título Observações e o texto |
+| Abas com contagem no título, coluna "#" e ações empilhadas nas tabelas da ficha | títulos das abas sem a quantidade de registros (`Itens`, `Servicos a executar`, ...); coluna **#** renomeada para **Item**; campo de descrição do serviço passou a ocupar toda a célula; botões **Salvar** e **Excluir** ficaram lado a lado (`.acoes-tabela`, flex) nas abas Itens, Serviços a executar e Serviços com valor |
+| Data de aprovação caindo para a segunda linha na tela de status | os quatro campos (situação, resultado, data de envio e data de aprovação) ficaram na mesma linha: situação ocupa 3 colunas, **resultado 4** e o par de datas 5, com as duas datas num bloco flex de 6px (`.campos-data`) |
+| Aba de itens fora do padrão e tabela longa | aba movida para depois de **Serviços a executar** e renomeada **Peças e Materiais**; colunas na ordem **Item, Código, Descrição do produto, Qtde, Valor unit., Valor total** (sem "Unit. original"/"Total original" e sem o prefixo "codigo" no valor); bloco **Incluir item** destacado acima da tabela; tabela com rolagem vertical de 6 linhas e rodapé **Total do material** fixo (`.tabela-rolagem`, `position:sticky`) |
+| Formulário de inclusão de item com campos desproporcionais | campo **Complemento** removido (o item passa a usar a própria descrição, com fallback para a descrição do produto); **Produto** reduzido para o tamanho de Unidade e **Descrição do item** ampliada para 8 colunas; Unidade, Quantidade, Valor unitário, Total e o botão **Incluir item** na mesma linha, nessa ordem (2+2+3+3+2 colunas) |
+| Percentual em massa sem como voltar apenas o desconto ou apenas o acréscimo | cada bloco ganhou um botão **Restaurar** ao lado do aplicar (`formaction` para `orcamentos/restaurar_percentual/{numero}/{tipo}`, com `title` "Restaura o valor original antes do desconto/acrescimo"). O model recalcula os itens a partir do valor original, mantendo o outro percentual quando ativo, e limpa só o percentual restaurado. Os campos de percentual foram reduzidos a 150px e os botões ficam na mesma linha do campo (`.campo-linha`); os três blocos usam `.percentual-massa` (flex: percentuais dividem o espaço e o bloco **Restaurar valores originais** fica com 290px, com o título e o botão na mesma linha e a ajuda embaixo) |
+| Aba Serviços com valor com a tabela antes do cadastro e campos grandes | cadastro movido para cima, em bloco destacado (`.bloco-inclusao`, título **Incluir servico com valor**); **Descrição** em linha própria e **Quantidade** (2), **Valor unitário** (4), **Total** (4) e o botão **Incluir servico** (2) na mesma linha. A tabela passou a usar `.tabela-rolagem`, com 6 registros visíveis, rolagem vertical e rodapé **Total dos servicos** fixo (`position:sticky`) |
+| Aba Contatos com a tabela antes do cadastro e campos espalhados | cadastro movido para cima, em bloco destacado (**Registrar contato**): **Data**, **Hora** e **Assunto** na primeira linha; **Funcionario**, **Pessoa de contato** e **Proximo contato** (data + hora no mesmo campo, `.campos-data`) na segunda; **Descricao** e o botão abaixo. Data/hora receberam o mesmo visual dos demais campos nos blocos de inclusão. A tabela mostra 6 registros e passa a rolar verticalmente a partir do sétimo, com cabeçalho fixo |
 
 ---
 

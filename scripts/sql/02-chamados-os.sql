@@ -545,6 +545,7 @@ CREATE INDEX IF NOT EXISTS biostech_chamado_log_chamado_idx
 CREATE TABLE IF NOT EXISTS {schema}.biostech_orcamentos (
     numero                 integer     PRIMARY KEY,
     chamado_numero         varchar(16) REFERENCES {schema}.biostech_chamados(numero),
+    chamado_numero_legado  varchar(16),
     data                   date        NOT NULL DEFAULT CURRENT_DATE,
     situacao               smallint,
     aprovado               boolean     NOT NULL DEFAULT false,

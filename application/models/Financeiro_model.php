@@ -1063,6 +1063,95 @@ class Financeiro_model extends MY_Model
         return array('total' => (int) $row['total'], 'valor' => (float) $row['valor']);
     }
 
+    /**
+     * Notas fiscais do cliente, agrupadas por numero_nota_fiscal.
+     *
+     * O BIOSTECH nao possui tabela propria de notas fiscais: o numero da nota
+     * vem dos titulos a receber (biostech_contas_receber.numero_nota_fiscal).
+     */
+    public function notas_fiscais_cliente($cliente_id, $busca = '', $limit = NULL, $offset = NULL)
+    {
+        $params = array();
+        $where  = $this->_where_nf_cliente($cliente_id, $busca, $params);
+        $baixas = "(SELECT 1 FROM " . T_CONTAS_RECEBER_BAIXAS . " b WHERE b.conta_codigo = c.codigo)";
+
+        $sql = "SELECT c.numero_nota_fiscal AS numero,
+                       min(c.data_emissao) AS data_emissao,
+                       min(c.data_vencimento) AS primeiro_vencimento,
+                       max(c.data_vencimento) AS ultimo_vencimento,
+                       count(*) AS parcelas,
+                       COALESCE(sum(c.valor), 0) AS valor_total,
+                       COALESCE(sum(c.valor) FILTER (WHERE EXISTS {$baixas}), 0) AS valor_baixado,
+                       count(*) FILTER (WHERE c.cancelado) AS parcelas_canceladas,
+                       count(*) FILTER (WHERE EXISTS {$baixas}) AS parcelas_baixadas
+                  FROM " . T_CONTAS_RECEBER . " c
+                 WHERE {$where}
+                 GROUP BY c.numero_nota_fiscal
+                 ORDER BY min(c.data_emissao) DESC NULLS LAST, c.numero_nota_fiscal DESC";
+
+        if ($limit !== NULL)
+        {
+            $sql .= ' LIMIT ' . (int) $limit . ' OFFSET ' . (int) $offset;
+        }
+
+        return $this->db->query($sql, $params)->result_array();
+    }
+
+    public function total_notas_fiscais_cliente($cliente_id, $busca = '')
+    {
+        $params = array();
+        $where  = $this->_where_nf_cliente($cliente_id, $busca, $params);
+
+        $row = $this->db->query(
+            "SELECT count(DISTINCT c.numero_nota_fiscal) AS total
+               FROM " . T_CONTAS_RECEBER . " c
+              WHERE {$where}",
+            $params
+        )->row_array();
+
+        return (int) $row['total'];
+    }
+
+    private function _where_nf_cliente($cliente_id, $busca, &$params)
+    {
+        $where = array(
+            'c.cliente_id = ?',
+            'c.numero_nota_fiscal IS NOT NULL',
+            "btrim(c.numero_nota_fiscal) <> ''",
+        );
+
+        $params[] = (int) $cliente_id;
+
+        $busca = trim((string) $busca);
+
+        if ($busca !== '')
+        {
+            $where[]  = 'c.numero_nota_fiscal ILIKE ?';
+            $params[] = '%' . $busca . '%';
+        }
+
+        return implode(' AND ', $where);
+    }
+
+    public function parcelas_nota_cliente($cliente_id, $numero)
+    {
+        $baixas = "(SELECT 1 FROM " . T_CONTAS_RECEBER_BAIXAS . " b WHERE b.conta_codigo = c.codigo)";
+
+        return $this->db->query(
+            "SELECT c.codigo, c.parcela, c.data_emissao, c.data_vencimento,
+                    c.valor, c.vliq, c.cancelado, c.arquivada,
+                    c.chamado_numero, c.numero_documento,
+                    CASE WHEN c.cancelado THEN 'cancelada'
+                         WHEN EXISTS {$baixas} THEN 'baixada'
+                         ELSE 'aberta' END AS situacao
+               FROM " . T_CONTAS_RECEBER . " c
+              WHERE c.cliente_id = ?
+                AND c.numero_nota_fiscal = ?
+              ORDER BY c.data_vencimento NULLS LAST, c.parcela, c.codigo",
+            array((int) $cliente_id, $numero)
+        )->result_array();
+    }
+
     public function conta_receber($codigo)
     {
         return $this->db->query(

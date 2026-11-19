@@ -82,7 +82,7 @@ class Orcamentos extends MY_Controller
 
         $pagina = (int) $this->input->get('pagina');
         $total  = $this->orcamentos_model->total($filtros);
-        $pag    = $this->paginar($total, 25, $pagina);
+        $pag    = $this->paginar($total, 8, $pagina);
 
         $this->render('orcamentos/index', array(
             'registros'   => $this->orcamentos_model->listar($filtros, $pag['por_pagina'], $pag['offset']),
@@ -181,7 +181,7 @@ class Orcamentos extends MY_Controller
             show_404();
         }
 
-        $abas = array('dados', 'itens', 'servicos', 'servicos_valores', 'contatos', 'log');
+        $abas = array('dados', 'itens', 'servicos', 'servicos_valores', 'financeiro', 'contatos', 'log');
         $aba  = (string) $this->input->get('aba');
 
         if ( ! in_array($aba, $abas, TRUE))
@@ -484,6 +484,68 @@ class Orcamentos extends MY_Controller
         }
 
         redirect('orcamentos/ver/' . (int) $numero . '?aba=itens');
+    }
+
+    // ------------------------------------------------------------------
+
+    /** Restaura os valores como estavam antes do desconto (ou do acrescimo) em massa. */
+    public function restaurar_percentual($numero, $tipo)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/ver/' . (int) $numero . '?aba=itens');
+        }
+
+        if ( ! in_array($tipo, array('desconto', 'acrescimo'), TRUE))
+        {
+            $this->flash('Percentual invalido.', 'erro');
+            redirect('orcamentos/ver/' . (int) $numero . '?aba=itens');
+        }
+
+        $resultado = $this->orcamentos_model->restaurar_percentual((int) $numero, $tipo, $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'orcamento_item', (int) $numero, array(
+                'restaurado' => $tipo,
+            ));
+            $this->flash('Valores restaurados antes do ' . $tipo . '.');
+        }
+
+        redirect('orcamentos/ver/' . (int) $numero . '?aba=itens');
+    }
+
+    // ------------------------------------------------------------------
+
+    /** Grava a composicao financeira (percentuais/valores) da aba Financeiro. */
+    public function salvar_financeiro($numero)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/ver/' . (int) $numero . '?aba=financeiro');
+        }
+
+        $resultado = $this->orcamentos_model->salvar_financeiro((int) $numero, $this->input->post(), $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'orcamento', (int) $numero, NULL);
+            $this->flash('Composicao financeira atualizada.');
+        }
+
+        redirect('orcamentos/ver/' . (int) $numero . '?aba=financeiro');
     }
 
     // ==================================================================
@@ -1130,8 +1192,9 @@ class Orcamentos extends MY_Controller
 
     public function buscar_produtos()
     {
-        $termo = trim((string) $this->input->get('termo'));
-        $lista = $termo === '' ? array() : $this->orcamentos_model->buscar_produtos($termo, 25);
+        $termo   = trim((string) $this->input->get('termo'));
+        $cliente = (int) $this->input->get('cliente');
+        $lista   = $termo === '' ? array() : $this->orcamentos_model->buscar_produtos($termo, 25, $cliente);
 
         $this->_json($lista);
     }

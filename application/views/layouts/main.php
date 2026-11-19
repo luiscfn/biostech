@@ -30,6 +30,11 @@
             <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
             <a class="item <?= $menu_ativo === 'financeiro' ? 'ativo' : '' ?>" href="<?= site_url('financeiro') ?>">Financeiro</a>
 
+            <div class="grupo">Consultas</div>
+            <a class="item <?= $menu_ativo === 'consulta_os' ? 'ativo' : '' ?>" href="<?= site_url('clientes/ordens') ?>">OS do Cliente</a>
+            <a class="item <?= $menu_ativo === 'consulta_orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('clientes/orcamentos') ?>">Orcamentos do Cliente</a>
+            <a class="item <?= $menu_ativo === 'consulta_notas' ? 'ativo' : '' ?>" href="<?= site_url('clientes/notas') ?>">Notas Fiscais do Cliente</a>
+
             <?php $tb_aberto = ($menu_ativo === 'tabelas_basicas'); ?>
 
             <div class="grupo">Tabelas Basicas</div>
@@ -59,6 +64,7 @@
 
             <div class="grupo">Cadastros</div>
             <a class="item <?= $menu_ativo === 'clientes' ? 'ativo' : '' ?>" href="<?= site_url('clientes') ?>">Clientes</a>
+            <a class="item <?= $menu_ativo === 'fornecedores' ? 'ativo' : '' ?>" href="<?= site_url('fornecedores') ?>">Fornecedores</a>
             <a class="item <?= $menu_ativo === 'produtos' ? 'ativo' : '' ?>" href="<?= site_url('produtos') ?>">Produtos</a>
             <a class="item <?= $menu_ativo === 'setores' ? 'ativo' : '' ?>" href="<?= site_url('setores') ?>">Setores</a>
 

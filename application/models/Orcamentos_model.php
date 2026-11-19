@@ -116,9 +116,10 @@ class Orcamentos_model extends MY_Model
         if ( ! empty($f['busca']))
         {
             $where .= " AND (o.numero::text = ? OR o.atencao ILIKE ? OR cl.nome ILIKE ?
-                             OR o.chamado_numero ILIKE ?)";
+                             OR o.chamado_numero ILIKE ? OR o.chamado_numero_legado ILIKE ?)";
             $termo    = trim($f['busca']);
             $params[] = $termo;
+            $params[] = '%' . $termo . '%';
             $params[] = '%' . $termo . '%';
             $params[] = '%' . $termo . '%';
             $params[] = '%' . $termo . '%';
@@ -391,7 +392,7 @@ class Orcamentos_model extends MY_Model
 
     // ------------------------------------------------------------------
 
-    public function buscar_produtos($termo, $limite = 25)
+    public function buscar_produtos($termo, $limite = 25, $cliente_id = NULL)
     {
         $termo = trim((string) $termo);
 
@@ -402,14 +403,22 @@ class Orcamentos_model extends MY_Model
 
         $like = '%' . $termo . '%';
 
+        // Quando o cliente tem preco especial para o produto, ele substitui o
+        // valor de tabela no autocomplete (mesma regra do Access).
         return $this->db->query(
-            "SELECT id, codigo, descricao, unidade, valor_venda, valor_compra
-               FROM " . T_PRODUTOS . "
-              WHERE id > 0
-                AND (codigo ILIKE ? OR descricao ILIKE ? OR id::text = ?)
-              ORDER BY descricao
+            "SELECT p.id, p.codigo, p.descricao, p.unidade,
+                    COALESCE(e.valor_venda, p.valor_venda) AS valor_venda,
+                    p.valor_venda AS valor_tabela,
+                    p.valor_compra,
+                    CASE WHEN e.produto_id IS NULL THEN 0 ELSE 1 END AS especial
+               FROM " . T_PRODUTOS . " p
+               LEFT JOIN " . T_CLIENTES_ESPECIAIS . " e
+                      ON e.produto_id = p.id AND e.cliente_id = ?
+              WHERE p.id > 0
+                AND (p.codigo ILIKE ? OR p.descricao ILIKE ? OR p.id::text = ?)
+              ORDER BY p.descricao
               LIMIT " . (int) $limite,
-            array($like, $like, $termo)
+            array((int) $cliente_id, $like, $like, $termo)
         )->result_array();
     }
 
@@ -693,6 +702,136 @@ class Orcamentos_model extends MY_Model
         }
 
         return $novo;
+    }
+
+    // ------------------------------------------------------------------
+
+    /**
+     * Grava a composicao financeira informada na aba Financeiro.
+     *
+     * Cada linha (mao de obra, material de fixacao, acrescimo de custo e
+     * imposto) pode ser informada em percentual ou em valor absoluto, sempre
+     * calculada sobre o acumulado da linha anterior, comecando pelo material.
+     * O desconto e aplicado sobre o total geral sem desconto.
+     */
+    public function salvar_financeiro($numero, $dados, $usuario)
+    {
+        $reg = $this->por_numero($numero);
+
+        if (empty($reg))
+        {
+            return array('ok' => FALSE, 'erro' => 'Orcamento nao encontrado.');
+        }
+
+        $material = (float) $this->db->query(
+            "SELECT COALESCE(SUM(valor_total), 0) AS total
+               FROM " . T_ORCAMENTO_ITENS . " WHERE orcamento_numero = ?",
+            array((int) $numero)
+        )->row()->total;
+
+        $servico = (float) $this->db->query(
+            "SELECT COALESCE(SUM(valor_total), 0) AS total
+               FROM " . T_ORCAMENTO_SERVICOS_VALORES . " WHERE orcamento_numero = ?",
+            array((int) $numero)
+        )->row()->total;
+
+        $linhas = array(
+            array('percentual_mao_obra', 'valor_mao_obra', 'Mao de obra'),
+            array('percentual_mat_fixacao', 'material_fixacao', 'Material de fixacao'),
+            array('percentual_acrescimo_custo', 'acrescimo_custo', 'Acrescimo de custo'),
+            array('percentual_nota_fiscal', 'valor_imposto', 'Imposto da nota fiscal'),
+        );
+
+        $novo = array(
+            'valor_material' => round($material, 2),
+            'valor_servico'  => round($servico, 2),
+        );
+
+        $acumulado = round($material, 2);
+
+        foreach ($linhas as $linha)
+        {
+            list($campoPerc, $campoValor, $rotulo) = $linha;
+
+            $perc  = $this->_dec($this->_v($dados, $campoPerc));
+            $valor = $this->_dec($this->_v($dados, $campoValor));
+            $modo  = $this->_v($dados, 'modo_' . $campoValor) === 'valor' ? 'valor' : 'percentual';
+
+            if ($perc !== NULL && ((float) $perc < 0 || (float) $perc > 1000))
+            {
+                return array('ok' => FALSE, 'erro' => 'Percentual invalido em ' . $rotulo . '.');
+            }
+
+            if ($valor !== NULL && (float) $valor < 0)
+            {
+                return array('ok' => FALSE, 'erro' => 'Valor invalido em ' . $rotulo . '.');
+            }
+
+            if ($modo === 'valor')
+            {
+                // Valor informado: guarda apenas o absoluto (percentual NULL),
+                // para que alteracoes posteriores nos itens nao convertam o
+                // valor digitado em percentual.
+                $v = round((float) ($valor ? $valor : 0), 2);
+                $p = NULL;
+            }
+            else
+            {
+                $p = $perc !== NULL ? round((float) $perc, 4) : NULL;
+                $v = $p !== NULL ? round($p * $acumulado / 100, 2) : 0.0;
+            }
+
+            $novo[$campoPerc] = $p;
+            $novo[$campoValor] = $v;
+
+            $acumulado = round($acumulado + $v, 2);
+        }
+
+        $sem_desconto = $acumulado;
+
+        $perc_desc  = $this->_dec($this->_v($dados, 'percentual_desconto'));
+        $valor_desc = $this->_dec($this->_v($dados, 'valor_desconto'));
+        $modo_desc  = $this->_v($dados, 'modo_valor_desconto') === 'valor' ? 'valor' : 'percentual';
+
+        if ($perc_desc !== NULL && ((float) $perc_desc < 0 || (float) $perc_desc > 100))
+        {
+            return array('ok' => FALSE, 'erro' => 'O desconto deve ficar entre 0 e 100%.');
+        }
+
+        if ($valor_desc !== NULL && (float) $valor_desc < 0)
+        {
+            return array('ok' => FALSE, 'erro' => 'Valor de desconto invalido.');
+        }
+
+        if ($modo_desc === 'valor')
+        {
+            $desconto  = round((float) ($valor_desc ? $valor_desc : 0), 2);
+            $perc_desc = NULL;
+        }
+        else
+        {
+            $perc_desc = $perc_desc !== NULL ? round((float) $perc_desc, 4) : NULL;
+            $desconto  = $perc_desc !== NULL ? round($perc_desc * $sem_desconto / 100, 2) : 0.0;
+        }
+
+        $bruto = round($sem_desconto + $servico, 2);
+
+        if ($desconto > $bruto)
+        {
+            return array('ok' => FALSE, 'erro' => 'O desconto nao pode ser maior que o total sem desconto.');
+        }
+
+        $novo['percentual_desconto']    = $perc_desc;
+        $novo['valor_desconto']         = $desconto;
+        $novo['valor_maximo_cliente']   = round((float) ($this->_dec($this->_v($dados, 'valor_maximo_cliente')) ?: 0), 2);
+        $novo['valor_custos_indiretos'] = round((float) ($this->_dec($this->_v($dados, 'valor_custos_indiretos')) ?: 0), 2);
+        $novo['valor_total']            = max(0, round($bruto - $desconto, 2));
+
+        $this->_atualizar(T_ORCAMENTOS, $numero, $novo, 'numero');
+
+        $this->_log($numero, 'A', 'financeiro', NULL, NULL, $novo, $usuario['login']);
+
+        return array('ok' => TRUE, 'dados' => $novo);
     }
 
     // ==================================================================
@@ -1099,6 +1238,81 @@ class Orcamentos_model extends MY_Model
 
         $this->recalcular($numero, array(), FALSE);
         $this->_log($numero, 'A', 'valores_restaurados', NULL, NULL, NULL, $usuario['login']);
+
+        $this->db->trans_complete();
+
+        return $this->db->trans_status()
+            ? array('ok' => TRUE)
+            : array('ok' => FALSE, 'erro' => 'Falha ao restaurar os valores.');
+    }
+
+    // ------------------------------------------------------------------
+
+    /**
+     * Restaura os itens como estavam antes de aplicar o desconto (ou o acrescimo)
+     * em massa, mantendo o outro percentual caso esteja ativo.
+     */
+    public function restaurar_percentual($numero, $tipo, $usuario)
+    {
+        $orcamento = $this->por_numero($numero);
+
+        if (empty($orcamento))
+        {
+            return array('ok' => FALSE, 'erro' => 'Orcamento nao encontrado.');
+        }
+
+        $itens = $this->itens($numero);
+
+        if (empty($itens))
+        {
+            return array('ok' => FALSE, 'erro' => 'O orcamento nao possui itens.');
+        }
+
+        $desconto  = $tipo === 'desconto'  ? NULL : $orcamento['percentual_desconto_item'];
+        $acrescimo = $tipo === 'acrescimo' ? NULL : $orcamento['percentual_acrescimo_item'];
+
+        $fator = 1.0;
+
+        if ($desconto !== NULL && $desconto !== '')
+        {
+            $fator *= 1 - ((float) $desconto / 100);
+        }
+
+        if ($acrescimo !== NULL && $acrescimo !== '')
+        {
+            $fator *= 1 + ((float) $acrescimo / 100);
+        }
+
+        $this->db->trans_start();
+
+        foreach ($itens as $item)
+        {
+            $unit  = (float) $item['valor_unitario_original'];
+            $total = (float) $item['valor_total_original'];
+
+            if ($unit == 0.0 && $total == 0.0)
+            {
+                $unit  = (float) $item['valor_unitario'];
+                $total = (float) $item['valor_total'];
+            }
+
+            $this->_atualizar(T_ORCAMENTO_ITENS, $item['id'], array(
+                'valor_unitario_original' => $unit,
+                'valor_total_original'    => $total,
+                'valor_unitario'          => round($unit * $fator, 2),
+                'valor_total'             => round($total * $fator, 2),
+            ), 'id');
+        }
+
+        $this->_atualizar(T_ORCAMENTOS, $numero, array(
+            'percentual_desconto_item'  => $desconto,
+            'percentual_acrescimo_item' => $acrescimo,
+        ), 'numero');
+
+        $this->recalcular($numero, array(), FALSE);
+        $this->_log($numero, 'A',
+            $tipo === 'desconto' ? 'desconto_restaurado' : 'acrescimo_restaurado',
+            NULL, NULL, NULL, $usuario['login']);
 
         $this->db->trans_complete();
 

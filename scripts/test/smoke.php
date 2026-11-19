@@ -93,6 +93,7 @@ echo "       (perfil: $perfil)\n";
 $paginas = array(
     '/dashboard'        => array('Painel', 'Ultimos eventos'),
     '/clientes'         => array('Clientes', 'Exibindo'),
+    '/fornecedores'     => array('Razao social', 'Exibindo'),
     '/produtos'         => array('Catalogo de produtos', 'Exibindo'),
     '/setores'          => array('Setores cadastrados', 'GERENCIA'),
     '/usuarios'         => array('Usuarios do sistema', strtoupper($login)),
@@ -117,6 +118,9 @@ foreach ($paginas as $caminho => $marcadores)
 /* 4. pesquisa ------------------------------------------------------------ */
 list($status, $corpo) = req("$base/clientes?busca=maria");
 checar('pesquisa de clientes', $status === 200 && sem_erro($corpo) && strpos($corpo, 'Exibindo') !== FALSE);
+
+list($status, $corpo) = req("$base/fornecedores?busca=ltda");
+checar('pesquisa de fornecedores', $status === 200 && sem_erro($corpo) && strpos($corpo, 'Exibindo') !== FALSE);
 
 list($status, $corpo) = req("$base/produtos?busca=papel");
 checar('pesquisa de produtos', $status === 200 && sem_erro($corpo));

@@ -116,7 +116,7 @@ foreach ($itens as $item)
             <div class="form-grid">
                 <div class="campo metade">
                     <label for="dim_produto_busca">Produto</label>
-                    <div class="autocomplete" data-url="<?= site_url('orcamentos/buscar_produtos') ?>"
+                    <div class="autocomplete" data-url="<?= site_url('orcamentos/buscar_produtos' . ( ! empty($registro['cliente_id']) ? '?cliente=' . (int) $registro['cliente_id'] : '')) ?>"
                          data-custo="#dim_valor_compra" data-preco="#dim_valor_venda"
                          data-unidade="#dim_unidade" data-descricao="descricao_produto">
                         <input type="text" id="dim_produto_busca" class="autocomplete-busca"

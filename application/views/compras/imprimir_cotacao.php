@@ -47,7 +47,8 @@ foreach ($itens as $i)
         .assinaturas { margin-top: 50px; display: flex; gap: 40px; }
         .assinaturas div { flex: 1; border-top: 1px solid #333; text-align: center; padding-top: 4px; font-size: 11px; }
         .acoes { margin-bottom: 16px; }
-        .acoes button { padding: 8px 16px; cursor: pointer; }
+        .acoes button { padding: 8px 16px; cursor: pointer; background: #0b3d6b; color: #fff; border: 1px solid #0b3d6b; border-radius: 8px; font-weight: 600; }
+        .acoes button:hover { background: #14558f; }
         @media print {
             .acoes { display: none; }
             body { margin: 8mm; }

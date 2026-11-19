@@ -56,7 +56,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="6" class="num"><strong>Total da entrada</strong></td>
-                            <td class="num"><strong>R$ <span id="total-entrada">0,00</span></strong></td>
+                            <td class="num"><strong><span id="total-entrada">0,00</span></strong></td>
                             <td></td>
                         </tr>
                     </tfoot>

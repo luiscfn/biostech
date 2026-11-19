@@ -3,11 +3,11 @@
         <table class="tabela">
             <thead>
                 <tr>
-                    <th class="num" style="width:40px">#</th>
+                    <th class="num" style="width:55px">Item</th>
                     <th>Servico a executar</th>
                     <th class="centro" style="width:100px">Concluido</th>
                     <?php if ($pode_editar): ?>
-                        <th class="centro" style="width:160px">Acoes</th>
+                        <th class="centro" style="width:175px">Acoes</th>
                     <?php endif; ?>
                 </tr>
             </thead>
@@ -22,7 +22,8 @@
                             <td>
                                 <?php if ($pode_editar): ?>
                                     <input type="text" name="descricao" form="<?= $form_id ?>"
-                                           value="<?= html_escape($servico['descricao']) ?>" maxlength="200">
+                                           value="<?= html_escape($servico['descricao']) ?>" maxlength="200"
+                                           style="width:100%">
                                 <?php else: ?>
                                     <?= html_escape($servico['descricao']) ?>
                                 <?php endif; ?>
@@ -37,15 +38,17 @@
                             </td>
                             <?php if ($pode_editar): ?>
                                 <td class="centro">
-                                    <?= form_open('orcamentos/atualizar_servico/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('id' => $form_id)) ?>
-                                        <button type="submit" class="botao secundario pequeno">Salvar</button>
-                                    <?= form_close() ?>
+                                    <div class="acoes-tabela">
+                                        <?= form_open('orcamentos/atualizar_servico/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('id' => $form_id)) ?>
+                                            <button type="submit" class="botao secundario pequeno">Salvar</button>
+                                        <?= form_close() ?>
 
-                                    <?= form_open('orcamentos/excluir_servico/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('style' => 'margin-top:4px', 'onsubmit' => "return confirm('Excluir o servico?')")) ?>
-                                        <button type="submit" class="botao perigo pequeno">Excluir</button>
-                                    <?= form_close() ?>
+                                        <?= form_open('orcamentos/excluir_servico/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('onsubmit' => "return confirm('Excluir o servico?')")) ?>
+                                            <button type="submit" class="botao perigo pequeno">Excluir</button>
+                                        <?= form_close() ?>
+                                    </div>
                                 </td>
                             <?php endif; ?>
                         </tr>

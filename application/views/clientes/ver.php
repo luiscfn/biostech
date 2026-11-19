@@ -8,8 +8,19 @@
                 <span class="badge off">Inativo</span>
             <?php endif; ?>
             <span class="badge info">codigo <?= (int) $registro['id'] ?></span>
+
+            <?php if ( ! empty($especial_qtd)): ?>
+                <span class="badge info">Cliente especial</span>
+            <?php endif; ?>
+
+            <?php if ( ! empty($registro['fornecedor_codigo'])): ?>
+                <a class="badge info" style="text-decoration:none"
+                   href="<?= site_url('fornecedores/editar/' . (int) $registro['fornecedor_codigo']) ?>">Tambem fornecedor</a>
+            <?php endif; ?>
         </div>
     </div>
+
+    <?php $this->load->view('clientes/_abas', array('registro' => $registro, 'aba' => 'dados')); ?>
 
     <div class="painel-corpo">
         <div class="detalhes">
@@ -87,8 +98,31 @@
             </div>
         <?php endif; ?>
 
-        <div class="form-acoes">
+        <div class="form-acoes" style="flex-wrap:wrap;align-items:center">
             <a class="botao" href="<?= site_url('clientes/editar/' . $registro['id']) ?>">Editar cliente</a>
+
+            <?php if ( ! empty($especial_qtd)): ?>
+                <a class="botao secundario" href="<?= site_url('clientes/especiais/' . $registro['id']) ?>">
+                    Precos especiais (<?= (int) $especial_qtd ?>)
+                </a>
+
+                <?= form_open('clientes/especial_alternar/' . $registro['id'], array(
+                    'style'    => 'display:inline',
+                    'onsubmit' => "return confirm('Excluir este cliente dos precos especiais? Os " . (int) $especial_qtd . " preco(s) cadastrado(s) serao removidos.');",
+                )) ?>
+                    <input type="hidden" name="acao" value="excluir">
+                    <button type="submit" class="botao perigo">Excluir como cliente especial</button>
+                <?= form_close() ?>
+            <?php else: ?>
+                <?= form_open('clientes/especial_alternar/' . $registro['id'], array(
+                    'style'    => 'display:inline',
+                    'onsubmit' => "return confirm('Inserir este cliente como cliente especial? Serao criados precos para todos os produtos ativos, com 15% sobre o custo.');",
+                )) ?>
+                    <input type="hidden" name="acao" value="incluir">
+                    <button type="submit" class="botao">Inserir como cliente especial</button>
+                <?= form_close() ?>
+            <?php endif; ?>
+
             <a class="botao secundario" href="<?= site_url('clientes') ?>">Voltar</a>
         </div>
     </div>

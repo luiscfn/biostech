@@ -1,0 +1,8 @@
+{
+  "tabelas": [
+    {
+      "tabela": "PRODUTO_CLIENTES_ESPECIAIS_01",
+      "colunas": ["CODCLI", "COD_PROD", "PERC_LUCRO", "VALOR_VENDA"]
+    }
+  ]
+}

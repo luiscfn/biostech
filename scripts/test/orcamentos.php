@@ -309,6 +309,44 @@ checar('original preservado em 37,50', dinheiro("SELECT valor_total_original FRO
 
 $token = token('/orcamentos/ver/' . $n . '?aba=itens');
 
+list($status, $corpo) = req($base . '/orcamentos/restaurar_percentual/' . $n . '/desconto', array('biostech_csrf' => $token));
+
+checar('restaurar antes do desconto sem erro', erro_pagina($corpo) === NULL, (string) erro_pagina($corpo));
+checar('valor restaurado antes do desconto = 37,50', dinheiro("SELECT valor_total FROM {$schema}.biostech_orcamento_itens WHERE id = ?", array($itemId)) === 37.50);
+checar('percentual de desconto limpo apos restaurar', valor("SELECT percentual_desconto_item FROM {$schema}.biostech_orcamentos WHERE numero = ?", array($n)) === NULL);
+
+$token = token('/orcamentos/ver/' . $n . '?aba=itens');
+
+list($status, $corpo) = req($base . '/orcamentos/aplicar_percentual/' . $n, array(
+    'biostech_csrf' => $token,
+    'tipo'          => 'acrescimo',
+    'percentual'    => '20',
+));
+
+checar('acrescimo em massa sem erro', erro_pagina($corpo) === NULL, (string) erro_pagina($corpo));
+checar('item com 20% de acrescimo = 45,00', dinheiro("SELECT valor_total FROM {$schema}.biostech_orcamento_itens WHERE id = ?", array($itemId)) === 45.00);
+checar('percentual de acrescimo gravado', dinheiro("SELECT percentual_acrescimo_item FROM {$schema}.biostech_orcamentos WHERE numero = ?", array($n)) === 20.00);
+
+$token = token('/orcamentos/ver/' . $n . '?aba=itens');
+
+list($status, $corpo) = req($base . '/orcamentos/restaurar_percentual/' . $n . '/acrescimo', array('biostech_csrf' => $token));
+
+checar('restaurar antes do acrescimo sem erro', erro_pagina($corpo) === NULL, (string) erro_pagina($corpo));
+checar('valor restaurado antes do acrescimo = 37,50', dinheiro("SELECT valor_total FROM {$schema}.biostech_orcamento_itens WHERE id = ?", array($itemId)) === 37.50);
+checar('percentual de acrescimo limpo apos restaurar', valor("SELECT percentual_acrescimo_item FROM {$schema}.biostech_orcamentos WHERE numero = ?", array($n)) === NULL);
+
+$token = token('/orcamentos/ver/' . $n . '?aba=itens');
+
+list($status, $corpo) = req($base . '/orcamentos/aplicar_percentual/' . $n, array(
+    'biostech_csrf' => $token,
+    'tipo'          => 'desconto',
+    'percentual'    => '10',
+));
+
+checar('desconto reaplicado sem erro', erro_pagina($corpo) === NULL, (string) erro_pagina($corpo));
+
+$token = token('/orcamentos/ver/' . $n . '?aba=itens');
+
 list($status, $corpo) = req($base . '/orcamentos/restaurar_valores/' . $n, array('biostech_csrf' => $token));
 
 checar('restaurar valores sem erro', erro_pagina($corpo) === NULL, (string) erro_pagina($corpo));
