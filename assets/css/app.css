@@ -424,15 +424,17 @@ table.tabela {
     font-size: 13px;
 }
 
+/* Padrao de cabecalho para todas as tabelas da aplicacao */
 table.tabela thead th {
     text-align: left;
     padding: 11px 14px;
-    background: #f8fafc;
-    border-bottom: 1px solid var(--borda);
-    font-size: 11px;
+    background: var(--azul-2);
+    border-bottom: 1px solid var(--azul-2);
+    font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .6px;
-    color: var(--muted);
+    color: #fff;
     white-space: nowrap;
 }
 
@@ -462,6 +464,7 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 /* Tabela com rolagem vertical e rodape fixo (Total do material) */
 .tabela-rolagem { overflow-y: auto; }
 .tabela-rolagem thead th { position: sticky; top: 0; z-index: 2; }
+
 .tabela-rolagem tfoot td {
     position: sticky;
     bottom: 0;
@@ -548,20 +551,19 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     white-space: nowrap;
 }
 
-.fin-desconto {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-}
-
-.fin-desconto > span { flex: 1 1 100%; }
-
+/* Desconto segue o padrao das demais linhas: label a esquerda e campos a direita, na mesma linha */
 .fin-desconto-campos {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.fin-desconto-campos .fin-campo { width: 84px; }
+.fin-desconto-campos .fin-campo {
+    width: 84px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--texto);
+}
 .fin-desconto-campos .fin-campo.fin-valor { width: 118px; }
 .fin-unidade { color: var(--muted); font-size: 12px; }
 
@@ -607,6 +609,12 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .badge.info    { background: var(--azul-claro); color: var(--azul); }
 .badge.alerta  { background: var(--amarelo-claro); color: var(--amarelo); }
 .badge.erro    { background: var(--vermelho-claro); color: var(--vermelho); }
+
+/* Caracteristicas do local com fonte maior */
+.badge.badge-caracteristica {
+    font-size: 13px;
+    padding: 5px 10px;
+}
 
 /* --------------------------------------------------------------- filtros */
 
@@ -661,6 +669,25 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .campo.quarto { grid-column: span 3; }
 .campo.longo { grid-column: span 5; }
 .campo.curto { grid-column: span 2; }
+.campo.micro { grid-column: span 1; }
+.campo.oitavo { grid-column: span 8; }
+
+/* Campo OS mais proximo do campo Data */
+@media (min-width: 901px) {
+    .campo.chamado-os { margin-left: -8px; }
+}
+
+/* Campo Data do orcamento com destaque */
+.campo input.data-orcamento {
+    padding: 11px 12px;
+    font-size: 15px;
+}
+
+/* Campos de valores e percentuais mais compactos */
+.form-grid-valores input[type=text] {
+    padding: 8px 10px;
+    font-size: 13px;
+}
 .campo.codigo,
 .campo.ordem,
 .campo.valor { grid-column: span 2; }
@@ -702,6 +729,7 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 }
 
 .campo textarea { min-height: 92px; resize: vertical; }
+.campo textarea.contato-descricao { min-height: 38px; }
 
 /* Data e hora dentro dos blocos de inclusao (mesmo visual dos demais campos) */
 .bloco-inclusao input[type=date],
@@ -714,6 +742,13 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     font-family: inherit;
     background: #fff;
     color: var(--texto);
+}
+
+/* Campos de data/hora bem estreitos na aba de contatos */
+.bloco-inclusao .campo.micro input[type=date],
+.bloco-inclusao .campo.micro input[type=time] {
+    padding: 10px 4px;
+    font-size: 12px;
 }
 
 /* Campo curto com botoes de acao na mesma linha */
@@ -846,6 +881,26 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 
 .detalhe .valor { font-size: 14px; color: var(--texto); word-break: break-word; }
 
+/* Topo do dimensionamento: cliente maior e campos mais proximos */
+@media (min-width: 901px) {
+    .detalhes.detalhes-dimensionamento {
+        grid-template-columns: repeat(12, 1fr);
+        column-gap: 12px;
+    }
+    .detalhes-dimensionamento .detalhe-data { grid-column: span 2; }
+    .detalhes-dimensionamento .detalhe-cliente { grid-column: span 4; margin-left: -10px; }
+    .detalhes-dimensionamento .detalhe-contato { grid-column: span 2; }
+    .detalhes-dimensionamento .detalhe-chamado { grid-column: span 2; }
+    .detalhes-dimensionamento .detalhe-orcamento { grid-column: span 2; margin-left: -10px; }
+}
+
+.detalhe-orcamento .orcamento-data {
+    margin-left: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
 .lista-eventos { list-style: none; margin: 0; padding: 0; }
 
 .lista-eventos li {
@@ -927,6 +982,82 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     font-size: 12.5px;
     font-weight: 700;
     letter-spacing: .5px;
+}
+
+.secao-titulo.destaque.titulo-grande {
+    padding: 10px 14px;
+    font-size: 15px;
+}
+
+/* Orcamentos: abas e titulos das secoes em destaque */
+.abas-orcamento { padding-top: 6px; }
+
+.abas-orcamento .aba {
+    background: #eef4fa;
+    border: 1px solid var(--borda);
+    border-bottom: 2px solid transparent;
+    border-radius: 6px 6px 0 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--azul);
+}
+
+.abas-orcamento .aba:hover { background: #e3edf7; }
+
+.abas-orcamento .aba.ativa {
+    background: var(--azul);
+    border-color: var(--azul);
+    color: #fff;
+}
+
+.aba-conteudo-orcamento .secao-titulo {
+    margin: 0 0 16px;
+    padding: 8px 12px;
+    background: #eef4fa;
+    border-left: 3px solid var(--azul);
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+/* Caixa de confirmacao para gerar chamado a partir do orcamento */
+.modal-confirmacao {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, .45);
+}
+
+.modal-confirmacao.visivel { display: flex; }
+
+.modal-confirmacao-caixa {
+    width: min(420px, calc(100vw - 32px));
+    padding: 22px 24px;
+    background: var(--branco);
+    border-radius: 10px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .25);
+}
+
+.modal-confirmacao-caixa h4 {
+    margin: 0 0 8px;
+    color: var(--azul);
+    font-size: 16px;
+}
+
+.modal-confirmacao-caixa p {
+    margin: 0 0 18px;
+    color: var(--texto);
+    font-size: 14px;
+}
+
+.modal-confirmacao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .divisor {
@@ -1076,6 +1207,11 @@ form.inline {
     gap: 12px 22px;
 }
 
+/* Local de instalacao com mais espaco na aba de dados */
+@media (min-width: 901px) {
+    .ficha-grade .dado-local { grid-column: span 2; }
+}
+
 /* Quebra de linha forcada dentro de .ficha-grade */
 .quebra-grade { grid-column: 1 / -1; height: 0; }
 
@@ -1089,6 +1225,30 @@ form.inline {
 .ficha-grade .dado {
     font-size: 13.5px;
     word-break: break-word;
+}
+
+/* Dias necessarios: rotulo, sub-rotulos e valores em tres linhas */
+.ficha-grade .dado-dias-necessarios > .rotulo { text-align: center; }
+
+.ficha-grade .dado-dias-necessarios .sub-rotulos-dias,
+.ficha-grade .dado-dias-necessarios .valores-dias {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    text-align: center;
+}
+
+.ficha-grade .dado-dias-necessarios .sub-rotulo {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.ficha-grade .dado-dias-necessarios .valores-dias {
+    margin-top: 3px;
+    font-weight: 600;
 }
 
 .saldo-grande {
@@ -1110,7 +1270,7 @@ form.inline {
     .sidebar .rodape { display: none; }
     .pagina { padding: 18px 16px 40px; }
     .topbar { padding: 12px 16px; }
-    .campo, .campo.terco, .campo.quarto, .campo.longo, .campo.curto,
+    .campo, .campo.terco, .campo.quarto, .campo.longo, .campo.curto, .campo.micro, .campo.oitavo,
     .campo.codigo, .campo.ordem, .campo.valor,
     .campo.nome, .campo.nome.com-ordem, .campo.nome.com-ordem.com-valor,
     .campo.ativo { grid-column: span 12; }

@@ -5,20 +5,7 @@
 
             <?= form_open('orcamentos/adicionar_contato/' . $registro['numero']) ?>
                 <div class="form-grid">
-                    <div class="campo terco">
-                        <label for="contato_data">Data</label>
-                        <input type="date" name="data_mov" id="contato_data" value="<?= date('Y-m-d') ?>">
-                    </div>
-                    <div class="campo terco">
-                        <label for="contato_hora">Hora</label>
-                        <input type="time" name="hora_mov" id="contato_hora" value="<?= date('H:i') ?>">
-                    </div>
-                    <div class="campo terco">
-                        <label for="contato_assunto">Assunto</label>
-                        <input type="text" name="assunto" id="contato_assunto" maxlength="80">
-                    </div>
-
-                    <div class="campo terco">
+                    <div class="campo quarto">
                         <label for="contato_funcionario">Funcionario</label>
                         <select name="funcionario_id" id="contato_funcionario">
                             <option value="">-</option>
@@ -27,21 +14,33 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="campo terco">
-                        <label for="contato_nome">Pessoa de contato</label>
-                        <input type="text" name="contato" id="contato_nome" maxlength="50">
+                    <div class="campo micro">
+                        <label for="contato_data">Data</label>
+                        <input type="date" name="data_mov" id="contato_data" value="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div class="campo micro">
+                        <label for="contato_hora">Hora</label>
+                        <input type="time" name="hora_mov" id="contato_hora" value="<?= date('H:i') ?>">
                     </div>
                     <div class="campo terco">
-                        <label for="contato_proximo">Proximo contato</label>
+                        <label for="contato_assunto">Assunto</label>
+                        <input type="text" name="assunto" id="contato_assunto" maxlength="80">
+                    </div>
+                    <div class="campo quarto">
+                        <label for="contato_proximo">Proximo contato (Data e Hora)</label>
                         <div class="campos-data">
                             <input type="date" name="data_proximo_contato" id="contato_proximo">
                             <input type="time" name="hora_proximo_contato" id="contato_proximo_hora">
                         </div>
                     </div>
 
-                    <div class="campo full">
+                    <div class="campo quarto">
+                        <label for="contato_nome">Pessoa de contato</label>
+                        <input type="text" name="contato" id="contato_nome" maxlength="50">
+                    </div>
+                    <div class="campo" style="grid-column: span 9">
                         <label for="contato_descricao">Descricao</label>
-                        <textarea name="descricao" id="contato_descricao" rows="3"></textarea>
+                        <textarea name="descricao" id="contato_descricao" class="contato-descricao" rows="1"></textarea>
                     </div>
                 </div>
 
@@ -56,13 +55,13 @@
         <table class="tabela">
             <thead>
                 <tr>
-                    <th style="width:95px">Data</th>
-                    <th style="width:70px">Hora</th>
-                    <th style="width:170px">Assunto</th>
-                    <th style="width:160px">Funcionario</th>
-                    <th style="width:140px">Contato</th>
-                    <th>Descricao</th>
-                    <th style="width:150px">Proximo contato</th>
+                    <th class="destaque" style="width:95px">Data</th>
+                    <th class="destaque" style="width:70px">Hora</th>
+                    <th class="destaque" style="width:170px">Assunto</th>
+                    <th class="destaque" style="width:160px">Funcionario</th>
+                    <th class="destaque" style="width:140px">Contato</th>
+                    <th class="destaque">Descricao</th>
+                    <th class="destaque" style="width:150px">Proximo contato (Data e Hora)</th>
                     <?php if ($pode_editar): ?>
                         <th class="centro" style="width:80px"></th>
                     <?php endif; ?>

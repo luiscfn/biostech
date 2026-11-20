@@ -10,7 +10,7 @@ $flags = array(
 ?>
 <div class="painel-corpo">
     <div class="ficha-grade">
-        <div class="dado">
+        <div class="dado dado-local">
             <div class="rotulo">Local de instalacao</div>
             <?= html_escape($registro['local_instalacao'] ? $registro['local_instalacao'] : '-') ?>
         </div>
@@ -27,20 +27,23 @@ $flags = array(
             <?= html_escape($registro['solicitante'] ? $registro['solicitante'] : '-') ?>
         </div>
         <div class="dado">
-            <div class="rotulo">E-mail</div>
-            <?= html_escape($registro['email'] ? $registro['email'] : '-') ?>
+            <div class="rotulo">Tecnico</div>
+            <?= html_escape($registro['tecnico_nome'] ? $registro['tecnico_nome'] : '-') ?>
         </div>
         <div class="dado">
-            <div class="rotulo">Dias previstos</div>
-            <?= $registro['qtd_dias'] !== NULL ? (int) $registro['qtd_dias'] : '-' ?>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Tecnicos</div>
+            <div class="rotulo">QTDE DE TECNICOS</div>
             <?= $registro['qtd_tecnicos'] !== NULL ? (int) $registro['qtd_tecnicos'] : '-' ?>
         </div>
-        <div class="dado">
-            <div class="rotulo">Comerciais / nao comerciais</div>
-            <?= numero_br($registro['qtd_comerciais'], 2) ?> / <?= numero_br($registro['qtd_nao_comerciais'], 2) ?>
+        <div class="dado dado-dias-necessarios">
+            <div class="rotulo">DIAS NECESSÁRIOS PARA O SERVIÇO</div>
+            <div class="sub-rotulos-dias">
+                <div class="sub-rotulo">COMERCIAIS</div>
+                <div class="sub-rotulo">NÃO COMERCIAIS</div>
+            </div>
+            <div class="valores-dias">
+                <div><?= $registro['qtd_comerciais'] !== NULL ? (int) $registro['qtd_comerciais'] : '-' ?></div>
+                <div><?= $registro['qtd_nao_comerciais'] !== NULL ? (int) $registro['qtd_nao_comerciais'] : '-' ?></div>
+            </div>
         </div>
         <div class="dado">
             <div class="rotulo">Cadastro</div>
@@ -65,7 +68,44 @@ $flags = array(
 
     <hr class="divisor">
 
-    <h4 class="secao-titulo">Medidas e caracteristicas</h4>
+    <h4 class="secao-titulo destaque titulo-grande">Levantamento</h4>
+
+    <div class="ficha-grade">
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">O que funciona</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['que_funciona'] ? $registro['que_funciona'] : '-')) ?></div>
+        </div>
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">O que quer fazer</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['quer_fazer'] ? $registro['quer_fazer'] : '-')) ?></div>
+        </div>
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">Dificuldades</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['dificuldades'] ? $registro['dificuldades'] : '-')) ?></div>
+        </div>
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">Material necessario</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['material_precisa'] ? $registro['material_precisa'] : '-')) ?></div>
+        </div>
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">Providenciar</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['providenciar'] ? $registro['providenciar'] : '-')) ?></div>
+        </div>
+        <div class="dado" style="grid-column:span 2">
+            <div class="rotulo">Observacoes</div>
+            <div class="texto-longo"><?= nl2br(html_escape($registro['observacao'] ? $registro['observacao'] : '-')) ?></div>
+        </div>
+    </div>
+
+    <?php if ($pode_editar): ?>
+        <div class="form-acoes">
+            <a class="botao secundario pequeno" href="<?= site_url('orcamentos/dimensionamento_editar/' . $registro['numero']) ?>">Editar levantamento</a>
+        </div>
+    <?php endif; ?>
+
+    <hr class="divisor">
+
+    <h4 class="secao-titulo destaque titulo-grande">Medidas e caracteristicas</h4>
 
     <div class="ficha-grade">
         <div class="dado">
@@ -92,68 +132,13 @@ $flags = array(
 
     <div style="margin-top:10px">
         <?php foreach ($flags as $campo => $rotulo): ?>
-            <span class="badge <?= bd_bool($registro[$campo]) ? 'info' : 'off' ?>"><?= html_escape($rotulo) ?>: <?= bd_bool($registro[$campo]) ? 'sim' : 'nao' ?></span>
+            <span class="badge badge-caracteristica <?= bd_bool($registro[$campo]) ? 'info' : 'off' ?>"><?= html_escape($rotulo) ?>: <?= bd_bool($registro[$campo]) ? 'sim' : 'nao' ?></span>
         <?php endforeach; ?>
-    </div>
-
-    <hr class="divisor">
-
-    <h4 class="secao-titulo">Valores calculados</h4>
-
-    <div class="ficha-grade">
-        <div class="dado">
-            <div class="rotulo">Mao de obra</div>
-            <?= moeda_br($registro['mao_obra']) ?>
-            <?php if ($registro['percentual_mao_obra'] !== NULL): ?>
-                <div class="ajuda"><?= numero_br($registro['percentual_mao_obra'], 4) ?>%</div>
-            <?php endif; ?>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Material de fixacao</div>
-            <?= moeda_br($registro['material_fixacao']) ?>
-            <?php if ($registro['percentual_mat_fixacao'] !== NULL): ?>
-                <div class="ajuda"><?= numero_br($registro['percentual_mat_fixacao'], 4) ?>%</div>
-            <?php endif; ?>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Nota fiscal</div>
-            <?= moeda_br($registro['nota_fiscal']) ?>
-            <?php if ($registro['percentual_nota_fiscal'] !== NULL): ?>
-                <div class="ajuda"><?= numero_br($registro['percentual_nota_fiscal'], 4) ?>%</div>
-            <?php endif; ?>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Acrescimo de custo</div>
-            <?= moeda_br($registro['acrescimo_custo']) ?>
-            <?php if ($registro['percentual_acrescimo_custo'] !== NULL): ?>
-                <div class="ajuda"><?= numero_br($registro['percentual_acrescimo_custo'], 4) ?>%</div>
-            <?php endif; ?>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Total de venda (itens)</div>
-            <strong><?= moeda_br($total_venda) ?></strong>
-        </div>
-        <div class="dado">
-            <div class="rotulo">Orcamento comercial</div>
-            <?php if ( ! empty($registro['orcamento_numero'])): ?>
-                <a href="<?= site_url('orcamentos/ver/' . $registro['orcamento_numero']) ?>"><?= (int) $registro['orcamento_numero'] ?></a>
-                <div class="ajuda"><?= moeda_br($registro['orcamento_valor']) ?></div>
-            <?php else: ?>
-                -
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <hr class="divisor">
-
-    <div class="dado">
-        <div class="rotulo">Observacoes</div>
-        <div class="texto-longo"><?= nl2br(html_escape($registro['observacao'] ? $registro['observacao'] : '-')) ?></div>
     </div>
 
     <?php if ($pode_editar): ?>
         <hr class="divisor">
-        <h4 class="secao-titulo">Acoes</h4>
+        <h4 class="secao-titulo destaque titulo-grande">Acoes</h4>
 
         <div class="campo">
             <label>Excluir o dimensionamento</label>

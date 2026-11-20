@@ -39,7 +39,7 @@ $abas_rotulos = array(
                 <a class="botao secundario pequeno" href="<?= site_url('orcamentos/status/' . $registro['numero']) ?>">Status</a>
 
                 <?php if ( ! $tem_os): ?>
-                    <?= form_open('orcamentos/gerar_chamado/' . $registro['numero'], array('style' => 'display:inline')) ?>
+                    <?= form_open('orcamentos/gerar_chamado/' . $registro['numero'], array('id' => 'form-gerar-chamado', 'style' => 'display:inline')) ?>
                         <button type="submit" class="botao pequeno"
                                 title="Exige situacao Concluido/Encerrado, resultado Aprovado e datas de envio e aprovacao">Gerar chamado</button>
                     <?= form_close() ?>
@@ -128,7 +128,7 @@ $abas_rotulos = array(
         </div>
     </div>
 
-    <div class="abas">
+    <div class="abas abas-orcamento">
         <?php foreach ($abas_rotulos as $chave => $rotulo): ?>
             <a class="aba <?= $aba === $chave ? 'ativa' : '' ?>" href="<?= site_url('orcamentos/ver/' . $registro['numero']) ?>?aba=<?= $chave ?>">
                 <?= html_escape($rotulo) ?>
@@ -136,7 +136,7 @@ $abas_rotulos = array(
         <?php endforeach; ?>
     </div>
 
-    <div class="aba-conteudo">
+    <div class="aba-conteudo aba-conteudo-orcamento">
         <?php $this->load->view('orcamentos/_' . $aba, array(
             'registro'         => $registro,
             'itens'            => $itens,
@@ -149,6 +149,59 @@ $abas_rotulos = array(
         )); ?>
     </div>
 </div>
+
+<?php if ( ! $tem_os && $pode_editar): ?>
+    <div class="modal-confirmacao" id="modal-gerar-chamado" aria-hidden="true">
+        <div class="modal-confirmacao-caixa">
+            <h4>Gerar chamado</h4>
+            <p>Deseja gerar o chamado a partir deste orcamento?</p>
+            <div class="modal-confirmacao-acoes">
+                <button type="button" class="botao" id="confirmar-gerar-chamado">Sim</button>
+                <button type="button" class="botao secundario" id="cancelar-gerar-chamado">Nao</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var form  = document.getElementById('form-gerar-chamado');
+            var modal = document.getElementById('modal-gerar-chamado');
+
+            if ( ! form || ! modal) {
+                return;
+            }
+
+            var btnSim = document.getElementById('confirmar-gerar-chamado');
+            var btnNao = document.getElementById('cancelar-gerar-chamado');
+
+            function fechar() {
+                modal.classList.remove('visivel');
+            }
+
+            form.addEventListener('submit', function (evento) {
+                evento.preventDefault();
+                modal.classList.add('visivel');
+            });
+
+            btnNao.addEventListener('click', fechar);
+            modal.addEventListener('click', function (evento) {
+                if (evento.target === modal) {
+                    fechar();
+                }
+            });
+            document.addEventListener('keydown', function (evento) {
+                if (evento.key === 'Escape') {
+                    fechar();
+                }
+            });
+
+            btnSim.addEventListener('click', function () {
+                fechar();
+                form.submit();
+            });
+        })();
+    </script>
+<?php endif; ?>
 
 <script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
 <script src="<?= base_url('assets/js/orcamentos.js') ?>"></script>

@@ -356,6 +356,11 @@ class Orcamentos_model extends MY_Model
         return $this->dominio_model->opcoes('finalidade');
     }
 
+    public function condicoes_pagamento()
+    {
+        return $this->dominio_model->opcoes('condicao_pagamento');
+    }
+
     public function clientes()
     {
         return $this->db->query(

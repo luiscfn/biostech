@@ -124,8 +124,9 @@ class Orcamentos extends MY_Controller
 
         $this->titulo = 'Novo orcamento';
         $this->render('orcamentos/form', array(
-            'registro'    => array(),
-            'finalidades' => $this->orcamentos_model->finalidades(),
+            'registro'            => array(),
+            'finalidades'         => $this->orcamentos_model->finalidades(),
+            'condicoes_pagamento' => $this->orcamentos_model->condicoes_pagamento(),
         ));
     }
 
@@ -164,8 +165,9 @@ class Orcamentos extends MY_Controller
 
         $this->titulo = 'Editar orcamento ' . $numero;
         $this->render('orcamentos/form', array(
-            'registro'    => $orcamento,
-            'finalidades' => $this->orcamentos_model->finalidades(),
+            'registro'            => $orcamento,
+            'finalidades'         => $this->orcamentos_model->finalidades(),
+            'condicoes_pagamento' => $this->orcamentos_model->condicoes_pagamento(),
         ));
     }
 

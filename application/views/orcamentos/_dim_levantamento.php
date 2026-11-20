@@ -1,34 +1,47 @@
 <div class="painel-corpo">
+    <h4 class="secao-titulo">Valores calculados</h4>
+
     <div class="ficha-grade">
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">O que funciona</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['que_funciona'] ? $registro['que_funciona'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Mao de obra</div>
+            <?= moeda_br($registro['mao_obra']) ?>
+            <?php if ($registro['percentual_mao_obra'] !== NULL): ?>
+                <div class="ajuda"><?= numero_br($registro['percentual_mao_obra'], 4) ?>%</div>
+            <?php endif; ?>
         </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">O que quer fazer</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['quer_fazer'] ? $registro['quer_fazer'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Material de fixacao</div>
+            <?= moeda_br($registro['material_fixacao']) ?>
+            <?php if ($registro['percentual_mat_fixacao'] !== NULL): ?>
+                <div class="ajuda"><?= numero_br($registro['percentual_mat_fixacao'], 4) ?>%</div>
+            <?php endif; ?>
         </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Dificuldades</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['dificuldades'] ? $registro['dificuldades'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Nota fiscal</div>
+            <?= moeda_br($registro['nota_fiscal']) ?>
+            <?php if ($registro['percentual_nota_fiscal'] !== NULL): ?>
+                <div class="ajuda"><?= numero_br($registro['percentual_nota_fiscal'], 4) ?>%</div>
+            <?php endif; ?>
         </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Material necessario</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['material_precisa'] ? $registro['material_precisa'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Acrescimo de custo</div>
+            <?= moeda_br($registro['acrescimo_custo']) ?>
+            <?php if ($registro['percentual_acrescimo_custo'] !== NULL): ?>
+                <div class="ajuda"><?= numero_br($registro['percentual_acrescimo_custo'], 4) ?>%</div>
+            <?php endif; ?>
         </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Providenciar</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['providenciar'] ? $registro['providenciar'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Total de venda (itens)</div>
+            <strong><?= moeda_br($total_venda) ?></strong>
         </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Observacoes</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['observacao'] ? $registro['observacao'] : '-')) ?></div>
+        <div class="dado">
+            <div class="rotulo">Orcamento comercial</div>
+            <?php if ( ! empty($registro['orcamento_numero'])): ?>
+                <a href="<?= site_url('orcamentos/ver/' . $registro['orcamento_numero']) ?>"><?= (int) $registro['orcamento_numero'] ?></a>
+                <div class="ajuda"><?= moeda_br($registro['orcamento_valor']) ?></div>
+            <?php else: ?>
+                -
+            <?php endif; ?>
         </div>
     </div>
-
-    <?php if ($pode_editar): ?>
-        <div class="form-acoes">
-            <a class="botao secundario pequeno" href="<?= site_url('orcamentos/dimensionamento_editar/' . $registro['numero']) ?>">Editar levantamento</a>
-        </div>
-    <?php endif; ?>
 </div>

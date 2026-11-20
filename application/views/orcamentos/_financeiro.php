@@ -34,7 +34,7 @@ $total_geral  = max(0, round($sem_desconto + $servico - $desconto, 2));
 
 $aceito    = (float) $registro['valor_maximo_cliente'];
 $indiretos = (float) $registro['valor_custos_indiretos'];
-$diluir    = round($material - $aceito - $indiretos, 2);
+$diluir    = round($aceito - $material - $indiretos, 2);
 $perc_diluir = $material > 0 ? round($diluir / $material * 100, 2) : 0.0;
 
 $modo = function ($percentual) {
@@ -166,7 +166,7 @@ $modo = function ($percentual) {
             </div>
 
             <div class="ajuda">
-                Valor a diluir = total das pecas (itens) - valor aceito pelo cliente - custos indiretos.
+                Valor a diluir = valor aceito pelo cliente - total das pecas (itens) - custos indiretos.
                 O percentual sugerido e o valor a diluir em relacao ao total das pecas.
             </div>
         </div>

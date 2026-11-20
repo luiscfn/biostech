@@ -45,8 +45,12 @@ $abas_rotulos = array(
     </div>
 
     <div class="painel-corpo">
-        <div class="detalhes">
-            <div class="detalhe">
+        <div class="detalhes detalhes-dimensionamento">
+            <div class="detalhe detalhe-data">
+                <div class="rotulo">Data</div>
+                <div class="valor"><?= data_br($registro['data']) ?></div>
+            </div>
+            <div class="detalhe detalhe-cliente">
                 <div class="rotulo">Cliente</div>
                 <div class="valor">
                     <?php if ( ! empty($registro['cliente_id'])): ?>
@@ -56,19 +60,11 @@ $abas_rotulos = array(
                     <?php endif; ?>
                 </div>
             </div>
-            <div class="detalhe">
-                <div class="rotulo">Data</div>
-                <div class="valor"><?= data_br($registro['data']) ?></div>
-            </div>
-            <div class="detalhe">
+            <div class="detalhe detalhe-contato">
                 <div class="rotulo">Contato</div>
                 <div class="valor"><?= html_escape($registro['contato'] ? $registro['contato'] : '-') ?></div>
             </div>
-            <div class="detalhe">
-                <div class="rotulo">Tecnico</div>
-                <div class="valor"><?= html_escape($registro['tecnico_nome'] ? $registro['tecnico_nome'] : '-') ?></div>
-            </div>
-            <div class="detalhe">
+            <div class="detalhe detalhe-chamado">
                 <div class="rotulo">Chamado / OS</div>
                 <div class="valor">
                     <?php if ( ! empty($registro['chamado_numero'])): ?>
@@ -78,15 +74,14 @@ $abas_rotulos = array(
                     <?php endif; ?>
                 </div>
             </div>
-            <div class="detalhe">
-                <div class="rotulo">Total de venda</div>
-                <div class="valor"><strong><?= moeda_br($total_venda) ?></strong></div>
-            </div>
-            <div class="detalhe">
-                <div class="rotulo">Orcamento gerado</div>
+            <div class="detalhe detalhe-orcamento">
+                <div class="rotulo">Nº Orçamento/Data</div>
                 <div class="valor">
                     <?php if ($tem_orcamento): ?>
                         <a href="<?= site_url('orcamentos/ver/' . $registro['orcamento_numero']) ?>"><?= (int) $registro['orcamento_numero'] ?></a>
+                        <?php if ( ! empty($registro['orcamento_data'])): ?>
+                            <span class="orcamento-data"><?= data_br($registro['orcamento_data']) ?></span>
+                        <?php endif; ?>
                     <?php else: ?>
                         -
                     <?php endif; ?>

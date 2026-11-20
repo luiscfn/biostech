@@ -52,13 +52,24 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
             <input type="text" name="busca" value="<?= html_escape($filtros['busca']) ?>"
                    placeholder="Numero, atencao, cliente ou OS...">
 
-            <div class="autocomplete" data-url="<?= site_url('orcamentos/buscar_clientes') ?>" style="min-width:220px">
+            <div class="autocomplete" data-url="<?= site_url('orcamentos/buscar_clientes') ?>" style="min-width:490px">
                 <input type="text" class="autocomplete-busca" placeholder="Cliente..."
                        value="<?= $filtros['cliente'] > 0 ? html_escape($filtros['cliente_nome']) : '' ?>"
                        autocomplete="off">
                 <input type="hidden" name="cliente" value="<?= $filtros['cliente'] > 0 ? (int) $filtros['cliente'] : '' ?>">
                 <div class="autocomplete-lista"></div>
             </div>
+
+            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial">
+            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final">
+
+            <button type="submit" class="botao secundario">Pesquisar</button>
+
+            <?php if ($tem_filtro): ?>
+                <a class="botao secundario" href="<?= site_url('orcamentos') ?>">Limpar</a>
+            <?php endif; ?>
+
+            <span class="quebra-filtros"></span>
 
             <select name="situacao">
                 <option value="">Situacao</option>
@@ -78,14 +89,6 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                 <?php endforeach; ?>
             </select>
 
-            <button type="submit" class="botao secundario">Pesquisar</button>
-
-            <?php if ($tem_filtro): ?>
-                <a class="botao secundario" href="<?= site_url('orcamentos') ?>">Limpar</a>
-            <?php endif; ?>
-
-            <span class="quebra-filtros"></span>
-
             <select name="com_os">
                 <option value="">OS</option>
                 <option value="S" <?= $filtros['com_os'] === 'S' ? 'selected' : '' ?>>Com OS</option>
@@ -97,9 +100,6 @@ foreach ($resultados as $r) { $rotulo_resultado[(int) $r['codigo']] = $r['nome']
                 <option value="S" <?= $filtros['com_dim'] === 'S' ? 'selected' : '' ?>>Com dimensionamento</option>
                 <option value="N" <?= $filtros['com_dim'] === 'N' ? 'selected' : '' ?>>Sem dimensionamento</option>
             </select>
-
-            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial">
-            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final">
         </form>
     </div>
 
