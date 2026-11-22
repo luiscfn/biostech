@@ -903,7 +903,7 @@ class Orcamentos extends MY_Controller
             show_404();
         }
 
-        $abas = array('dados', 'itens', 'servicos', 'levantamento', 'cronograma',
+        $abas = array('dados', 'servicos', 'itens', 'levantamento', 'cronograma',
                       'materiais', 'cotacoes', 'log');
         $aba = (string) $this->input->get('aba');
 

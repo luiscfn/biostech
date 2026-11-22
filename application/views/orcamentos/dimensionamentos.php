@@ -69,11 +69,11 @@ $tem_filtro = $filtros['busca'] !== '' || $filtros['data_de'] !== ''
                 <tr>
                     <th style="width:75px">Numero</th>
                     <th style="width:95px">Data</th>
-                    <th>Cliente / local</th>
+                    <th style="width:170px">Cliente</th>
+                    <th style="width:190px">Local</th>
                     <th style="width:150px">Contato</th>
                     <th style="width:150px">Tecnico</th>
-                    <th class="num" style="width:55px">Itens</th>
-                    <th class="num" style="width:110px">Total venda</th>
+                    <th class="num" style="width:120px">VALOR TOTAL</th>
                     <th class="centro" style="width:100px">Orcamento</th>
                     <th class="centro" style="width:100px">OS</th>
                     <th class="centro" style="width:80px">Acoes</th>
@@ -87,21 +87,11 @@ $tem_filtro = $filtros['busca'] !== '' || $filtros['data_de'] !== ''
                         <tr>
                             <td><a href="<?= site_url('orcamentos/dimensionamento/' . $r['numero']) ?>"><strong><?= (int) $r['numero'] ?></strong></a></td>
                             <td><?= data_br($r['data']) ?></td>
-                            <td>
-                                <?= html_escape($r['cliente_nome'] ? $r['cliente_nome'] : 'Sem cliente') ?>
-                                <?php if ( ! empty($r['local_instalacao'])): ?>
-                                    <div class="ajuda"><?= html_escape($r['local_instalacao']) ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?= html_escape($r['contato'] ? $r['contato'] : '-') ?>
-                                <?php if ( ! empty($r['tipo_contato'])): ?>
-                                    <div class="ajuda"><?= html_escape($r['tipo_contato']) ?></div>
-                                <?php endif; ?>
-                            </td>
+                            <td><?= html_escape($r['cliente_nome'] ? $r['cliente_nome'] : 'Sem cliente') ?></td>
+                            <td><?= html_escape($r['local_instalacao'] ? $r['local_instalacao'] : '-') ?></td>
+                            <td><?= html_escape($r['contato'] ? $r['contato'] : '-') ?></td>
                             <td><?= html_escape($r['tecnico_nome'] ? $r['tecnico_nome'] : '-') ?></td>
-                            <td class="num"><?= numero_br($r['qtd_itens']) ?></td>
-                            <td class="num"><strong><?= moeda_br($r['total_venda']) ?></strong></td>
+                            <td class="num"><strong><?= moeda_br($r['valor_total_dimensionado']) ?></strong></td>
                             <td class="centro">
                                 <?php if ( ! empty($r['orcamento_numero'])): ?>
                                     <a href="<?= site_url('orcamentos/ver/' . $r['orcamento_numero']) ?>"><?= (int) $r['orcamento_numero'] ?></a>

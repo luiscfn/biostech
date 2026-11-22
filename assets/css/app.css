@@ -465,6 +465,16 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .tabela-rolagem { overflow-y: auto; }
 .tabela-rolagem thead th { position: sticky; top: 0; z-index: 2; }
 
+/* Servicos: mostra cerca de 6 registros com rolagem vertical */
+.servicos-rolagem {
+    max-height: 305px;
+    overflow-y: auto;
+}
+
+.servicos-rolagem thead th { padding: 9px 12px; }
+.servicos-rolagem tbody td { padding: 7px 12px; }
+.servicos-rolagem .servico-descricao { padding: 6px 9px; }
+
 .tabela-rolagem tfoot td {
     position: sticky;
     bottom: 0;
@@ -613,7 +623,17 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 /* Caracteristicas do local com fonte maior */
 .badge.badge-caracteristica {
     font-size: 13px;
-    padding: 5px 10px;
+    padding: 6px 12px;
+}
+
+/* Caracteristicas separadas das medidas com mais espacamento */
+.caracteristicas-locais {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--borda);
 }
 
 /* --------------------------------------------------------------- filtros */
@@ -963,6 +983,22 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     align-items: center;
 }
 
+/* Servicos do dimensionamento: campo maior e acoes lado a lado */
+.tabela-servicos .servico-descricao {
+    width: 100%;
+    min-width: 420px;
+}
+
+.acoes-linha {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.acoes-linha form { display: inline; }
+
 .secao-titulo {
     margin: 4px 0 14px;
     font-size: 13px;
@@ -1215,6 +1251,17 @@ form.inline {
 /* Quebra de linha forcada dentro de .ficha-grade */
 .quebra-grade { grid-column: 1 / -1; height: 0; }
 
+/* Separador apos a primeira linha do levantamento */
+.separador-grade {
+    grid-column: 1 / -1;
+    margin: 6px 0 2px;
+    border-top: 1px dashed var(--borda);
+}
+
+.ficha-grade.ficha-levantamento {
+    gap: 18px 28px;
+}
+
 .ficha-grade .rotulo {
     font-size: 11px;
     color: var(--muted);
@@ -1225,6 +1272,16 @@ form.inline {
 .ficha-grade .dado {
     font-size: 13.5px;
     word-break: break-word;
+}
+
+/* Rotulo de quantidade de tecnicos em tres linhas */
+.ficha-grade .rotulo-qtd-tecnicos {
+    line-height: 1.35;
+}
+
+/* Medidas com mais espacamento entre os campos */
+.ficha-grade.ficha-medidas {
+    gap: 18px 28px;
 }
 
 /* Dias necessarios: rotulo, sub-rotulos e valores em tres linhas */

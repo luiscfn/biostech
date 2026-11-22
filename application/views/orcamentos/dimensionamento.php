@@ -7,8 +7,8 @@ foreach ($itens as $item) { $total_venda += (float) $item['total_venda']; }
 
 $abas_rotulos = array(
     'dados'        => 'Dados',
+    'servicos'     => 'Serviço a Executar',
     'itens'        => 'Itens (' . count($itens) . ')',
-    'servicos'     => 'Servicos (' . count($servicos) . ')',
     'levantamento' => 'Levantamento',
     'cronograma'   => 'Cronograma',
     'materiais'    => 'Materiais (' . count($materiais) . ')',
@@ -90,7 +90,7 @@ $abas_rotulos = array(
         </div>
     </div>
 
-    <div class="abas">
+    <div class="abas abas-orcamento">
         <?php foreach ($abas_rotulos as $chave => $rotulo): ?>
             <a class="aba <?= $aba === $chave ? 'ativa' : '' ?>" href="<?= site_url('orcamentos/dimensionamento/' . $registro['numero']) ?>?aba=<?= $chave ?>">
                 <?= html_escape($rotulo) ?>

@@ -31,7 +31,7 @@ $flags = array(
             <?= html_escape($registro['tecnico_nome'] ? $registro['tecnico_nome'] : '-') ?>
         </div>
         <div class="dado">
-            <div class="rotulo">QTDE DE TECNICOS</div>
+            <div class="rotulo rotulo-qtd-tecnicos">QTDE DE TECNICOS<br>PARA O SERVIÇO</div>
             <?= $registro['qtd_tecnicos'] !== NULL ? (int) $registro['qtd_tecnicos'] : '-' ?>
         </div>
         <div class="dado dado-dias-necessarios">
@@ -70,25 +70,18 @@ $flags = array(
 
     <h4 class="secao-titulo destaque titulo-grande">Levantamento</h4>
 
-    <div class="ficha-grade">
+    <div class="ficha-grade ficha-levantamento">
         <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">O que funciona</div>
+            <div class="rotulo">O que funciona atualmente no cliente</div>
             <div class="texto-longo"><?= nl2br(html_escape($registro['que_funciona'] ? $registro['que_funciona'] : '-')) ?></div>
         </div>
         <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">O que quer fazer</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['quer_fazer'] ? $registro['quer_fazer'] : '-')) ?></div>
-        </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Dificuldades</div>
+            <div class="rotulo">Dificuldades para argumentação do orçamento</div>
             <div class="texto-longo"><?= nl2br(html_escape($registro['dificuldades'] ? $registro['dificuldades'] : '-')) ?></div>
         </div>
+        <div class="separador-grade"></div>
         <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Material necessario</div>
-            <div class="texto-longo"><?= nl2br(html_escape($registro['material_precisa'] ? $registro['material_precisa'] : '-')) ?></div>
-        </div>
-        <div class="dado" style="grid-column:span 2">
-            <div class="rotulo">Providenciar</div>
+            <div class="rotulo">O que o Cliente deve Providenciar</div>
             <div class="texto-longo"><?= nl2br(html_escape($registro['providenciar'] ? $registro['providenciar'] : '-')) ?></div>
         </div>
         <div class="dado" style="grid-column:span 2">
@@ -107,7 +100,7 @@ $flags = array(
 
     <h4 class="secao-titulo destaque titulo-grande">Medidas e caracteristicas</h4>
 
-    <div class="ficha-grade">
+    <div class="ficha-grade ficha-medidas">
         <div class="dado">
             <div class="rotulo">Altura</div>
             <?= $registro['altura'] !== NULL ? numero_br($registro['altura'], 2) . ' m' : '-' ?>
@@ -130,7 +123,7 @@ $flags = array(
         </div>
     </div>
 
-    <div style="margin-top:10px">
+    <div class="caracteristicas-locais">
         <?php foreach ($flags as $campo => $rotulo): ?>
             <span class="badge badge-caracteristica <?= bd_bool($registro[$campo]) ? 'info' : 'off' ?>"><?= html_escape($rotulo) ?>: <?= bd_bool($registro[$campo]) ? 'sim' : 'nao' ?></span>
         <?php endforeach; ?>

@@ -1,10 +1,33 @@
 <div class="painel-corpo">
-    <div class="tabela-wrap">
-        <table class="tabela">
+    <?php if ($pode_editar): ?>
+        <div class="bloco-inclusao">
+            <h4 class="secao-titulo">Incluir servico</h4>
+
+            <?= form_open('orcamentos/dim_adicionar_servico/' . $registro['numero']) ?>
+                <div class="form-grid">
+                    <div class="campo" style="grid-column:span 8">
+                        <label for="dim_servico_descricao">Descricao do servico</label>
+                        <input type="text" name="descricao" id="dim_servico_descricao" maxlength="200" required>
+                    </div>
+                    <div class="campo terco">
+                        <label class="check">
+                            <input type="checkbox" name="concluido" value="S"> Concluido
+                        </label>
+                    </div>
+                    <div class="campo terco" style="align-self:end">
+                        <button type="submit" class="botao">Incluir servico</button>
+                    </div>
+                </div>
+            <?= form_close() ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="tabela-wrap tabela-rolagem servicos-rolagem">
+        <table class="tabela tabela-servicos">
             <thead>
                 <tr>
-                    <th class="num" style="width:40px">#</th>
-                    <th>Servico a executar</th>
+                    <th class="num" style="width:60px">Item</th>
+                    <th>Serviço a Executar</th>
                     <th class="centro" style="width:100px">Concluido</th>
                     <?php if ($pode_editar): ?>
                         <th class="centro" style="width:160px">Acoes</th>
@@ -21,7 +44,7 @@
                             <td class="num"><?= (int) $servico['numero_item'] ?></td>
                             <td>
                                 <?php if ($pode_editar): ?>
-                                    <input type="text" name="descricao" form="<?= $form_id ?>"
+                                    <input type="text" class="servico-descricao" name="descricao" form="<?= $form_id ?>"
                                            value="<?= html_escape($servico['descricao']) ?>" maxlength="200">
                                 <?php else: ?>
                                     <?= html_escape($servico['descricao']) ?>
@@ -37,15 +60,17 @@
                             </td>
                             <?php if ($pode_editar): ?>
                                 <td class="centro">
-                                    <?= form_open('orcamentos/dim_atualizar_servico/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('id' => $form_id)) ?>
-                                        <button type="submit" class="botao secundario pequeno">Salvar</button>
-                                    <?= form_close() ?>
+                                    <div class="acoes-linha">
+                                        <?= form_open('orcamentos/dim_atualizar_servico/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('id' => $form_id)) ?>
+                                            <button type="submit" class="botao secundario pequeno">Salvar</button>
+                                        <?= form_close() ?>
 
-                                    <?= form_open('orcamentos/dim_excluir_servico/' . $registro['numero'] . '/' . $servico['id'],
-                                        array('style' => 'margin-top:4px', 'onsubmit' => "return confirm('Excluir o servico?')")) ?>
-                                        <button type="submit" class="botao perigo pequeno">Excluir</button>
-                                    <?= form_close() ?>
+                                        <?= form_open('orcamentos/dim_excluir_servico/' . $registro['numero'] . '/' . $servico['id'],
+                                            array('onsubmit' => "return confirm('Excluir o servico?')")) ?>
+                                            <button type="submit" class="botao perigo pequeno">Excluir</button>
+                                        <?= form_close() ?>
+                                    </div>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -54,26 +79,4 @@
             </tbody>
         </table>
     </div>
-
-    <?php if ($pode_editar): ?>
-        <hr class="divisor">
-        <h4 class="secao-titulo">Incluir servico</h4>
-
-        <?= form_open('orcamentos/dim_adicionar_servico/' . $registro['numero']) ?>
-            <div class="form-grid">
-                <div class="campo" style="grid-column:span 8">
-                    <label for="dim_servico_descricao">Descricao do servico</label>
-                    <input type="text" name="descricao" id="dim_servico_descricao" maxlength="200" required>
-                </div>
-                <div class="campo terco">
-                    <label class="check">
-                        <input type="checkbox" name="concluido" value="S"> Concluido
-                    </label>
-                </div>
-                <div class="campo terco" style="align-self:end">
-                    <button type="submit" class="botao">Incluir servico</button>
-                </div>
-            </div>
-        <?= form_close() ?>
-    <?php endif; ?>
 </div>

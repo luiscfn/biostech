@@ -1880,7 +1880,10 @@ class Orcamentos_model extends MY_Model
                        o.data AS orcamento_data,
                        o.valor_total AS orcamento_valor,
                        COALESCE(it.itens, 0) AS qtd_itens,
-                       COALESCE(it.total, 0) AS total_venda
+                       COALESCE(it.total, 0) AS total_venda,
+                       COALESCE(it.total, 0) + COALESCE(d.mao_obra, 0)
+                           + COALESCE(d.material_fixacao, 0) + COALESCE(d.acrescimo_custo, 0)
+                           + COALESCE(d.nota_fiscal, 0) AS valor_total_dimensionado
                   FROM " . T_ORCAMENTOS_DIMENSIONAMENTO . " d
                   LEFT JOIN " . T_CLIENTES . " cl ON cl.id = d.cliente_id
                   LEFT JOIN " . T_USUARIOS . " u ON u.funcionario_id = d.tecnico_id
