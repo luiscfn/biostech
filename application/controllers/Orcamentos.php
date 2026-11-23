@@ -903,27 +903,160 @@ class Orcamentos extends MY_Controller
             show_404();
         }
 
-        $abas = array('dados', 'servicos', 'itens', 'levantamento', 'cronograma',
-                      'materiais', 'cotacoes', 'log');
-        $aba = (string) $this->input->get('aba');
+        $classificacoes = $this->_classificacoes_produtos();
+        $itens          = $this->orcamentos_model->itens_dimensionamento($numero);
+
+        $abas = array('dados', 'servicos', 'materiais');
+
+        foreach (array_keys($classificacoes) as $chave)
+        {
+            $abas[] = $chave;
+        }
+
+        $abas = array_merge($abas, array('itens', 'levantamento'));
+        $aba  = (string) $this->input->get('aba');
 
         if ( ! in_array($aba, $abas, TRUE))
         {
             $aba = 'dados';
         }
 
+        $classificacao      = isset($classificacoes[$aba]) ? $classificacoes[$aba] : NULL;
+        $grupos_disponiveis = array();
+
+        $dados_produtos = array(
+            'classificacao'      => $classificacao,
+            'grupos_disponiveis' => $grupos_disponiveis,
+            'subgrupos'          => array(),
+            'produtos'           => array(),
+            'itens_classificacao'=> array(),
+            'filtros'            => array('busca' => '', 'grupo' => '', 'subgrupo' => ''),
+            'pag'                => NULL,
+        );
+
+        if ($classificacao !== NULL)
+        {
+            $this->load->model('produto_model');
+            $this->load->model('estoque_model');
+
+            $busca       = trim((string) $this->input->get('busca'));
+            $subgrupo_raw = trim((string) $this->input->get('subgrupo'));
+            $subgrupo    = $subgrupo_raw === '' ? '' : $this->_codigo_normalizado($subgrupo_raw);
+            $grupo       = trim((string) $this->input->get('grupo'));
+
+            if ($aba === 'outros')
+            {
+                $usados = array();
+
+                foreach ($classificacoes as $info)
+                {
+                    if ($info['grupos'] !== NULL)
+                    {
+                        $usados = array_merge($usados, $info['grupos']);
+                    }
+                }
+
+                foreach ($this->estoque_model->grupos() as $g)
+                {
+                    if ( ! in_array($g['codigo'], $usados, TRUE))
+                    {
+                        $grupos_disponiveis[] = $g;
+                    }
+                }
+
+                $codigos_disponiveis = array();
+
+                foreach ($grupos_disponiveis as $g)
+                {
+                    $codigos_disponiveis[] = $this->_codigo_normalizado($g['codigo']);
+                }
+
+                if ($grupo !== '')
+                {
+                    $grupo_norm = $this->_codigo_normalizado($grupo);
+
+                    if (in_array($grupo_norm, $codigos_disponiveis, TRUE))
+                    {
+                        $grupo = $grupo_norm;
+                    }
+                    else
+                    {
+                        $grupo = '';
+                    }
+                }
+
+                $grupos_filter = $grupo !== '' ? array($grupo) : $codigos_disponiveis;
+                $subgrupos     = $grupo !== ''
+                    ? $this->estoque_model->subgrupos_por_grupos(array($grupo))
+                    : $this->estoque_model->subgrupos_por_grupos($codigos_disponiveis);
+            }
+            else
+            {
+                $grupo         = '';
+                $grupos_filter = $classificacao['grupos'];
+                $subgrupos     = $this->estoque_model->subgrupos_por_grupos($grupos_filter);
+            }
+
+            $grupos_filter = array_values(array_unique(array_map(
+                array($this, '_codigo_normalizado'), $grupos_filter
+            )));
+
+            $codigos_subgrupos = array();
+
+            foreach ($subgrupos as $sg)
+            {
+                $codigos_subgrupos[] = $this->_codigo_normalizado($sg['codigo']);
+            }
+
+            if ($subgrupo !== '' && ! in_array($subgrupo, $codigos_subgrupos, TRUE))
+            {
+                $subgrupo = '';
+            }
+
+            $itens_classificacao = array();
+
+            foreach ($itens as $item)
+            {
+                if ( ! in_array($this->_codigo_normalizado($item['grupo_efetivo']), $grupos_filter, TRUE))
+                {
+                    continue;
+                }
+
+                if ($subgrupo !== '' && $this->_codigo_normalizado($item['subgrupo_efetivo']) !== $subgrupo)
+                {
+                    continue;
+                }
+
+                $itens_classificacao[] = $item;
+            }
+
+            $dados_produtos = array(
+                'classificacao'      => $classificacao,
+                'grupos_disponiveis' => $grupos_disponiveis,
+                'subgrupos'          => $subgrupos,
+                'produtos'           => $this->produto_model->listar_por_grupos(
+                    $grupos_filter, $subgrupo, $busca, 200, 0
+                ),
+                'itens_classificacao'=> $itens_classificacao,
+                'filtros'            => array('busca' => $busca, 'grupo' => $grupo, 'subgrupo' => $subgrupo),
+                'pag'                => NULL,
+            );
+        }
+
         $this->titulo = 'Dimensionamento ' . $numero;
 
-        $this->render('orcamentos/dimensionamento', array(
+        $dados = array(
             'registro'   => $registro,
-            'itens'      => $this->orcamentos_model->itens_dimensionamento($numero),
+            'itens'      => $itens,
             'servicos'   => $this->orcamentos_model->servicos_dimensionamento($numero),
             'materiais'  => $this->orcamentos_model->materiais_dimensionamento($numero),
-            'cotacoes'   => $this->orcamentos_model->cotacoes_dimensionamento($numero),
-            'log'        => $this->orcamentos_model->log_dimensionamento($numero),
             'aba'        => $aba,
             'abas'       => $abas,
-        ));
+        );
+
+        $this->render('orcamentos/dimensionamento', array_merge($dados, $dados_produtos, array(
+            'classificacoes' => $classificacoes,
+        )));
     }
 
     // ------------------------------------------------------------------
@@ -1035,7 +1168,74 @@ class Orcamentos extends MY_Controller
             $this->flash('Item incluido no dimensionamento.');
         }
 
-        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=itens');
+        redirect($this->_aba_classificacao_post($numero));
+    }
+
+    // ------------------------------------------------------------------
+
+    public function dim_adicionar_item_classificacao($numero)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        $aba = trim((string) $this->input->post('aba'));
+        $classificacoes = $this->_classificacoes_produtos();
+
+        if ( ! $this->eh_post() || ! isset($classificacoes[$aba]))
+        {
+            redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=dados');
+        }
+
+        $this->load->model('estoque_model');
+
+        $grupo_raw    = trim((string) $this->input->post('grupo'));
+        $subgrupo_raw = trim((string) $this->input->post('subgrupo'));
+
+        $grupo    = $grupo_raw === '' ? '' : $this->_codigo_normalizado($grupo_raw);
+        $subgrupo = $subgrupo_raw === '' ? '' : $this->_codigo_normalizado($subgrupo_raw);
+
+        if ($aba === 'outros')
+        {
+            $grupos = array($grupo);
+        }
+        else
+        {
+            $grupos = $classificacoes[$aba]['grupos'];
+        }
+
+        $grupos = array_values(array_filter($grupos, 'strlen'));
+
+        $subgrupos_permitidos = $this->estoque_model->subgrupos_por_grupos($grupos);
+
+        foreach ($subgrupos_permitidos as $sg)
+        {
+            if ($this->_codigo_normalizado($sg['codigo']) === $subgrupo)
+            {
+                $grupo = $this->_codigo_normalizado($sg['grupo_codigo']);
+                break;
+            }
+        }
+
+        $cor = trim((string) $this->input->post('cor'));
+
+        $resultado = $this->orcamentos_model->adicionar_item_dimensionamento((int) $numero, array(
+            'produto_id' => $this->input->post('produto_id'),
+            'descricao'  => $cor !== '' ? 'Cor: ' . $cor : NULL,
+            'quantidade' => $this->input->post('quantidade'),
+            'grupo'      => $grupo,
+            'subgrupo'   => $subgrupo,
+        ), $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'dimensionamento_item', (int) $numero, NULL);
+            $this->flash('Produto incluído no dimensionamento.');
+        }
+
+        redirect($this->_url_dim_classificacao($numero, $aba, $grupo, $subgrupo));
     }
 
     // ------------------------------------------------------------------
@@ -1065,7 +1265,7 @@ class Orcamentos extends MY_Controller
             $this->flash('Item atualizado.');
         }
 
-        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=itens');
+        redirect($this->_aba_classificacao_post($numero));
     }
 
     // ------------------------------------------------------------------
@@ -1091,7 +1291,7 @@ class Orcamentos extends MY_Controller
             $this->flash('Item excluido.');
         }
 
-        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=itens');
+        redirect($this->_aba_classificacao_post($numero));
     }
 
     // ------------------------------------------------------------------
@@ -1178,6 +1378,90 @@ class Orcamentos extends MY_Controller
         redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=servicos');
     }
 
+    // ------------------------------------------------------------------
+
+    public function dim_adicionar_material($numero)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+        }
+
+        $resultado = $this->orcamentos_model->adicionar_material_dimensionamento((int) $numero, array(
+            'descricao'  => $this->input->post('descricao'),
+            'quantidade' => $this->input->post('quantidade'),
+        ), $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'dimensionamento_material', (int) $numero, NULL);
+            $this->flash('Material incluido.');
+        }
+
+        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+    }
+
+    // ------------------------------------------------------------------
+
+    public function dim_atualizar_material($numero, $id)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+        }
+
+        $resultado = $this->orcamentos_model->atualizar_material_dimensionamento((int) $id, array(
+            'descricao'  => $this->input->post('descricao'),
+            'quantidade' => $this->input->post('quantidade'),
+        ), $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'dimensionamento_material', (int) $numero, array('material_id' => (int) $id));
+            $this->flash('Material atualizado.');
+        }
+
+        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+    }
+
+    // ------------------------------------------------------------------
+
+    public function dim_excluir_material($numero, $id)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+        }
+
+        $resultado = $this->orcamentos_model->excluir_material_dimensionamento((int) $id, $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('excluir', 'dimensionamento_material', (int) $numero, array('material_id' => (int) $id));
+            $this->flash('Material excluido.');
+        }
+
+        redirect('orcamentos/dimensionamento/' . (int) $numero . '?aba=materiais');
+    }
+
     // ==================================================================
     // Autocomplete (JSON)
     // ==================================================================
@@ -1204,6 +1488,59 @@ class Orcamentos extends MY_Controller
     // ==================================================================
     // Helpers
     // ==================================================================
+
+    private function _codigo_normalizado($codigo)
+    {
+        $codigo = ltrim(trim((string) $codigo), '0');
+
+        return $codigo === '' ? '0' : $codigo;
+    }
+
+    private function _url_dim_classificacao($numero, $aba, $grupo = '', $subgrupo = '')
+    {
+        $url = 'orcamentos/dimensionamento/' . (int) $numero . '?aba=' . rawurlencode($aba);
+
+        if ($grupo !== '')
+        {
+            $url .= '&grupo=' . rawurlencode($grupo);
+        }
+        if ($subgrupo !== '')
+        {
+            $url .= '&subgrupo=' . rawurlencode($subgrupo);
+        }
+
+        return $url;
+    }
+
+    private function _aba_classificacao_post($numero, $padrao = 'itens')
+    {
+        $aba    = trim((string) $this->input->post('aba'));
+        $classificacoes = $this->_classificacoes_produtos();
+
+        if (isset($classificacoes[$aba]))
+        {
+            return $this->_url_dim_classificacao($numero, $aba,
+                trim((string) $this->input->post('grupo')),
+                trim((string) $this->input->post('subgrupo')));
+        }
+
+        return 'orcamentos/dimensionamento/' . (int) $numero . '?aba=' . $padrao;
+    }
+
+    private function _classificacoes_produtos()
+    {
+        return array(
+            'eletrocalha'      => array('rotulo' => 'Eletrocalha', 'grupos' => array('050')),
+            'eletroduto'       => array('rotulo' => 'Eletroduto', 'grupos' => array('051')),
+            'canaleta'         => array('rotulo' => 'Canaleta', 'grupos' => array('017', '052', '053')),
+            'rede_logica'      => array('rotulo' => 'Rede Lógica', 'grupos' => array('054', '025')),
+            'rede_eletrica'    => array('rotulo' => 'Rede Elétrica', 'grupos' => array('055', '026')),
+            'antena_painel_som'=> array('rotulo' => 'Antena/Painel/Som', 'grupos' => array('056', '039')),
+            'seg_eletronica'   => array('rotulo' => 'Seg. Eletrônica', 'grupos' => array('057', '029')),
+            'mat_fixacao'      => array('rotulo' => 'Mat. Fixação', 'grupos' => array('058')),
+            'outros'           => array('rotulo' => 'Outros', 'grupos' => NULL),
+        );
+    }
 
     private function _post_orcamento()
     {

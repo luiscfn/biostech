@@ -1953,7 +1953,10 @@ class Orcamentos_model extends MY_Model
     {
         return $this->db->query(
             "SELECT i.*, p.unidade AS produto_unidade, p.codigo AS produto_codigo,
-                    p.valor_venda AS produto_valor_venda
+                    p.marca AS produto_marca, p.valor_venda AS produto_valor_venda,
+                    COALESCE(NULLIF(i.descricao_produto, ''), p.descricao) AS descricao_produto,
+                    ltrim(COALESCE(NULLIF(i.grupo, ''), p.grupo), '0') AS grupo_efetivo,
+                    ltrim(COALESCE(NULLIF(i.subgrupo, ''), p.subgrupo), '0') AS subgrupo_efetivo
                FROM " . T_ORCAMENTO_DIMENSIONAMENTO_ITENS . " i
                LEFT JOIN " . T_PRODUTOS . " p ON p.id = i.produto_id
               WHERE i.dimensionamento_numero = ?
@@ -2589,6 +2592,105 @@ class Orcamentos_model extends MY_Model
 
         $this->_log_dim((int) $servico['dimensionamento_numero'], 'A', 'servico_excluido',
             $servico['descricao'], NULL, NULL, $usuario['login']);
+
+        return array('ok' => TRUE);
+    }
+
+    // ==================================================================
+    // Dimensionamento - materiais
+    // ==================================================================
+
+    public function adicionar_material_dimensionamento($numero, $dados, $usuario)
+    {
+        $descricao = $this->_texto($this->_v($dados, 'descricao'));
+
+        if ($descricao === NULL)
+        {
+            return array('ok' => FALSE, 'erro' => 'Informe a descricao do material.');
+        }
+
+        if (empty($this->dimensionamento($numero)))
+        {
+            return array('ok' => FALSE, 'erro' => 'Dimensionamento nao encontrado.');
+        }
+
+        $proximo = (int) $this->db->query(
+            "SELECT COALESCE(MAX(numero_item), 0) + 1 AS n
+               FROM " . T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS . "
+              WHERE dimensionamento_numero = ?",
+            array((int) $numero)
+        )->row()->n;
+
+        $this->_inserir(T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS, array(
+            'dimensionamento_numero' => (int) $numero,
+            'numero_item'            => $proximo,
+            'descricao'              => $descricao,
+            'quantidade'             => (float) ($this->_dec($this->_v($dados, 'quantidade')) ?: 0),
+        ));
+
+        $this->_log_dim($numero, 'A', 'material_incluido', NULL, $descricao, NULL,
+            $usuario['login']);
+
+        return array('ok' => TRUE);
+    }
+
+    // ------------------------------------------------------------------
+
+    public function atualizar_material_dimensionamento($id, $dados, $usuario)
+    {
+        $material = $this->db->query(
+            "SELECT * FROM " . T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS . " WHERE id = ?",
+            array((int) $id)
+        )->row_array();
+
+        if (empty($material))
+        {
+            return array('ok' => FALSE, 'erro' => 'Material nao encontrado.');
+        }
+
+        $novo = array();
+
+        if (array_key_exists('descricao', $dados))
+        {
+            $novo['descricao'] = $this->_texto($this->_v($dados, 'descricao')) ?: $material['descricao'];
+        }
+
+        if (array_key_exists('quantidade', $dados))
+        {
+            $novo['quantidade'] = (float) ($this->_dec($this->_v($dados, 'quantidade')) ?: 0);
+        }
+
+        if ($novo)
+        {
+            $this->_atualizar(T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS, $id, $novo, 'id');
+
+            $this->_log_dim((int) $material['dimensionamento_numero'], 'A', 'material_alterado',
+                $material['descricao'], isset($novo['descricao']) ? $novo['descricao'] : NULL,
+                NULL, $usuario['login']);
+        }
+
+        return array('ok' => TRUE);
+    }
+
+    // ------------------------------------------------------------------
+
+    public function excluir_material_dimensionamento($id, $usuario)
+    {
+        $material = $this->db->query(
+            "SELECT * FROM " . T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS . " WHERE id = ?",
+            array((int) $id)
+        )->row_array();
+
+        if (empty($material))
+        {
+            return array('ok' => FALSE, 'erro' => 'Material nao encontrado.');
+        }
+
+        $this->db->query("DELETE FROM " . T_ORCAMENTO_DIMENSIONAMENTO_MATERIAIS . " WHERE id = ?",
+            array((int) $id));
+
+        $this->_log_dim((int) $material['dimensionamento_numero'], 'A', 'material_excluido',
+            $material['descricao'], NULL, NULL, $usuario['login']);
 
         return array('ok' => TRUE);
     }

@@ -465,15 +465,33 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 .tabela-rolagem { overflow-y: auto; }
 .tabela-rolagem thead th { position: sticky; top: 0; z-index: 2; }
 
-/* Servicos: mostra cerca de 6 registros com rolagem vertical */
-.servicos-rolagem {
+/* Servicos e materiais: mostra cerca de 6 registros com rolagem vertical */
+.servicos-rolagem,
+.materiais-rolagem,
+.classificacao-rolagem {
     max-height: 305px;
     overflow-y: auto;
 }
 
-.servicos-rolagem thead th { padding: 9px 12px; }
-.servicos-rolagem tbody td { padding: 7px 12px; }
-.servicos-rolagem .servico-descricao { padding: 6px 9px; }
+.servicos-rolagem thead th,
+.materiais-rolagem thead th,
+.classificacao-rolagem thead th { padding: 9px 12px; }
+
+.servicos-rolagem tbody td,
+.materiais-rolagem tbody td,
+.classificacao-rolagem tbody td { padding: 7px 12px; }
+
+.servicos-rolagem .servico-descricao,
+.materiais-rolagem .material-descricao,
+.materiais-rolagem .material-quantidade {
+    width: 100%;
+    padding: 6px 9px;
+    border: 1px solid var(--borda);
+    border-radius: 7px;
+    font: inherit;
+    font-size: 12.5px;
+    background: #fff;
+}
 
 .tabela-rolagem tfoot td {
     position: sticky;
@@ -998,6 +1016,70 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 }
 
 .acoes-linha form { display: inline; }
+
+/* Classificacao de produtos: campos curtos acompanham o tamanho do rotulo */
+#form-class-produto .campo.micro label { white-space: nowrap; }
+#form-class-produto .campo.micro input { min-width: 0; }
+
+/* Mostra 4 produtos completos; os demais ficam na rolagem vertical */
+.rolagem-quatro {
+    --altura-cabecalho: 36px;
+    --altura-linha: 36px;
+    --altura-total: 48px;
+    max-height: calc(var(--altura-cabecalho) + (4 * var(--altura-linha)) + var(--altura-total));
+}
+
+.rolagem-quatro thead th {
+    height: var(--altura-cabecalho);
+    padding: 8px 12px;
+}
+
+.rolagem-quatro tbody td {
+    height: var(--altura-linha);
+    padding: 7px 12px;
+    white-space: nowrap;
+}
+
+.rolagem-quatro tfoot td {
+    height: var(--altura-total);
+    padding: 12px 12px 10px;
+    border-top: 8px solid #fff;
+}
+
+/* Evita rolagem horizontal: larguras fixas e texto truncado com reticencias */
+.tabela-classificacao {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.tabela-classificacao th,
+.tabela-classificacao td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tabela-classificacao th {
+    overflow: visible;
+    text-overflow: clip;
+    letter-spacing: 0;
+}
+
+.tabela-classificacao .acoes-cell { overflow: visible; }
+
+.tabela-classificacao .qtd-orcamento {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font: inherit;
+    text-align: right;
+    outline: none;
+}
+
+.tabela-classificacao .qtd-orcamento:focus { background: #fffbe6; }
 
 .secao-titulo {
     margin: 4px 0 14px;

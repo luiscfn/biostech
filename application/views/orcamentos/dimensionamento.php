@@ -8,13 +8,20 @@ foreach ($itens as $item) { $total_venda += (float) $item['total_venda']; }
 $abas_rotulos = array(
     'dados'        => 'Dados',
     'servicos'     => 'Serviço a Executar',
-    'itens'        => 'Itens (' . count($itens) . ')',
-    'levantamento' => 'Levantamento',
-    'cronograma'   => 'Cronograma',
-    'materiais'    => 'Materiais (' . count($materiais) . ')',
-    'cotacoes'     => 'Cotacoes (' . count($cotacoes) . ')',
-    'log'          => 'Historico (' . count($log) . ')',
+    'materiais'    => 'Material Necessário',
 );
+
+foreach ($classificacoes as $chave => $info)
+{
+    $abas_rotulos[$chave] = $info['rotulo'];
+}
+
+$abas_rotulos['itens']        = 'Itens (' . count($itens) . ')';
+$abas_rotulos['levantamento'] = 'Levantamento';
+
+$partial = isset($classificacoes[$aba])
+    ? 'orcamentos/_dim_produtos_classificacao'
+    : 'orcamentos/_dim_' . $aba;
 ?>
 <div class="painel">
     <div class="painel-cabecalho">
@@ -99,15 +106,21 @@ $abas_rotulos = array(
     </div>
 
     <div class="aba-conteudo">
-        <?php $this->load->view('orcamentos/_dim_' . $aba, array(
-            'registro'    => $registro,
-            'itens'       => $itens,
-            'servicos'    => $servicos,
-            'materiais'   => $materiais,
-            'cotacoes'    => $cotacoes,
-            'log'         => $log,
-            'pode_editar' => $pode_editar,
-            'total_venda' => $total_venda,
+        <?php $this->load->view($partial, array(
+            'registro'           => $registro,
+            'itens'              => $itens,
+            'servicos'           => $servicos,
+            'materiais'          => $materiais,
+            'pode_editar'        => $pode_editar,
+            'total_venda'        => $total_venda,
+            'aba'                => $aba,
+            'classificacao'      => $classificacao,
+            'grupos_disponiveis' => $grupos_disponiveis,
+            'subgrupos'          => $subgrupos,
+            'produtos'           => $produtos,
+            'itens_classificacao'=> $itens_classificacao,
+            'filtros'            => $filtros,
+            'pag'                => $pag,
         )); ?>
     </div>
 </div>

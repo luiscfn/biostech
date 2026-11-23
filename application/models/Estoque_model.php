@@ -852,6 +852,40 @@ class Estoque_model extends MY_Model
         return $this->db->query($sql)->result_array();
     }
 
+    public function subgrupos_por_grupos(array $grupos)
+    {
+        $codigos = array();
+
+        foreach ($grupos as $grupo)
+        {
+            $codigo = ltrim(trim((string) $grupo), '0');
+
+            if ($codigo === '')
+            {
+                continue;
+            }
+
+            $codigos[] = $this->db->escape($codigo);
+        }
+
+        if ( ! $codigos)
+        {
+            return array();
+        }
+
+        $sql = "SELECT sg.*, g.nome AS grupo_nome, count(p.id) AS produtos
+                  FROM " . T_ESTOQUE_SUBGRUPOS . " sg
+                  LEFT JOIN " . T_ESTOQUE_GRUPOS . " g ON g.codigo = sg.grupo_codigo
+                  LEFT JOIN " . T_PRODUTOS . " p
+                         ON ltrim(p.grupo, '0') = ltrim(sg.grupo_codigo, '0')
+                        AND ltrim(p.subgrupo, '0') = ltrim(sg.codigo, '0')
+                 WHERE ltrim(sg.grupo_codigo, '0') IN (" . implode(', ', $codigos) . ")
+                 GROUP BY sg.grupo_codigo, sg.codigo, g.nome
+                 ORDER BY sg.grupo_codigo, sg.codigo";
+
+        return $this->db->query($sql)->result_array();
+    }
+
     public function posicoes()
     {
         return $this->db->query("SELECT * FROM " . T_ESTOQUE_POSICOES . " ORDER BY codigo")->result_array();
