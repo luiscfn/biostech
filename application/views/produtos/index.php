@@ -1,16 +1,48 @@
+<?php
+$tem_filtro = $busca !== '' || $grupo !== '' || $subgrupo !== '' || $situacao !== '';
+?>
 <div class="painel">
     <div class="painel-cabecalho">
         <h3>Catalogo de produtos</h3>
-
-        <div class="filtros">
-            <form method="get" action="<?= site_url('produtos') ?>" class="filtros">
-                <input type="text" name="busca" value="<?= html_escape($busca) ?>" placeholder="Descricao, codigo, marca, grupo...">
-                <button type="submit" class="botao secundario">Pesquisar</button>
-                <?php if ($busca !== ''): ?>
-                    <a class="botao secundario" href="<?= site_url('produtos') ?>">Limpar</a>
-                <?php endif; ?>
-            </form>
+        <div>
+            <a class="botao pequeno" href="<?= site_url('produtos/novo') ?>">+ Novo produto</a>
         </div>
+    </div>
+
+    <div class="painel-corpo">
+        <form method="get" action="<?= site_url('produtos') ?>" class="filtros" id="filtro-produtos">
+            <input type="text" name="busca" value="<?= html_escape($busca) ?>" placeholder="Descricao, codigo, marca, grupo...">
+
+            <select name="grupo" id="filtro-grupo" style="width:190px;min-width:190px;font-size:12px">
+                <option value="">Grupo</option>
+                <?php foreach ($grupos as $g): ?>
+                    <option value="<?= html_escape($g['codigo']) ?>" <?= (string) $g['codigo'] === $grupo ? 'selected' : '' ?>>
+                        <?= html_escape($g['codigo'] . ' - ' . $g['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="subgrupo" id="filtro-subgrupo" style="width:190px;min-width:190px;font-size:12px" <?= $grupo === '' ? 'disabled title="Selecione um grupo"' : '' ?>>
+                <option value="">Subgrupo</option>
+                <?php foreach ($subgrupos as $sg): ?>
+                    <option value="<?= html_escape($sg['codigo']) ?>" <?= (string) $sg['codigo'] === $subgrupo ? 'selected' : '' ?>>
+                        <?= html_escape($sg['codigo'] . ' - ' . $sg['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="situacao" style="width:110px;min-width:110px;font-size:12px">
+                <option value="ativos" <?= $situacao === 'ativos' ? 'selected' : '' ?>>Ativos</option>
+                <option value="inativos" <?= $situacao === 'inativos' ? 'selected' : '' ?>>Inativos</option>
+                <option value="" <?= $situacao === '' ? 'selected' : '' ?>>Todos</option>
+            </select>
+
+            <button type="submit" class="botao secundario">Pesquisar</button>
+
+            <?php if ($tem_filtro): ?>
+                <a class="botao secundario" href="<?= site_url('produtos') ?>">Limpar</a>
+            <?php endif; ?>
+        </form>
     </div>
 
     <div class="tabela-wrap">
@@ -18,15 +50,15 @@
             <thead>
                 <tr>
                     <th style="width:80px">Codigo</th>
-                    <th>Descricao</th>
-                    <th style="width:70px" class="centro">Un.</th>
-                    <th style="width:90px">Grupo</th>
-                    <th style="width:120px">Localizacao</th>
-                    <th class="num" style="width:90px">Est. min.</th>
-                    <th class="num" style="width:110px">Compra</th>
-                    <th class="num" style="width:110px">Venda</th>
+                    <th style="min-width:420px">Descricao</th>
+                    <th style="width:130px">Grupo</th>
+                    <th style="width:130px">Subgrupo</th>
+                    <th class="num" style="width:100px">Compra</th>
+                    <th class="num" style="width:90px">% Lucro</th>
+                    <th class="num" style="width:100px">Venda</th>
+                    <th class="num" style="width:60px">Estoque</th>
                     <th style="width:90px">Situacao</th>
-                    <th class="centro" style="width:80px">Acoes</th>
+                    <th class="centro" style="width:180px">Acoes</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,26 +66,28 @@
                     <tr><td colspan="10" class="vazio">Nenhum produto encontrado.</td></tr>
                 <?php else: ?>
                     <?php foreach ($registros as $r): ?>
+                        <?php
+                        $ativo        = bd_bool($r['ativo']);
+                        $grupo_nome   = ! empty($r['grupo_nome']) ? $r['grupo_nome'] : $r['grupo'];
+                        $subgrupo_nome = ! empty($r['subgrupo_nome']) ? $r['subgrupo_nome'] : $r['subgrupo'];
+                        $acao         = $ativo ? 'Inativar' : 'Reativar';
+                        ?>
                         <tr>
                             <td class="num"><?= (int) $r['id'] ?></td>
-                            <td>
+                            <td style="font-size:12px">
                                 <a href="<?= site_url('produtos/ver/' . $r['id']) ?>"><strong><?= html_escape($r['descricao']) ?></strong></a>
                                 <?php if ( ! empty($r['marca'])): ?>
-                                    <div style="font-size:11.5px;color:#6b7785"><?= html_escape($r['marca']) ?></div>
+                                    <div style="font-size:11px;color:#6b7785"><?= html_escape($r['marca']) ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td class="centro"><?= html_escape($r['unidade'] ? $r['unidade'] : '-') ?></td>
-                            <td><?= html_escape($r['grupo'] ? $r['grupo'] : '-') ?></td>
-                            <td>
-                                <?= $r['estante'] !== NULL ? 'E' . (int) $r['estante'] : '' ?>
-                                <?= $r['prateleira'] !== NULL ? ' P' . (int) $r['prateleira'] : '' ?>
-                                <?= ($r['estante'] === NULL && $r['prateleira'] === NULL) ? '-' : '' ?>
-                            </td>
-                            <td class="num"><?= numero_br($r['estoque_minimo']) ?></td>
+                            <td style="font-size:11px"><?= html_escape($grupo_nome ? $grupo_nome : '-') ?></td>
+                            <td style="font-size:11px"><?= html_escape($subgrupo_nome ? $subgrupo_nome : '-') ?></td>
                             <td class="num"><?= moeda_br($r['valor_compra']) ?></td>
+                            <td class="num"><?= $r['perc_lucro'] !== NULL ? numero_br($r['perc_lucro'], 2) . '%' : '-' ?></td>
                             <td class="num"><?= moeda_br($r['valor_venda']) ?></td>
+                            <td class="num"><?= numero_br($r['saldo']) ?></td>
                             <td>
-                                <?php if (bd_bool($r['ativo'])): ?>
+                                <?php if ($ativo): ?>
                                     <span class="badge ok">Ativo</span>
                                 <?php else: ?>
                                     <span class="badge off">Inativo</span>
@@ -61,6 +95,17 @@
                             </td>
                             <td class="centro">
                                 <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . $r['id']) ?>">Ver</a>
+                                <?= form_open('produtos/alternar_ativo/' . (int) $r['id'], array(
+                                    'class'    => 'inline',
+                                    'onsubmit' => "return confirm('" . $acao . " o produto " . (int) $r['id'] . "?');",
+                                )) ?>
+                                    <input type="hidden" name="busca" value="<?= html_escape($busca) ?>">
+                                    <input type="hidden" name="grupo" value="<?= html_escape($grupo) ?>">
+                                    <input type="hidden" name="subgrupo" value="<?= html_escape($subgrupo) ?>">
+                                    <input type="hidden" name="situacao" value="<?= html_escape($situacao) ?>">
+                                    <input type="hidden" name="pagina" value="<?= (int) $pag['pagina'] ?>">
+                                    <button type="submit" class="botao <?= $ativo ? 'secundario' : '' ?> pequeno"><?= $acao ?></button>
+                                <?= form_close() ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -69,5 +114,30 @@
         </table>
     </div>
 
-    <?php $this->load->view('layouts/paginacao', array('pag' => $pag, 'base' => site_url('produtos'), 'busca' => $busca)); ?>
+    <?php $this->load->view('layouts/paginacao', array(
+        'pag'   => $pag,
+        'base'  => site_url('produtos'),
+        'busca' => $busca,
+        'extra' => array(
+            'grupo'    => $grupo,
+            'subgrupo' => $subgrupo,
+            'situacao' => $situacao,
+        ),
+    )); ?>
 </div>
+
+<script>
+(function () {
+    var grupo = document.getElementById('filtro-grupo');
+
+    if ( ! grupo) { return; }
+
+    grupo.addEventListener('change', function () {
+        var subgrupo = document.getElementById('filtro-subgrupo');
+
+        if (subgrupo) { subgrupo.value = ''; }
+
+        this.form.submit();
+    });
+})();
+</script>

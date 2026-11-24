@@ -23,18 +23,6 @@
             <div class="grupo">Principal</div>
             <a class="item <?= $menu_ativo === 'dashboard' ? 'ativo' : '' ?>" href="<?= site_url('dashboard') ?>">Painel</a>
 
-            <div class="grupo">Operacao</div>
-            <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
-            <a class="item <?= $menu_ativo === 'orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('orcamentos') ?>">Orcamentos</a>
-            <a class="item <?= $menu_ativo === 'estoque' ? 'ativo' : '' ?>" href="<?= site_url('estoque') ?>">Estoque</a>
-            <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
-            <a class="item <?= $menu_ativo === 'financeiro' ? 'ativo' : '' ?>" href="<?= site_url('financeiro') ?>">Financeiro</a>
-
-            <div class="grupo">Consultas</div>
-            <a class="item <?= $menu_ativo === 'consulta_os' ? 'ativo' : '' ?>" href="<?= site_url('clientes/ordens') ?>">OS do Cliente</a>
-            <a class="item <?= $menu_ativo === 'consulta_orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('clientes/orcamentos') ?>">Orcamentos do Cliente</a>
-            <a class="item <?= $menu_ativo === 'consulta_notas' ? 'ativo' : '' ?>" href="<?= site_url('clientes/notas') ?>">Notas Fiscais do Cliente</a>
-
             <?php $tb_aberto = ($menu_ativo === 'tabelas_basicas'); ?>
 
             <div class="grupo">Tabelas Basicas</div>
@@ -66,11 +54,22 @@
             <a class="item <?= $menu_ativo === 'clientes' ? 'ativo' : '' ?>" href="<?= site_url('clientes') ?>">Clientes</a>
             <a class="item <?= $menu_ativo === 'fornecedores' ? 'ativo' : '' ?>" href="<?= site_url('fornecedores') ?>">Fornecedores</a>
             <a class="item <?= $menu_ativo === 'produtos' ? 'ativo' : '' ?>" href="<?= site_url('produtos') ?>">Produtos</a>
-            <a class="item <?= $menu_ativo === 'setores' ? 'ativo' : '' ?>" href="<?= site_url('setores') ?>">Setores</a>
 
             <?php if (in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE)): ?>
                 <a class="item <?= $menu_ativo === 'usuarios' ? 'ativo' : '' ?>" href="<?= site_url('usuarios') ?>">Usuarios</a>
             <?php endif; ?>
+
+            <div class="grupo">Operacao</div>
+            <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
+            <a class="item <?= $menu_ativo === 'orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('orcamentos') ?>">Orcamentos</a>
+            <a class="item <?= $menu_ativo === 'estoque' ? 'ativo' : '' ?>" href="<?= site_url('estoque') ?>">Estoque</a>
+            <a class="item <?= $menu_ativo === 'compras' ? 'ativo' : '' ?>" href="<?= site_url('compras') ?>">Compras</a>
+            <a class="item <?= $menu_ativo === 'financeiro' ? 'ativo' : '' ?>" href="<?= site_url('financeiro') ?>">Financeiro</a>
+
+            <div class="grupo">Consultas</div>
+            <a class="item <?= $menu_ativo === 'consulta_os' ? 'ativo' : '' ?>" href="<?= site_url('clientes/ordens') ?>">OS do Cliente</a>
+            <a class="item <?= $menu_ativo === 'consulta_orcamentos' ? 'ativo' : '' ?>" href="<?= site_url('clientes/orcamentos') ?>">Orcamentos do Cliente</a>
+            <a class="item <?= $menu_ativo === 'consulta_notas' ? 'ativo' : '' ?>" href="<?= site_url('clientes/notas') ?>">Notas Fiscais do Cliente</a>
         </nav>
 
         <div class="rodape">

@@ -90,6 +90,62 @@ class Cliente_especial_model extends MY_Model
 
     // ------------------------------------------------------------------
 
+    /**
+     * Precos especiais de um produto em todos os clientes (grade do cadastro).
+     */
+    public function clientes_do_produto($produto_id)
+    {
+        return $this->db->query(
+            "SELECT e.cliente_id, e.perc_lucro, e.valor_venda, e.updated_at,
+                    c.nome AS cliente_nome
+               FROM {$this->tabela} e
+               JOIN " . T_CLIENTES . " c ON c.id = e.cliente_id
+              WHERE e.produto_id = ?
+              ORDER BY c.nome",
+            array((int) $produto_id)
+        )->result_array();
+    }
+
+    /**
+     * Acopla o produto corrente a todos os clientes que ja possuem preco
+     * especial (query POPULA_PRODUTOS_CLIENTES_03 do Access).
+     */
+    public function incluir_clientes_especiais($produto_id, $perc_lucro = 15)
+    {
+        $produto_id = (int) $produto_id;
+        $perc       = (float) $perc_lucro;
+
+        $sql = "INSERT INTO {$this->tabela} (cliente_id, produto_id, perc_lucro, valor_venda)
+                SELECT c.cliente_id, ?, ?, round(p.valor_compra * (1 + (? / 100.0)), 2)
+                  FROM (SELECT DISTINCT cliente_id FROM {$this->tabela}) c
+                  JOIN " . T_PRODUTOS . " p ON p.id = ?
+                 WHERE NOT EXISTS (
+                       SELECT 1 FROM {$this->tabela} e
+                        WHERE e.cliente_id = c.cliente_id AND e.produto_id = ?
+                 )
+                ON CONFLICT (cliente_id, produto_id) DO NOTHING";
+
+        $this->db->query($sql, array($produto_id, $perc, $perc, $produto_id, $produto_id));
+
+        return $this->db->affected_rows();
+    }
+
+    /**
+     * Recalcula todos os precos especiais com base no custo atual do produto.
+     */
+    public function recalcular_todos()
+    {
+        $this->db->query(
+            "UPDATE {$this->tabela} e
+                SET valor_venda = round(p.valor_compra * (1 + COALESCE(e.perc_lucro, 15) / 100), 2),
+                    updated_at = now()
+               FROM " . T_PRODUTOS . " p
+              WHERE p.id = e.produto_id"
+        );
+
+        return $this->db->affected_rows();
+    }
+
     public function por_produto($cliente_id, $produto_id)
     {
         return $this->db->query(

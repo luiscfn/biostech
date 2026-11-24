@@ -902,6 +902,23 @@ class Estoque_model extends MY_Model
         )->result_array();
     }
 
+    public function prateleiras_por_estante($estante)
+    {
+        if ($estante === '' || $estante === NULL)
+        {
+            return array();
+        }
+
+        return $this->db->query(
+            "SELECT pr.*, e.nome AS estante_nome
+               FROM " . T_ESTOQUE_PRATELEIRAS . " pr
+               LEFT JOIN " . T_ESTOQUE_ESTANTES . " e ON e.codigo = pr.estante_codigo
+              WHERE pr.estante_codigo = ?
+              ORDER BY pr.codigo",
+            array((int) $estante)
+        )->result_array();
+    }
+
     public function prateleiras()
     {
         return $this->db->query(

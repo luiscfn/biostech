@@ -40,6 +40,20 @@ class Auditoria
     }
 
     /**
+     * Eventos de uma entidade (ex.: alteracoes de um produto).
+     */
+    public function por_entidade($entidade, $entidade_id, $limite = 50)
+    {
+        $sql = "SELECT * FROM " . T_AUDITORIA . "
+                 WHERE entidade = ? AND entidade_id = ?
+                 ORDER BY created_at DESC, id DESC LIMIT ?";
+
+        return $this->CI->db->query($sql, array(
+            $entidade, (string) $entidade_id, (int) $limite,
+        ))->result_array();
+    }
+
+    /**
      * Ultimos eventos.
      */
     public function ultimos($limite = 20)
