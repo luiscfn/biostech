@@ -839,6 +839,82 @@ class Orcamentos_model extends MY_Model
         return array('ok' => TRUE, 'dados' => $novo);
     }
 
+    /**
+     * Grava a composicao do total (percentuais/valores) da aba Levantamento
+     * do dimensionamento. Replica salvar_financeiro(), trocando os campos
+     * de valor do orçamento pelos campos do dimensionamento.
+     */
+    public function salvar_composicao_dimensionamento($numero, $dados, $usuario)
+    {
+        $antes = $this->dimensionamento($numero);
+
+        if (empty($antes))
+        {
+            return array('ok' => FALSE, 'erro' => 'Dimensionamento nao encontrado.');
+        }
+
+        $material = (float) $this->db->query(
+            "SELECT COALESCE(SUM(total_venda), 0) AS total
+               FROM " . T_ORCAMENTO_DIMENSIONAMENTO_ITENS . "
+              WHERE dimensionamento_numero = ?",
+            array((int) $numero)
+        )->row()->total;
+
+        $linhas = array(
+            array('percentual_mao_obra', 'mao_obra', 'Mao de obra'),
+            array('percentual_mat_fixacao', 'material_fixacao', 'Material de fixacao'),
+            array('percentual_acrescimo_custo', 'acrescimo_custo', 'Acrescimo de custo'),
+            array('percentual_nota_fiscal', 'nota_fiscal', 'Imposto da nota fiscal'),
+        );
+
+        $novo      = array();
+        $acumulado = round($material, 2);
+
+        foreach ($linhas as $linha)
+        {
+            list($campoPerc, $campoValor, $rotulo) = $linha;
+
+            $perc  = $this->_dec($this->_v($dados, $campoPerc));
+            $valor = $this->_dec($this->_v($dados, $campoValor));
+            $modo  = $this->_v($dados, 'modo_' . $campoValor) === 'valor' ? 'valor' : 'percentual';
+
+            if ($perc !== NULL && ((float) $perc < 0 || (float) $perc > 1000))
+            {
+                return array('ok' => FALSE, 'erro' => 'Percentual invalido em ' . $rotulo . '.');
+            }
+
+            if ($valor !== NULL && (float) $valor < 0)
+            {
+                return array('ok' => FALSE, 'erro' => 'Valor invalido em ' . $rotulo . '.');
+            }
+
+            if ($modo === 'valor')
+            {
+                // Valor informado diretamente: percentual fica NULL para que
+                // recalcular_dimensionamento() nao o substitua depois.
+                $v = round((float) ($valor ? $valor : 0), 2);
+                $p = NULL;
+            }
+            else
+            {
+                $p = $perc !== NULL ? round((float) $perc, 4) : NULL;
+                $v = $p !== NULL ? round($p * $acumulado / 100, 2) : 0.0;
+            }
+
+            $novo[$campoPerc]  = $p;
+            $novo[$campoValor] = $v;
+
+            $acumulado = round($acumulado + $v, 2);
+        }
+
+        $this->_atualizar(T_ORCAMENTOS_DIMENSIONAMENTO, (int) $numero, $novo, 'numero');
+
+        $depois = $this->dimensionamento($numero);
+        $this->_log_diff_dim($numero, $antes, $depois, $usuario['login'], 'A');
+
+        return array('ok' => TRUE, 'dados' => $novo);
+    }
+
     // ==================================================================
     // Exclusao / status
     // ==================================================================
@@ -1954,11 +2030,27 @@ class Orcamentos_model extends MY_Model
         return $this->db->query(
             "SELECT i.*, p.unidade AS produto_unidade, p.codigo AS produto_codigo,
                     p.marca AS produto_marca, p.valor_venda AS produto_valor_venda,
+                    COALESCE((SELECT CASE WHEN ci.novo_valor_unitario > 0
+                                          THEN ci.novo_valor_unitario ELSE ci.valor_unitario END
+                                FROM " . T_COMPRAS_ITENS . " ci
+                                JOIN " . T_COMPRAS_PEDIDOS . " cp ON cp.numero = ci.pedido_numero
+                               WHERE ci.produto_id = i.produto_id AND cp.situacao = 'fechado'
+                               ORDER BY cp.data DESC, cp.numero DESC, ci.id DESC
+                               LIMIT 1), i.valor_compra) AS ultima_compra,
                     COALESCE(NULLIF(i.descricao_produto, ''), p.descricao) AS descricao_produto,
                     ltrim(COALESCE(NULLIF(i.grupo, ''), p.grupo), '0') AS grupo_efetivo,
-                    ltrim(COALESCE(NULLIF(i.subgrupo, ''), p.subgrupo), '0') AS subgrupo_efetivo
+                    ltrim(COALESCE(NULLIF(i.subgrupo, ''), p.subgrupo), '0') AS subgrupo_efetivo,
+                    COALESCE(NULLIF(i.grupo, ''), p.grupo) AS grupo_exibicao,
+                    COALESCE(NULLIF(i.subgrupo, ''), p.subgrupo) AS subgrupo_exibicao,
+                    g.nome AS grupo_descricao,
+                    sg.nome AS subgrupo_descricao
                FROM " . T_ORCAMENTO_DIMENSIONAMENTO_ITENS . " i
                LEFT JOIN " . T_PRODUTOS . " p ON p.id = i.produto_id
+               LEFT JOIN " . T_ESTOQUE_GRUPOS . " g
+                      ON g.codigo = COALESCE(NULLIF(i.grupo, ''), p.grupo)
+               LEFT JOIN " . T_ESTOQUE_SUBGRUPOS . " sg
+                      ON sg.grupo_codigo = COALESCE(NULLIF(i.grupo, ''), p.grupo)
+                     AND sg.codigo = COALESCE(NULLIF(i.subgrupo, ''), p.subgrupo)
               WHERE i.dimensionamento_numero = ?
               ORDER BY i.numero_item",
             array((int) $numero)

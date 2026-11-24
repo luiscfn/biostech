@@ -164,6 +164,7 @@ $route['orcamentos/dimensionamento/(:num)']            = 'orcamentos/dimensionam
 $route['orcamentos/dimensionamento_excluir/(:num)']    = 'orcamentos/dimensionamento_excluir/$1';
 $route['orcamentos/dimensionamento_gerar_orcamento/(:num)'] = 'orcamentos/dimensionamento_gerar_orcamento/$1';
 $route['orcamentos/dimensionamento_imprimir/(:num)']   = 'orcamentos/dimensionamento_imprimir/$1';
+$route['orcamentos/salvar_composicao_dimensionamento/(:num)'] = 'orcamentos/salvar_composicao_dimensionamento/$1';
 $route['orcamentos/dim_adicionar_item/(:num)']         = 'orcamentos/dim_adicionar_item/$1';
 $route['orcamentos/dim_adicionar_item_classificacao/(:num)'] = 'orcamentos/dim_adicionar_item_classificacao/$1';
 $route['orcamentos/dim_atualizar_item/(:num)/(:num)']  = 'orcamentos/dim_atualizar_item/$1/$2';

@@ -418,6 +418,72 @@ a:hover { text-decoration: underline; }
 
 .tabela-wrap { overflow-x: auto; }
 
+/* Aba Itens do dimensionamento: 8 linhas visiveis, cabecalho e Total Geral fixos */
+.tabela-wrap-itens {
+    max-height: 640px; /* ajustada via JS para exatamente 8 linhas */
+    overflow-y: auto;
+}
+
+/* Aba Levantamento do dimensionamento: 4 produtos visiveis, o restante via rolagem */
+.tabela-wrap-levantamento {
+    max-height: 340px; /* ajustada via JS para exatamente 4 linhas */
+    overflow-y: auto;
+}
+.tabela-dimen-itens .produto { min-width: 420px; }
+.tabela-dimen-itens input.sem-borda {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 2px 4px;
+    font: inherit;
+}
+/* Rodape alinhado com as colunas da tabela (o padding de tbody nao vale para tfoot) */
+.tabela-dimen-itens tfoot td { padding: 9px 12px; white-space: nowrap; }
+.tabela-dimen-itens .total-geral-valor { text-align: right; }
+
+.composicao-grade { display: flex; align-items: flex-start; gap: 14px; flex-wrap: nowrap; }
+.composicao-bloco { flex: 0 1 540px; min-width: 0; }
+.composicao-bloco form { margin: 0; }
+.resumo-grade { display: flex; align-items: flex-start; gap: 14px; flex-wrap: nowrap; }
+.resumo-bloco { flex: 0 1 330px; min-width: 0; }
+.resumo-total-bloco { flex: 0 1 350px; min-width: 0; }
+.resumo-geral-tabela,
+.resumo-total-tabela { width: 100%; }
+.resumo-geral-tabela td,
+.resumo-total-tabela td { padding: 6px 8px; }
+.resumo-total-tabela th:first-child,
+.resumo-total-tabela td:first-child { width: 240px; }
+.resumo-total-tabela td.percentual { color: var(--verde); font-weight: 700; white-space: nowrap; }
+
+/* Contorno das tabelas do resumo/dimensionamento (caixa fechada) */
+.composicao-total th,
+.composicao-total td,
+.resumo-geral-tabela th,
+.resumo-geral-tabela td,
+.resumo-total-tabela th,
+.resumo-total-tabela td {
+    border-left: 1px solid var(--borda);
+    border-right: 1px solid var(--borda);
+}
+.composicao-total thead th,
+.resumo-geral-tabela thead th,
+.resumo-total-tabela thead th { border-top: 1px solid var(--borda); }
+.composicao-total tbody tr:last-child td,
+.resumo-geral-tabela tbody tr:last-child td,
+.resumo-total-tabela tbody tr:last-child td { border-bottom: 1px solid var(--borda); }
+.composicao-total,
+.resumo-geral-tabela,
+.resumo-total-tabela { border-radius: 6px; overflow: hidden; }
+.resumo-total-tabela td { font-size: 12px; }
+
+.secao-titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.secao-titulo-linha .secao-titulo { flex: 1 1 auto; margin: 0 0 10px; }
+.composicao-total { max-width: 560px; }
+.composicao-total .fin-campo { padding: 6px 8px; font-size: 12px; }
+.composicao-total thead th,
+.composicao-total tbody td { padding: 7px 10px; }
+.composicao-total tfoot td { padding: 9px 10px; border-top: 1px solid var(--borda); }
+
 table.tabela {
     width: 100%;
     border-collapse: collapse;
@@ -1416,4 +1482,17 @@ form.inline {
     .campo.ativo { justify-content: flex-start; }
     .filtros input[type=text], .filtros select { min-width: 0; width: 100%; }
     .filtros-largos input[type=text] { max-width: none; }
+}
+
+/* ---------------------------------------- ajustes finais - aba Financeiro */
+.composicao-grade { margin-top: 24px; }
+.painel-corpo .secao-titulo-linha .secao-titulo.destaque,
+.painel-corpo .resumo-bloco .secao-titulo.destaque,
+.painel-corpo .resumo-total-bloco .secao-titulo.destaque { margin-bottom: 2px; }
+.resumo-total-bloco { flex-basis: 370px; }
+.tabela-dimen-itens td.produto { font-size: 11px; }
+.tabela-dimen-itens tfoot td:first-child { padding-left: 42%; }
+table.tabela.resumo-geral-tabela tbody td { padding: 8px 8px; }
+@media (max-width: 1200px) {
+    .tabela-dimen-itens tfoot td:first-child { padding-left: 12px; }
 }

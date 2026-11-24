@@ -1061,6 +1061,37 @@ class Orcamentos extends MY_Controller
 
     // ------------------------------------------------------------------
 
+    /** Grava a composicao do total informada na aba Levantamento. */
+    public function salvar_composicao_dimensionamento($numero)
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        $numero = (int) $numero;
+
+        if ( ! $this->eh_post())
+        {
+            redirect('orcamentos/dimensionamento/' . $numero . '?aba=levantamento');
+        }
+
+        $resultado = $this->orcamentos_model->salvar_composicao_dimensionamento(
+            $numero, $this->input->post(), $this->usuario
+        );
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'dimensionamento', $numero, NULL);
+            $this->flash('Composicao do total atualizada.');
+        }
+
+        redirect('orcamentos/dimensionamento/' . $numero . '?aba=levantamento');
+    }
+
+    // ------------------------------------------------------------------
+
     public function dimensionamento_excluir($numero)
     {
         $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
@@ -1535,7 +1566,7 @@ class Orcamentos extends MY_Controller
             'canaleta'         => array('rotulo' => 'Canaleta', 'grupos' => array('017', '052', '053')),
             'rede_logica'      => array('rotulo' => 'Rede Lógica', 'grupos' => array('054', '025')),
             'rede_eletrica'    => array('rotulo' => 'Rede Elétrica', 'grupos' => array('055', '026')),
-            'antena_painel_som'=> array('rotulo' => 'Antena/Painel/Som', 'grupos' => array('056', '039')),
+            'antena_painel_som'=> array('rotulo' => 'Painel/Som', 'grupos' => array('056', '039')),
             'seg_eletronica'   => array('rotulo' => 'Seg. Eletrônica', 'grupos' => array('057', '029')),
             'mat_fixacao'      => array('rotulo' => 'Mat. Fixação', 'grupos' => array('058')),
             'outros'           => array('rotulo' => 'Outros', 'grupos' => NULL),

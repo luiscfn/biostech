@@ -7,8 +7,8 @@ foreach ($itens as $item) { $total_venda += (float) $item['total_venda']; }
 
 $abas_rotulos = array(
     'dados'        => 'Dados',
-    'servicos'     => 'Serviço a Executar',
-    'materiais'    => 'Material Necessário',
+    'servicos'     => 'Serviços',
+    'materiais'    => 'Materiais',
 );
 
 foreach ($classificacoes as $chave => $info)
@@ -16,8 +16,8 @@ foreach ($classificacoes as $chave => $info)
     $abas_rotulos[$chave] = $info['rotulo'];
 }
 
-$abas_rotulos['itens']        = 'Itens (' . count($itens) . ')';
-$abas_rotulos['levantamento'] = 'Levantamento';
+$abas_rotulos['itens']        = 'Itens';
+$abas_rotulos['levantamento'] = 'Financeiro';
 
 $partial = isset($classificacoes[$aba])
     ? 'orcamentos/_dim_produtos_classificacao'
@@ -127,3 +127,4 @@ $partial = isset($classificacoes[$aba])
 
 <script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
 <script src="<?= base_url('assets/js/orcamentos.js') ?>"></script>
+<script src="<?= base_url('assets/js/orcamentos_dim_levantamento.js') ?>"></script>
