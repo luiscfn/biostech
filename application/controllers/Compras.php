@@ -1075,6 +1075,69 @@ class Compras extends MY_Controller
 
     // ------------------------------------------------------------------
 
+    /**
+     * Autocomplete de pedidos abertos para transferencia/copia de itens.
+     */
+    public function buscar_pedidos_transferencia()
+    {
+        $origem = (int) $this->input->get('origem');
+        $termo  = trim((string) $this->input->get('termo'));
+        $lista  = array();
+
+        foreach ($this->compras_model->pedidos_abertos_para_transferencia($origem, $termo) as $p)
+        {
+            $lista[] = array(
+                'id'          => (int) $p['numero'],
+                'numero'      => (int) $p['numero'],
+                'data'        => data_br($p['data']),
+                'fornecedor'  => $p['fornecedor'] ? $p['fornecedor'] : 'Sem fornecedor',
+                'nome'        => (int) $p['numero'] . ' - ' . data_br($p['data']) . ' - ' . ($p['fornecedor'] ? $p['fornecedor'] : 'Sem fornecedor'),
+            );
+        }
+
+        $this->_json($lista);
+    }
+
+    /**
+     * Transfere ou copia um item para outro pedido de compra.
+     */
+    public function transferir_item_modal()
+    {
+        $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
+
+        if ( ! $this->eh_post())
+        {
+            show_error('Metodo nao permitido.', 405);
+        }
+
+        $origem   = (int) $this->input->post('origem');
+        $destino  = (int) $this->input->post('destino');
+        $produto  = (int) $this->input->post('produto_id');
+        $copiar   = (string) $this->input->post('acao') === 'copiar';
+
+        $resultado = $this->compras_model->transferir_item_modal($origem, $destino, $produto, $copiar, $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+        }
+        else
+        {
+            $this->auditoria->registrar('alterar', 'compra_pedido', $origem, array(
+                'destino' => $destino,
+                'produto' => $produto,
+                'acao'    => $copiar ? 'copiar_item' : 'transferir_item',
+            ));
+            $this->flash($copiar
+                ? 'Produto copiado para o pedido ' . $destino . '.'
+                : 'Produto transferido para o pedido ' . $destino . '.');
+        }
+
+        redirect('compras/editar/' . $origem);
+    }
+
+    // ------------------------------------------------------------------
+
     private function _dominios()
     {
         return array(

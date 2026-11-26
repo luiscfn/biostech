@@ -117,7 +117,7 @@ $data   = $edicao ? $registro['data_cotacao'] : date('Y-m-d');
                     <div class="autocomplete-lista"></div>
                 </div>
             </td>
-            <td><input type="number" name="quantidade[]" class="qtd" value="1" min="0.001" step="0.001" style="text-align:right"></td>
+            <td><input type="text" inputmode="decimal" name="quantidade[]" class="qtd" value="1" style="text-align:right"></td>
 
             <td>
                 <div class="autocomplete fornecedor-1" data-url="<?= site_url('compras/buscar_fornecedores') ?>">
@@ -174,4 +174,4 @@ window.BIOSTECH_COTACAO_ITENS = <?= json_encode(array_map(function ($i) {
 </script>
 
 <script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
-<script src="<?= base_url('assets/js/compras.js') ?>"></script>
+<script src="<?= base_url('assets/js/compras.js?v=5') ?>"></script>

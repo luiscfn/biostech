@@ -294,7 +294,7 @@ window.BIOSTECH_SOLICITACAO_ITENS = <?= json_encode(array_map(function ($i) {
 </script>
 
 <script src="<?= base_url('assets/js/autocomplete.js?v=3') ?>"></script>
-<script src="<?= base_url('assets/js/compras.js?v=4') ?>"></script>
+<script src="<?= base_url('assets/js/compras.js?v=5') ?>"></script>
 
 <script>
 (function () {

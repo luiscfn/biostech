@@ -180,6 +180,11 @@ class Compras_model extends MY_Model
                     f.cnpj AS fornecedor_cnpj,
                     f.fone AS fornecedor_fone,
                     f.contato AS fornecedor_contato,
+                    f.cidade AS fornecedor_cidade,
+                    f.uf AS fornecedor_uf,
+                    f.endereco AS fornecedor_endereco,
+                    f.numero AS fornecedor_numero,
+                    f.bairro AS fornecedor_bairro,
                     s.nome AS setor_nome,
                     u.nome AS funcionario_nome,
                     uc.nome AS usuario_cadastro_nome,
@@ -249,6 +254,153 @@ class Compras_model extends MY_Model
               ORDER BY parcela",
             array((string) (int) $numero)
         )->result_array();
+    }
+
+    /**
+     * Pedidos abertos disponiveis para receber itens transferidos/copiados.
+     */
+    public function pedidos_abertos_para_transferencia($origem, $termo = '')
+    {
+        $sql = "SELECT p.numero, p.data, f.razao_social AS fornecedor
+                  FROM " . T_COMPRAS_PEDIDOS . " p
+                   LEFT JOIN " . T_FORNECEDORES . " f ON f.codigo = p.fornecedor_codigo
+                  WHERE p.situacao = 'aberto'
+                    AND p.numero <> ?";
+
+        $params = array((int) $origem);
+
+        if (trim((string) $termo) !== '')
+        {
+            $sql .= " AND (p.numero::text LIKE ? OR lower(f.razao_social) LIKE ?)";
+            $like = '%' . mb_strtolower(trim($termo), 'UTF-8') . '%';
+            $params[] = $like;
+            $params[] = $like;
+        }
+
+        $sql .= " ORDER BY p.numero DESC LIMIT 25";
+
+        return $this->db->query($sql, $params)->result_array();
+    }
+
+    /**
+     * Transfere ou copia um item de um pedido para outro.
+     * $copiar = FALSE remove o item do pedido de origem.
+     */
+    public function transferir_item_modal($origem, $destino, $produto_id, $copiar, $usuario)
+    {
+        $origem  = (int) $origem;
+        $destino = (int) $destino;
+        $produto = (int) $produto_id;
+
+        if ($origem <= 0 || $destino <= 0 || $origem === $destino || $produto <= 0)
+        {
+            return array('ok' => FALSE, 'erro' => 'Pedidos ou produto invalidos.');
+        }
+
+        $pedido_origem  = $this->pedido($origem);
+        $pedido_destino = $this->pedido($destino);
+
+        if (empty($pedido_origem) || empty($pedido_destino))
+        {
+            return array('ok' => FALSE, 'erro' => 'Pedido nao encontrado.');
+        }
+
+        if ($pedido_origem['situacao'] !== 'aberto' || $pedido_destino['situacao'] !== 'aberto')
+        {
+            return array('ok' => FALSE, 'erro' => 'Somente pedidos abertos podem receber itens.');
+        }
+
+        $itens_origem = $this->itens_pedido($origem);
+        $item = NULL;
+
+        foreach ($itens_origem as $i)
+        {
+            if ((int) $i['produto_id'] === $produto) { $item = $i; break; }
+        }
+
+        if ($item === NULL)
+        {
+            return array('ok' => FALSE, 'erro' => 'Produto nao esta no pedido de origem.');
+        }
+
+        $itens_destino = $this->itens_pedido($destino);
+
+        foreach ($itens_destino as $i)
+        {
+            if ((int) $i['produto_id'] === $produto)
+            {
+                return array('ok' => FALSE, 'erro' => 'Este produto ja esta no pedido de destino.');
+            }
+        }
+
+        $novo_item = array(
+            'produto_id'            => $produto,
+            'quantidade'            => $item['quantidade'],
+            'valor_unitario'        => $item['valor_unitario'],
+            'novo_valor_unitario'   => $item['novo_valor_unitario'],
+            'desconto_percentual'   => $item['desconto_percentual'],
+            'desconto_item'         => $item['desconto_item'],
+            'observacao'            => $item['observacao'],
+            'atualiza_preco_compra' => $item['atualiza_preco_compra'],
+        );
+
+        $dados_destino = $pedido_destino;
+        $dados_destino['numero'] = $destino;
+        $dados_destino['desconto_pedido_percentual'] = $pedido_destino['desconto_percentual'];
+
+        $itens_destino[] = $novo_item;
+
+        $this->db->trans_start();
+
+        $r = $this->salvar_pedido($dados_destino, $itens_destino, $usuario, FALSE, TRUE);
+
+        if ( ! $r['ok'])
+        {
+            $this->db->trans_rollback();
+            return $r;
+        }
+
+        if ( ! $copiar)
+        {
+            $dados_origem = $pedido_origem;
+            $dados_origem['numero'] = $origem;
+            $dados_origem['desconto_pedido_percentual'] = $pedido_origem['desconto_percentual'];
+
+            $resto = array();
+
+            foreach ($itens_origem as $i)
+            {
+                if ((int) $i['produto_id'] === $produto) { continue; }
+
+                $resto[] = array(
+                    'produto_id'            => (int) $i['produto_id'],
+                    'quantidade'            => $i['quantidade'],
+                    'valor_unitario'        => $i['valor_unitario'],
+                    'novo_valor_unitario'   => $i['novo_valor_unitario'],
+                    'desconto_percentual'   => $i['desconto_percentual'],
+                    'desconto_item'         => $i['desconto_item'],
+                    'observacao'            => $i['observacao'],
+                    'atualiza_preco_compra' => $i['atualiza_preco_compra'],
+                );
+            }
+
+            $r2 = $this->salvar_pedido($dados_origem, $resto, $usuario, FALSE, TRUE);
+
+            if ( ! $r2['ok'])
+            {
+                $this->db->trans_rollback();
+                return $r2;
+            }
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE)
+        {
+            return array('ok' => FALSE, 'erro' => 'Falha ao '.($copiar ? 'copiar' : 'transferir').' o item.');
+        }
+
+        return array('ok' => TRUE, 'erro' => NULL);
     }
 
     // ==================================================================
@@ -2127,7 +2279,11 @@ class Compras_model extends MY_Model
             $v = trim($v);
             $v = str_replace(array('R$', ' ', "\xc2\xa0"), '', $v);
 
-            if (strpos($v, ',') !== FALSE && strpos($v, '.') !== FALSE)
+            if (strpos($v, ',') !== FALSE)
+            {
+                $v = str_replace('.', '', $v);
+            }
+            elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $v))
             {
                 $v = str_replace('.', '', $v);
             }

@@ -30,6 +30,8 @@
 
         if (texto.indexOf(',') !== -1) {
             texto = texto.replace(/\./g, '').replace(',', '.');
+        } else if (/^\d{1,3}(\.\d{3})+$/.test(texto)) {
+            texto = texto.replace(/\./g, '');
         }
 
         var n = parseFloat(texto);
@@ -37,7 +39,29 @@
     }
 
     function formatar(valor) {
-        return Number(valor).toFixed(2).replace('.', ',');
+        var n = Number(valor);
+
+        if (!isFinite(n)) {
+            n = 0;
+        }
+
+        return n.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function formatarQtd(valor) {
+        var n = Number(valor);
+
+        if (!isFinite(n)) {
+            n = 0;
+        }
+
+        return n.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 3
+        });
     }
 
     function linhas(tabela) {
@@ -101,10 +125,10 @@
         if (unidade) { unidade.value = dados.unidade || ''; }
 
         var saldo = linha.querySelector('.saldo');
-        if (saldo) { saldo.value = dados.saldo !== undefined ? dados.saldo : ''; }
+        if (saldo) { saldo.value = dados.saldo !== undefined ? formatarQtd(dados.saldo) : ''; }
 
         var qtd = linha.querySelector('.qtd');
-        if (qtd) { qtd.value = dados.quantidade; }
+        if (qtd) { qtd.value = formatarQtd(dados.quantidade); }
 
         var unit = linha.querySelector('.valor-unit');
         if (unit) { unit.value = formatar(dados.valor_unitario || 0); }
@@ -212,7 +236,7 @@
         } else {
             var vazio = document.createElement('tr');
             vazio.className = 'linha-vazia';
-            vazio.innerHTML = '<td colspan="13" class="vazio">Nenhum item no pedido.</td>';
+            vazio.innerHTML = '<td colspan="11" class="vazio">Nenhum item no pedido.</td>';
             tabela.querySelector('tbody').appendChild(vazio);
         }
 
@@ -235,12 +259,12 @@
                     produto_id: id,
                     descricao: descricao,
                     unidade: document.getElementById('item-unidade').value,
-                    saldo: parseFloat(document.getElementById('item-saldo').value || '0'),
-                    quantidade: parseFloat(document.getElementById('item-qtd').value || '1'),
-                    valor_unitario: parseFloat(document.getElementById('item-valor-unit').value || '0'),
-                    novo_valor_unitario: parseFloat(document.getElementById('item-novo-valor').value || '0'),
-                    desconto_percentual: parseFloat(document.getElementById('item-desc-perc').value || '0'),
-                    desconto_item: parseFloat(document.getElementById('item-desc-valor').value || '0'),
+                    saldo: numero(document.getElementById('item-saldo').value),
+                    quantidade: numero(document.getElementById('item-qtd').value) || 1,
+                    valor_unitario: numero(document.getElementById('item-valor-unit').value),
+                    novo_valor_unitario: numero(document.getElementById('item-novo-valor').value),
+                    desconto_percentual: numero(document.getElementById('item-desc-perc').value),
+                    desconto_item: numero(document.getElementById('item-desc-valor').value),
                     observacao: ''
                 });
 
@@ -279,7 +303,40 @@
 
             ['item-qtd', 'item-valor-unit', 'item-novo-valor', 'item-desc-perc', 'item-desc-valor'].forEach(function (id) {
                 var campo = document.getElementById(id);
-                if (campo) { campo.addEventListener('input', calcularItemCadastro); }
+                if (!campo) { return; }
+
+                campo.addEventListener('input', calcularItemCadastro);
+
+                campo.addEventListener('focusout', function () {
+                    if (campo.value.trim() === '') { return; }
+
+                    campo.value = id === 'item-qtd'
+                        ? formatarQtd(numero(campo.value))
+                        : formatar(numero(campo.value));
+                    calcularItemCadastro();
+                });
+            });
+
+            document.addEventListener('autocomplete:selecionar', function (ev) {
+                var box = ev.target && ev.target.closest ? ev.target.closest('.autocomplete') : null;
+
+                if (!box) { return; }
+
+                var custo = box.getAttribute('data-custo');
+                if (custo) {
+                    var campoCusto = document.querySelector(custo);
+                    if (campoCusto && campoCusto.value !== '') {
+                        campoCusto.value = formatar(numero(campoCusto.value));
+                    }
+                }
+
+                var estoque = box.getAttribute('data-estoque');
+                if (estoque) {
+                    var campoEstoque = document.querySelector(estoque);
+                    if (campoEstoque && campoEstoque.value !== '') {
+                        campoEstoque.value = formatarQtd(numero(campoEstoque.value));
+                    }
+                }
             });
         }
 
@@ -290,6 +347,26 @@
         });
 
         tabela.addEventListener('change', function () {
+            atualizarTotaisPedido(tabela);
+        });
+
+        tabela.addEventListener('focusout', function (ev) {
+            var campo = ev.target;
+
+            if (!campo || !campo.matches) { return; }
+
+            if (campo.classList.contains('qtd') || campo.classList.contains('saldo')) {
+                if (campo.value.trim() !== '') {
+                    campo.value = formatarQtd(numero(campo.value));
+                }
+            } else if (campo.matches('.valor-unit, .novo-valor, .desc-item, .desc-perc')) {
+                if (campo.value.trim() !== '') {
+                    campo.value = formatar(numero(campo.value));
+                }
+            } else {
+                return;
+            }
+
             atualizarTotaisPedido(tabela);
         });
 
@@ -311,6 +388,13 @@
 
             if (campo) {
                 campo.addEventListener('input', function () {
+                    atualizarTotaisPedido(tabela);
+                });
+
+                campo.addEventListener('focusout', function () {
+                    if (campo.value.trim() === '') { return; }
+
+                    campo.value = formatar(numero(campo.value));
                     atualizarTotaisPedido(tabela);
                 });
             }
