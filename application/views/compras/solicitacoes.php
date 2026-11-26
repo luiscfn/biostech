@@ -15,8 +15,6 @@ $rotulos = array(
 
         <div class="acoes-ficha">
             <a class="botao secundario pequeno" href="<?= site_url('compras') ?>">Pedidos</a>
-            <a class="botao secundario pequeno" href="<?= site_url('compras/cotacoes') ?>">Cotacoes</a>
-            <a class="botao secundario pequeno" href="<?= site_url('compras/prazos') ?>">Prazos</a>
             <?php if (in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE)): ?>
                 <a class="botao pequeno" href="<?= site_url('compras/solicitacao') ?>">+ Nova solicitacao</a>
             <?php endif; ?>
@@ -26,7 +24,8 @@ $rotulos = array(
     <div class="painel-corpo">
         <form method="get" action="<?= site_url('compras/solicitacoes') ?>" class="filtros">
             <input type="text" name="busca" value="<?= html_escape($filtros['busca']) ?>"
-                   placeholder="Numero, observacao, local ou produto...">
+                   style="width:330px;min-width:330px"
+                   placeholder="Numero, solicitante ou local de entrega...">
 
             <select name="situacao">
                 <option value="">Situacao</option>
@@ -44,8 +43,8 @@ $rotulos = array(
                 <?php endforeach; ?>
             </select>
 
-            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial">
-            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final">
+            <input type="date" name="data_de" value="<?= html_escape($filtros['data_de']) ?>" title="Data inicial" style="height:37px">
+            <input type="date" name="data_ate" value="<?= html_escape($filtros['data_ate']) ?>" title="Data final" style="height:37px">
 
             <button type="submit" class="botao secundario">Pesquisar</button>
 
@@ -55,7 +54,7 @@ $rotulos = array(
         </form>
     </div>
 
-    <div class="tabela-wrap">
+    <div class="tabela-wrap" style="overflow-y:auto">
         <table class="tabela">
             <thead>
                 <tr>
@@ -63,9 +62,9 @@ $rotulos = array(
                     <th style="width:95px">Data</th>
                     <th>Setor</th>
                     <th>Solicitante</th>
-                    <th class="num" style="width:60px">Itens</th>
                     <th>Local de entrega</th>
                     <th class="centro" style="width:100px">Situacao</th>
+                    <th class="num" style="width:60px">Itens</th>
                     <th class="centro" style="width:90px">Pedido</th>
                     <th class="centro" style="width:160px">Acoes</th>
                 </tr>
@@ -87,9 +86,9 @@ $rotulos = array(
                             <td><?= data_br($r['data']) ?></td>
                             <td><?= html_escape($r['setor_nome'] ? $r['setor_nome'] : '-') ?></td>
                             <td><?= html_escape($r['funcionario_nome'] ? $r['funcionario_nome'] : '-') ?></td>
-                            <td class="num"><?= numero_br($r['qtd_itens']) ?></td>
                             <td><?= html_escape($r['local_entrega'] ? $r['local_entrega'] : '-') ?></td>
                             <td class="centro"><span class="badge <?= $situacao[1] ?>"><?= html_escape($situacao[0]) ?></span></td>
+                            <td class="num"><?= numero_br($r['qtd_itens']) ?></td>
                             <td class="centro">
                                 <?php if ( ! empty($r['pedido_numero'])): ?>
                                     <a href="<?= site_url('compras/ver/' . $r['pedido_numero']) ?>"><?= (int) $r['pedido_numero'] ?></a>

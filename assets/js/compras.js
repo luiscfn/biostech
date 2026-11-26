@@ -91,7 +91,7 @@
     }
 
     function preencherLinha(linha, dados) {
-        var busca = linha.querySelector('.autocomplete-busca');
+        var busca = linha.querySelector('.autocomplete-busca') || linha.querySelector('.produto-desc');
         var oculto = linha.querySelector('input[name="produto_id[]"]');
 
         if (busca) { busca.value = dados.descricao || ''; }
@@ -210,7 +210,77 @@
                 adicionarLinha(tabela, existentes[i]);
             }
         } else {
-            adicionarLinha(tabela);
+            var vazio = document.createElement('tr');
+            vazio.className = 'linha-vazia';
+            vazio.innerHTML = '<td colspan="13" class="vazio">Nenhum item no pedido.</td>';
+            tabela.querySelector('tbody').appendChild(vazio);
+        }
+
+        var botaoItem = document.getElementById('btn-adicionar-item-pedido');
+
+        if (botaoItem) {
+            botaoItem.addEventListener('click', function () {
+                var id = parseInt(document.getElementById('item-produto-id').value, 10);
+                var descricao = document.getElementById('item-produto').value.trim();
+
+                if (!id) {
+                    window.alert('Selecione um produto.');
+                    return;
+                }
+
+                var vazio = tabela.querySelector('tbody tr.linha-vazia');
+                if (vazio) { vazio.remove(); }
+
+                var nova = adicionarLinha(tabela, {
+                    produto_id: id,
+                    descricao: descricao,
+                    unidade: document.getElementById('item-unidade').value,
+                    saldo: parseFloat(document.getElementById('item-saldo').value || '0'),
+                    quantidade: parseFloat(document.getElementById('item-qtd').value || '1'),
+                    valor_unitario: parseFloat(document.getElementById('item-valor-unit').value || '0'),
+                    novo_valor_unitario: parseFloat(document.getElementById('item-novo-valor').value || '0'),
+                    desconto_percentual: parseFloat(document.getElementById('item-desc-perc').value || '0'),
+                    desconto_item: parseFloat(document.getElementById('item-desc-valor').value || '0'),
+                    observacao: ''
+                });
+
+                if (nova) { recalcularLinha(nova); }
+                renumerar(tabela);
+                atualizarTotaisPedido(tabela);
+
+                ['item-produto', 'item-produto-id', 'item-unidade', 'item-saldo',
+                 'item-valor-unit', 'item-novo-valor', 'item-desc-perc', 'item-desc-valor'].forEach(function (campo) {
+                    var el = document.getElementById(campo);
+                    if (el) { el.value = ''; }
+                });
+
+                var qtd = document.getElementById('item-qtd');
+                if (qtd) { qtd.value = '1'; }
+
+                var totalItem = document.getElementById('item-total');
+                if (totalItem) { totalItem.textContent = '0,00'; }
+            });
+
+            function calcularItemCadastro() {
+                var alvo = document.getElementById('item-total');
+                if (!alvo) { return; }
+
+                var qtd = numero(document.getElementById('item-qtd').value);
+                var unit = numero(document.getElementById('item-valor-unit').value);
+                var novo = numero(document.getElementById('item-novo-valor').value);
+                var perc = numero(document.getElementById('item-desc-perc').value);
+                var desc = numero(document.getElementById('item-desc-valor').value);
+                var base = qtd * unit;
+                var total = novo > 0 ? qtd * novo : base - (perc > 0 ? base * perc / 100 : desc);
+
+                if (total < 0) { total = 0; }
+                alvo.textContent = formatar(total);
+            }
+
+            ['item-qtd', 'item-valor-unit', 'item-novo-valor', 'item-desc-perc', 'item-desc-valor'].forEach(function (id) {
+                var campo = document.getElementById(id);
+                if (campo) { campo.addEventListener('input', calcularItemCadastro); }
+            });
         }
 
         atualizarTotaisPedido(tabela);
@@ -499,6 +569,65 @@
     // Solicitacao interna
     // ==================================================================
 
+    function aviso(texto) {
+        var antigo = document.getElementById('modal-aviso-solicitacao');
+
+        if (antigo) { antigo.remove(); }
+
+        var modal = document.createElement('div');
+        modal.className = 'modal-confirmacao visivel';
+        modal.id = 'modal-aviso-solicitacao';
+        modal.innerHTML = '<div class="modal-confirmacao-caixa">'
+            + '<h4>Aten&ccedil;&atilde;o</h4>'
+            + '<div class="alert alert-warning"></div>'
+            + '<div class="modal-confirmacao-acoes"><button type="button" class="botao pequeno">Ok</button></div>'
+            + '</div>';
+        modal.querySelector('.alert').textContent = texto;
+
+        document.body.appendChild(modal);
+
+        var ok = modal.querySelector('button');
+        ok.addEventListener('click', function () { modal.remove(); });
+        ok.focus();
+    }
+
+    function avisoProdutoDuplicado() {
+        var antigo = document.getElementById('modal-produto-duplicado');
+
+        if (antigo) { antigo.remove(); }
+
+        var modal = document.createElement('div');
+        modal.className = 'modal-confirmacao visivel';
+        modal.id = 'modal-produto-duplicado';
+        modal.innerHTML = '<div class="modal-confirmacao-caixa">'
+            + '<h4>Aten&ccedil;&atilde;o</h4>'
+            + '<div class="alert alert-warning">Produto j&aacute; est&aacute; cadastrado nesta solicita&ccedil;&atilde;o.</div>'
+            + '<div class="modal-confirmacao-acoes"><button type="button" class="botao pequeno">Ok</button></div>'
+            + '</div>';
+
+        document.body.appendChild(modal);
+
+        var ok = modal.querySelector('button');
+        ok.addEventListener('click', function () { modal.remove(); });
+        ok.focus();
+    }
+
+    function produtoJaCadastrado(tabela, produto_id, linhaAtual) {
+        var linhasAtuais = linhas(tabela);
+
+        for (var i = 0; i < linhasAtuais.length; i++) {
+            if (linhaAtual && linhasAtuais[i] === linhaAtual) { continue; }
+
+            var oculto = linhasAtuais[i].querySelector('input[name="produto_id[]"]');
+
+            if (oculto && parseInt(oculto.value, 10) === parseInt(produto_id, 10)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function iniciarSolicitacao(tabela) {
         var existentes = window.BIOSTECH_SOLICITACAO_ITENS || [];
 
@@ -529,7 +658,63 @@
                 if (selecionado) { selecionado.checked = !!existentes[i].selecionado; }
             }
         } else {
-            adicionarLinha(tabela);
+            var vazio = document.createElement('tr');
+            vazio.className = 'linha-vazia';
+            vazio.innerHTML = '<td colspan="7" class="vazio">Nenhum item na solicitacao.</td>';
+            tabela.querySelector('tbody').appendChild(vazio);
+        }
+
+        var botaoAdicionar = document.getElementById('btn-adicionar-produto');
+
+        if (botaoAdicionar) {
+            botaoAdicionar.addEventListener('click', function () {
+                var id = parseInt(document.getElementById('pf_novo_produto_id').value, 10);
+                var qtd = parseInt(document.getElementById('pf_novo_qtd').value, 10);
+                var descricao = document.getElementById('pf_novo_produto').value.trim();
+                var unidade = document.getElementById('pf_novo_unidade').value;
+                var saldo = parseFloat(document.getElementById('pf_novo_saldo').value || '0');
+                var repor = document.getElementById('pf_novo_repor').checked;
+
+                if (!id) {
+                    aviso('Selecione um produto.');
+                    return;
+                }
+
+                if (!qtd || qtd <= 0) {
+                    aviso('Informe uma quantidade maior que zero.');
+                    return;
+                }
+
+                if (produtoJaCadastrado(tabela, id)) {
+                    avisoProdutoDuplicado();
+                    return;
+                }
+
+                var vazio = tabela.querySelector('tbody tr.linha-vazia');
+                if (vazio) { vazio.remove(); }
+
+                adicionarLinha(tabela, {
+                    produto_id: id,
+                    descricao: descricao,
+                    unidade: unidade,
+                    saldo: saldo,
+                    quantidade: qtd
+                });
+
+                var nova = linhas(tabela);
+                var ultima = nova[nova.length - 1];
+                var caixaRepor = ultima ? ultima.querySelector('input[name="repor_estoque[]"]') : null;
+                if (caixaRepor) { caixaRepor.checked = repor; }
+
+                renumerar(tabela);
+
+                document.getElementById('pf_novo_produto').value = '';
+                document.getElementById('pf_novo_produto_id').value = '';
+                document.getElementById('pf_novo_unidade').value = '';
+                document.getElementById('pf_novo_saldo').value = '';
+                document.getElementById('pf_novo_qtd').value = '1';
+                document.getElementById('pf_novo_repor').checked = false;
+            });
         }
 
         tabela.addEventListener('click', function (ev) {
@@ -538,6 +723,24 @@
             if (botao && tabela.contains(botao)) {
                 ev.preventDefault();
                 removerLinha(botao, tabela, null);
+            }
+        });
+
+        tabela.addEventListener('autocomplete:selecionar', function (ev) {
+            var item = ev.detail || {};
+            var id = parseInt(item.id, 10);
+            var linhaAtual = ev.target.closest('tr');
+
+            if (!id || !linhaAtual) { return; }
+
+            if (produtoJaCadastrado(tabela, id, linhaAtual)) {
+                var busca = linhaAtual.querySelector('.autocomplete-busca');
+                var oculto = linhaAtual.querySelector('input[name="produto_id[]"]');
+
+                if (busca) { busca.value = ''; }
+                if (oculto) { oculto.value = ''; }
+
+                avisoProdutoDuplicado();
             }
         });
     }
@@ -595,6 +798,7 @@
                     var oculto = existentes[j].querySelector('input[name="produto_id[]"]');
 
                     if (oculto && parseInt(oculto.value, 10) === id) {
+                        avisoProdutoDuplicado();
                         return;
                     }
                 }

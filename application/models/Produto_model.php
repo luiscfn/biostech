@@ -17,20 +17,17 @@ class Produto_model extends MY_Model
 
         if ($busca !== '')
         {
+            // A busca textual considera apenas nome e codigo do produto.
             $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
             $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
             $onde[] = '(' . sprintf($sem_acento, 'p.descricao') . ' LIKE ?'
-                    . ' OR ' . sprintf($sem_acento, 'p.marca') . ' LIKE ?'
-                    . ' OR lower(p.codigo) LIKE ?'
-                    . ' OR p.grupo = ?'
-                    . ' OR p.subgrupo = ?)';
+                    . ' OR lower(COALESCE(p.codigo, \'\')) LIKE ?'
+                    . ' OR CAST(p.id AS text) LIKE ?)';
 
             $params[] = $termo;
             $params[] = $termo;
             $params[] = $termo;
-            $params[] = mb_strtoupper($busca, 'UTF-8');
-            $params[] = mb_strtoupper($busca, 'UTF-8');
         }
 
         if ($grupo !== '')

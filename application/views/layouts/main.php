@@ -53,11 +53,15 @@
             <div class="grupo">Cadastros</div>
             <a class="item <?= $menu_ativo === 'clientes' ? 'ativo' : '' ?>" href="<?= site_url('clientes') ?>">Clientes</a>
             <a class="item <?= $menu_ativo === 'fornecedores' ? 'ativo' : '' ?>" href="<?= site_url('fornecedores') ?>">Fornecedores</a>
-            <a class="item <?= $menu_ativo === 'produtos' ? 'ativo' : '' ?>" href="<?= site_url('produtos') ?>">Produtos</a>
 
             <?php if (in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE)): ?>
                 <a class="item <?= $menu_ativo === 'usuarios' ? 'ativo' : '' ?>" href="<?= site_url('usuarios') ?>">Usuarios</a>
             <?php endif; ?>
+
+            <div class="grupo">Almoxarifado</div>
+            <a class="item <?= $menu_ativo === 'produtos' ? 'ativo' : '' ?>" href="<?= site_url('produtos') ?>">Produtos</a>
+            <a class="item <?= $menu_ativo === 'compras' && $this->uri->segment(2) === 'solicitacoes' ? 'ativo' : '' ?>" href="<?= site_url('compras/solicitacoes') ?>">Solicitacao de Compra</a>
+
 
             <div class="grupo">Operacao</div>
             <a class="item <?= $menu_ativo === 'chamados' ? 'ativo' : '' ?>" href="<?= site_url('chamados') ?>">Chamados / OS</a>
@@ -95,19 +99,44 @@
         </header>
 
         <main class="pagina">
-            <?php if ( ! empty($flash)): ?>
-                <div class="alert alert-<?= html_escape($flash['tipo']) ?>">
-                    <?= html_escape($flash['mensagem']) ?>
-                </div>
-            <?php endif; ?>
-
             <?= $conteudo ?>
         </main>
     </div>
 
 </div>
 
+<?php if ( ! empty($flash)): ?>
+    <div class="modal-confirmacao visivel" id="modal-mensagem" role="dialog" aria-modal="true" aria-labelledby="modal-mensagem-titulo">
+        <div class="modal-confirmacao-caixa">
+            <h4 id="modal-mensagem-titulo">Mensagem</h4>
+            <div class="alert alert-<?= html_escape($flash['tipo']) ?>"><?= html_escape($flash['mensagem']) ?></div>
+            <div class="modal-confirmacao-acoes">
+                <button type="button" class="botao pequeno" id="modal-mensagem-ok">Ok</button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <script>
+(function () {
+    var modal = document.getElementById('modal-mensagem');
+
+    if ( ! modal) { return; }
+
+    var ok = document.getElementById('modal-mensagem-ok');
+
+    function fechar() { modal.classList.remove('visivel'); }
+
+    if (ok) {
+        ok.addEventListener('click', fechar);
+        ok.focus();
+    }
+
+    document.addEventListener('keydown', function (evento) {
+        if (evento.key === 'Escape') { fechar(); }
+    });
+})();
+
 (function () {
     var botao = document.querySelector('.sidebar .submenu-toggle');
 

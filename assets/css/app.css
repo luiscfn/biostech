@@ -327,7 +327,9 @@ a:hover { text-decoration: underline; }
 
 .alert-success { background: var(--verde-claro); color: #11603e; border-color: #bfe6d4; }
 .alert-danger  { background: var(--vermelho-claro); color: var(--vermelho); border-color: #f6c9c3; }
+.alert-erro    { background: var(--vermelho-claro); color: var(--vermelho); border-color: #f6c9c3; }
 .alert-warning { background: var(--amarelo-claro); color: var(--amarelo); border-color: #f3e0a8; }
+.alert-info    { background: var(--azul-claro); color: var(--azul); border-color: #cfe0f2; }
 
 .cartoes {
     display: grid;
@@ -529,7 +531,15 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
 
 /* Tabela com rolagem vertical e rodape fixo (Total do material) */
 .tabela-rolagem { overflow-y: auto; }
-.tabela-rolagem thead th { position: sticky; top: 0; z-index: 2; }
+
+/* Cabecalho fixo em todas as tabelas com rolagem (somente as linhas rolam) */
+.tabela-wrap thead th,
+.tabela-rolagem thead th,
+.tabela-itens-rolagem thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
 
 /* Servicos e materiais: mostra cerca de 6 registros com rolagem vertical */
 .servicos-rolagem,

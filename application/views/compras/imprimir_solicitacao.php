@@ -94,19 +94,15 @@ foreach ($itens as $i)
         <tr>
             <th style="width:35px">#</th>
             <th style="width:70px">Codigo</th>
-            <th>Produto</th>
-            <th style="width:50px">Unid.</th>
-            <th style="width:65px">Saldo</th>
+            <th style="min-width:420px">Produto</th>
+            <th style="width:70px">Unid.</th>
             <th style="width:65px">Qtd</th>
-            <th style="width:90px">Utilizacao</th>
-            <th style="width:90px">Periodo</th>
             <th style="width:50px">Repor</th>
-            <th style="width:55px">Marcado</th>
         </tr>
     </thead>
     <tbody>
         <?php if (empty($itens)): ?>
-            <tr><td colspan="10">Nenhum item solicitado.</td></tr>
+            <tr><td colspan="6">Nenhum item solicitado.</td></tr>
         <?php else: ?>
             <?php $n = 0; foreach ($itens as $i): $n++; ?>
                 <tr>
@@ -114,12 +110,8 @@ foreach ($itens as $i)
                     <td><?= html_escape($i['produto_codigo'] ? $i['produto_codigo'] : (string) $i['produto_id']) ?></td>
                     <td><?= html_escape($i['descricao']) ?></td>
                     <td><?= html_escape($i['unidade']) ?></td>
-                    <td class="direita"><?= numero_br($i['saldo'], 3) ?></td>
                     <td class="direita"><?= numero_br($i['quantidade'], 3) ?></td>
-                    <td><?= data_br($i['data_utilizacao']) ?></td>
-                    <td><?= html_escape($i['periodo'] ? $i['periodo'] : '-') ?></td>
                     <td class="centro"><?= bd_bool($i['repor_estoque']) ? 'Sim' : 'Nao' ?></td>
-                    <td class="centro"><?= bd_bool($i['selecionado']) ? 'Sim' : 'Nao' ?></td>
                 </tr>
             <?php endforeach; ?>
         <?php endif; ?>

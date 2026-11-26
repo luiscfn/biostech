@@ -17,6 +17,7 @@ class Compras extends MY_Controller
         parent::__construct();
 
         $this->load->model('compras_model');
+        $this->load->model('financeiro_model');
         $this->load->library('auditoria');
         $this->load->library('form_validation');
 
@@ -41,13 +42,12 @@ class Compras extends MY_Controller
 
         $pagina = (int) $this->input->get('pagina');
         $total  = $this->compras_model->total_pedidos($filtros);
-        $pag    = $this->paginar($total, 25, $pagina);
+        $pag    = $this->paginar($total, 10, $pagina);
 
         $dados = array(
             'registros' => $this->compras_model->listar_pedidos($filtros, $pag['por_pagina'], $pag['offset']),
             'filtros'   => $filtros,
             'pag'       => $pag,
-            'stats'     => $this->compras_model->stats(),
             'setores'   => $this->compras_model->setores(),
         );
 
@@ -90,6 +90,8 @@ class Compras extends MY_Controller
             'setores'     => $this->compras_model->setores(),
             'funcionarios'=> $this->compras_model->funcionarios(),
             'dominios'    => $this->_dominios(),
+            'centros_custo' => $this->financeiro_model->centros_custo(),
+            'contas'      => array(),
         ));
     }
 
@@ -142,6 +144,8 @@ class Compras extends MY_Controller
             'setores'     => $this->compras_model->setores(),
             'funcionarios'=> $this->compras_model->funcionarios(),
             'dominios'    => $this->_dominios(),
+            'centros_custo' => $this->financeiro_model->centros_custo(),
+            'contas'      => $this->compras_model->contas_pagar($numero),
         ));
     }
 
@@ -617,7 +621,7 @@ class Compras extends MY_Controller
 
         $pagina = (int) $this->input->get('pagina');
         $total  = $this->compras_model->total_solicitacoes($filtros);
-        $pag    = $this->paginar($total, 25, $pagina);
+        $pag    = $this->paginar($total, 10, $pagina);
 
         $this->titulo = 'Solicitacoes internas';
         $this->render('compras/solicitacoes', array(
@@ -680,7 +684,6 @@ class Compras extends MY_Controller
             'itens'       => $numero > 0 ? $this->compras_model->itens_solicitacao($numero) : array(),
             'setores'     => $this->compras_model->setores(),
             'funcionarios'=> $this->compras_model->funcionarios(),
-            'abaixo_minimo' => $numero > 0 ? array() : $this->compras_model->produtos_abaixo_minimo(30),
         ));
     }
 
@@ -745,9 +748,7 @@ class Compras extends MY_Controller
             redirect('compras/solicitacao/' . (int) $numero);
         }
 
-        $somente = (string) $this->input->post('somente_selecionados') === 'S';
-
-        $resultado = $this->compras_model->gerar_pedido_solicitacao((int) $numero, $this->usuario, $somente);
+        $resultado = $this->compras_model->gerar_pedido_solicitacao((int) $numero, $this->usuario);
 
         if ( ! $resultado['ok'])
         {
@@ -1026,7 +1027,6 @@ class Compras extends MY_Controller
         $repor  = $this->_array_post('repor_estoque');
         $datas  = $this->_array_post('data_utilizacao');
         $period = $this->_array_post('periodo');
-        $selec  = $this->_array_post('selecionado');
 
         $itens = array();
 
@@ -1038,7 +1038,6 @@ class Compras extends MY_Controller
                 'repor_estoque'   => isset($repor[$i]) ? $repor[$i] : NULL,
                 'data_utilizacao' => isset($datas[$i]) ? $datas[$i] : NULL,
                 'periodo'         => isset($period[$i]) ? $period[$i] : NULL,
-                'selecionado'     => isset($selec[$i]) ? $selec[$i] : NULL,
             );
         }
 

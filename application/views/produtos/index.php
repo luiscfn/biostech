@@ -1,6 +1,15 @@
 <?php
 $tem_filtro = $busca !== '' || $grupo !== '' || $subgrupo !== '' || $situacao !== '';
 ?>
+<style>
+.filtros.filtros-produtos { align-items:flex-end; gap:12px; }
+.filtros-produtos .filtro-campo { display:flex; flex-direction:column; gap:5px; }
+.filtros-produtos .filtro-campo > label { font-size:12px; color:#2a3a55; font-weight:600; white-space:nowrap; }
+.filtros-produtos .filtro-busca input[type=text] { width:360px; min-width:360px; }
+.filtros-produtos .filtro-campo select { width:190px; min-width:190px; font-size:12px; }
+.filtros-produtos .filtro-situacao select { width:110px; min-width:110px; }
+.filtros-produtos .filtro-acoes { display:flex; gap:8px; align-items:center; }
+</style>
 <div class="painel">
     <div class="painel-cabecalho">
         <h3>Catalogo de produtos</h3>
@@ -10,38 +19,54 @@ $tem_filtro = $busca !== '' || $grupo !== '' || $subgrupo !== '' || $situacao !=
     </div>
 
     <div class="painel-corpo">
-        <form method="get" action="<?= site_url('produtos') ?>" class="filtros" id="filtro-produtos">
-            <input type="text" name="busca" value="<?= html_escape($busca) ?>" placeholder="Descricao, codigo, marca, grupo...">
+        <div class="secao-titulo destaque">Filtros</div>
 
-            <select name="grupo" id="filtro-grupo" style="width:190px;min-width:190px;font-size:12px">
-                <option value="">Grupo</option>
-                <?php foreach ($grupos as $g): ?>
-                    <option value="<?= html_escape($g['codigo']) ?>" <?= (string) $g['codigo'] === $grupo ? 'selected' : '' ?>>
-                        <?= html_escape($g['codigo'] . ' - ' . $g['nome']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <form method="get" action="<?= site_url('produtos') ?>" class="filtros filtros-produtos" id="filtro-produtos">
+            <div class="filtro-campo filtro-busca">
+                <label for="filtro-busca">Produto (nome ou código):</label>
+                <input type="text" id="filtro-busca" name="busca" value="<?= html_escape($busca) ?>" placeholder="Nome ou código do produto...">
+            </div>
 
-            <select name="subgrupo" id="filtro-subgrupo" style="width:190px;min-width:190px;font-size:12px" <?= $grupo === '' ? 'disabled title="Selecione um grupo"' : '' ?>>
-                <option value="">Subgrupo</option>
-                <?php foreach ($subgrupos as $sg): ?>
-                    <option value="<?= html_escape($sg['codigo']) ?>" <?= (string) $sg['codigo'] === $subgrupo ? 'selected' : '' ?>>
-                        <?= html_escape($sg['codigo'] . ' - ' . $sg['nome']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <div class="filtro-campo">
+                <label for="filtro-grupo">Grupo:</label>
+                <select name="grupo" id="filtro-grupo">
+                    <option value="">Todos</option>
+                    <?php foreach ($grupos as $g): ?>
+                        <option value="<?= html_escape($g['codigo']) ?>" <?= (string) $g['codigo'] === $grupo ? 'selected' : '' ?>>
+                            <?= html_escape($g['codigo'] . ' - ' . $g['nome']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-            <select name="situacao" style="width:110px;min-width:110px;font-size:12px">
-                <option value="ativos" <?= $situacao === 'ativos' ? 'selected' : '' ?>>Ativos</option>
-                <option value="inativos" <?= $situacao === 'inativos' ? 'selected' : '' ?>>Inativos</option>
-                <option value="" <?= $situacao === '' ? 'selected' : '' ?>>Todos</option>
-            </select>
+            <div class="filtro-campo">
+                <label for="filtro-subgrupo">Subgrupo:</label>
+                <select name="subgrupo" id="filtro-subgrupo" <?= $grupo === '' ? 'disabled title="Selecione um grupo"' : '' ?>>
+                    <option value="">Todos</option>
+                    <?php foreach ($subgrupos as $sg): ?>
+                        <option value="<?= html_escape($sg['codigo']) ?>" <?= (string) $sg['codigo'] === $subgrupo ? 'selected' : '' ?>>
+                            <?= html_escape($sg['codigo'] . ' - ' . $sg['nome']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-            <button type="submit" class="botao secundario">Pesquisar</button>
+            <div class="filtro-campo filtro-situacao">
+                <label for="filtro-situacao">Situação:</label>
+                <select name="situacao" id="filtro-situacao">
+                    <option value="ativos" <?= $situacao === 'ativos' ? 'selected' : '' ?>>Ativos</option>
+                    <option value="inativos" <?= $situacao === 'inativos' ? 'selected' : '' ?>>Inativos</option>
+                    <option value="" <?= $situacao === '' ? 'selected' : '' ?>>Todos</option>
+                </select>
+            </div>
 
-            <?php if ($tem_filtro): ?>
-                <a class="botao secundario" href="<?= site_url('produtos') ?>">Limpar</a>
-            <?php endif; ?>
+            <div class="filtro-acoes">
+                <button type="submit" class="botao secundario">Pesquisar</button>
+
+                <?php if ($tem_filtro): ?>
+                    <a class="botao secundario" href="<?= site_url('produtos') ?>">Limpar</a>
+                <?php endif; ?>
+            </div>
         </form>
     </div>
 

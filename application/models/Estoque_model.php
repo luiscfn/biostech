@@ -46,7 +46,7 @@ class Estoque_model extends MY_Model
 
         if ($busca !== '')
         {
-            $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
+            $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
             $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
             $onde[] = '(' . sprintf($sem_acento, 'p.descricao') . ' LIKE ?'
@@ -222,7 +222,7 @@ class Estoque_model extends MY_Model
 
         if ($busca !== '')
         {
-            $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
+            $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
             $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
             $onde[] = '(' . sprintf($sem_acento, 'p.descricao') . ' LIKE ? OR lower(p.codigo) LIKE ?)';
@@ -1147,7 +1147,7 @@ class Estoque_model extends MY_Model
             return array();
         }
 
-        $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
+        $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
         $like       = '%' . mb_strtolower($termo, 'UTF-8') . '%';
 
         $sql = "SELECT p.id, p.codigo, p.descricao, p.unidade, p.valor_compra, p.valor_venda,
@@ -1174,7 +1174,8 @@ class Estoque_model extends MY_Model
 
         $like = '%' . mb_strtolower($termo, 'UTF-8') . '%';
 
-        $sql = "SELECT codigo AS id, razao_social AS nome, nome_fantasia, cnpj
+        $sql = "SELECT codigo AS id, razao_social AS nome, nome_fantasia, cnpj,
+                        cidade, uf, endereco, numero AS endereco_numero, bairro, cep, fone
                   FROM " . T_FORNECEDORES . "
                  WHERE ativo
                    AND (lower(razao_social) LIKE ? OR lower(nome_fantasia) LIKE ? OR cnpj LIKE ?)
@@ -1197,7 +1198,7 @@ class Estoque_model extends MY_Model
             return array('', array());
         }
 
-        $sem_acento = "translate(lower(%s), 'Ã¡Ã Ã£Ã¢Ã¤Ã©Ã¨ÃªÃ«Ã­Ã¬Ã®Ã¯Ã³Ã²ÃµÃ´Ã¶ÃºÃ¹Ã»Ã¼Ã§', 'aaaaaeeeeiiiiooooouuuuc')";
+        $sem_acento = "translate(lower(%s), 'áàãâäéèêëíìîïóòõôöúùûüç', 'aaaaaeeeeiiiiooooouuuuc')";
         $termo      = '%' . mb_strtolower($busca, 'UTF-8') . '%';
 
         $onde = '(' . sprintf($sem_acento, 'razao_social') . ' LIKE ?'

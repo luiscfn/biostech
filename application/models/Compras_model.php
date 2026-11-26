@@ -132,6 +132,7 @@ class Compras_model extends MY_Model
         $sql = "SELECT p.*,
                        f.razao_social AS fornecedor_nome,
                        f.nome_fantasia AS fornecedor_fantasia,
+                       f.cidade AS fornecedor_cidade,
                        s.nome AS setor_nome,
                        COALESCE(i.itens, 0) AS qtd_itens
                   FROM " . T_COMPRAS_PEDIDOS . " p
@@ -141,7 +142,7 @@ class Compras_model extends MY_Model
                                FROM " . T_COMPRAS_ITENS . "
                               GROUP BY pedido_numero) i ON i.pedido_numero = p.numero
                  WHERE {$where}
-                 ORDER BY p.data DESC, p.numero DESC";
+                 ORDER BY p.numero DESC";
 
         if ($limit !== NULL)
         {
@@ -1498,14 +1499,13 @@ class Compras_model extends MY_Model
 
         if ( ! empty($f['busca']))
         {
+            // Busca livre apenas por numero, solicitante e local de entrega.
             $like     = '%' . mb_strtolower(trim($f['busca']), 'UTF-8') . '%';
-            $onde[]   = "(s.numero::text LIKE ? OR lower(COALESCE(s.observacao, '')) LIKE ?
+            $onde[]   = "(s.numero::text LIKE ?
                           OR lower(COALESCE(s.local_entrega, '')) LIKE ?
-                          OR EXISTS (SELECT 1 FROM " . T_COMPRAS_SOLICITACAO_ITENS . " si
-                                       JOIN " . T_PRODUTOS . " pr ON pr.id = si.produto_id
-                                      WHERE si.solicitacao_numero = s.numero
-                                        AND lower(pr.descricao) LIKE ?))";
-            $params[] = $like;
+                          OR EXISTS (SELECT 1 FROM " . T_USUARIOS . " su
+                                       WHERE su.funcionario_id = s.funcionario_id
+                                         AND lower(COALESCE(su.nome, '')) LIKE ?))";
             $params[] = $like;
             $params[] = $like;
             $params[] = $like;
@@ -1550,7 +1550,8 @@ class Compras_model extends MY_Model
                        COALESCE(i.itens, 0) AS qtd_itens
                   FROM " . T_COMPRAS_SOLICITACOES . " s
                   LEFT JOIN " . T_SETORES . " se ON se.id = s.setor_id
-                  LEFT JOIN " . T_USUARIOS . " u ON u.funcionario_id = s.funcionario_id
+                  LEFT JOIN (SELECT funcionario_id, min(nome) AS nome
+                               FROM " . T_USUARIOS . " GROUP BY funcionario_id) u ON u.funcionario_id = s.funcionario_id
                   LEFT JOIN (SELECT solicitacao_numero, count(*) AS itens
                                FROM " . T_COMPRAS_SOLICITACAO_ITENS . "
                               GROUP BY solicitacao_numero) i ON i.solicitacao_numero = s.numero
@@ -1588,12 +1589,17 @@ class Compras_model extends MY_Model
                     se.nome AS setor_nome,
                     u.nome AS funcionario_nome,
                     uc.nome AS usuario_cadastro_nome,
+                    ua.nome AS usuario_alteracao_nome,
+                    uf.nome AS usuario_fechamento_nome,
                     p.numero AS pedido_gerado,
                     p.situacao AS pedido_situacao
                FROM " . T_COMPRAS_SOLICITACOES . " s
                LEFT JOIN " . T_SETORES . " se ON se.id = s.setor_id
-               LEFT JOIN " . T_USUARIOS . " u ON u.funcionario_id = s.funcionario_id
+               LEFT JOIN (SELECT funcionario_id, min(nome) AS nome
+                            FROM " . T_USUARIOS . " GROUP BY funcionario_id) u ON u.funcionario_id = s.funcionario_id
                LEFT JOIN " . T_USUARIOS . " uc ON uc.login = s.usuario_cadastro
+               LEFT JOIN " . T_USUARIOS . " ua ON ua.login = s.usuario_ultima_alteracao
+               LEFT JOIN " . T_USUARIOS . " uf ON uf.login = s.usuario_fechamento
                LEFT JOIN " . T_COMPRAS_PEDIDOS . " p ON p.numero = s.pedido_numero
               WHERE s.numero = ?",
             array((int) $numero)

@@ -19,174 +19,77 @@ $rotulos = array(
 );
 
 $situacao_rotulo = isset($rotulos[$situacao]) ? $rotulos[$situacao] : array($situacao, 'off');
+
+$nome_cadastro = ! empty($registro['usuario_cadastro_nome']) ? $registro['usuario_cadastro_nome']
+               : (! empty($registro['usuario_cadastro']) ? $registro['usuario_cadastro'] : '-');
+$nome_alteracao = ! empty($registro['usuario_alteracao_nome']) ? $registro['usuario_alteracao_nome']
+                : (! empty($registro['usuario_ultima_alteracao']) ? $registro['usuario_ultima_alteracao'] : '-');
+$nome_fechamento = ! empty($registro['usuario_fechamento_nome']) ? $registro['usuario_fechamento_nome']
+                 : (! empty($registro['usuario_fechamento']) ? $registro['usuario_fechamento'] : '-');
+
+$disabled_attr = $editavel ? '' : ' disabled';
 ?>
+<style>
+.cabecalho-titulo { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+.dados-solicitacao { display:flex; gap:18px; flex-wrap:wrap; align-items:center; font-size:14px; color:#2a3a55; margin-top:0; }
+.dados-solicitacao strong { color:#123; font-size:15px; }
+.dados-solicitacao .badge { font-size:12px; }
+.sol-campos .campo.sol-meio { grid-column:span 6; }
+.sol-campos .campo.sol-setor { grid-column:span 4; }
+.sol-campos .campo.sol-solicitante { grid-column:span 3; }
+.sol-campos .campo.sol-responsavel { grid-column:span 3; }
+.sol-campos .campo.sol-fone { grid-column:span 2; }
+.sol-campos .campo.sol-auditoria { grid-column:span 5; }
+.sol-campos > .campo { display:flex; flex-direction:column; justify-content:flex-end; }
+.sol-item-cadastro { margin:10px 0 14px; padding:12px; border:1px solid var(--borda); border-radius:6px; background:#fafcff; }
+.sol-item-cadastro .campo.sol-produto { grid-column:span 7; }
+.sol-item-cadastro .campo.sol-unid { grid-column:span 1; }
+.sol-item-cadastro .campo.sol-saldo { grid-column:span 1; }
+.sol-item-cadastro .campo.sol-qtd { grid-column:span 1; }
+.sol-item-cadastro .campo.sol-repor { grid-column:span 1; }
+.sol-item-cadastro .campo.sol-botao { grid-column:span 1; align-self:end; }
+.sol-item-cadastro input[readonly] { background:#f0f3f7; }
+.detalhes-auditoria { grid-template-columns:repeat(3, 1fr); gap:8px; }
+.detalhes-auditoria .rotulo { font-size:10px; margin-bottom:2px; }
+.detalhes-auditoria .valor { font-size:12px; }
+.detalhes-auditoria .ajuda { font-size:11px; }
+.tabela-itens .qtd { text-align:center; }
+.tabela-itens input.qtd::-webkit-outer-spin-button,
+.tabela-itens input.qtd::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.sol-campos textarea { width:100%; height:62px; min-height:62px; resize:vertical; }
+.tabela-itens-rolagem { max-height:260px; overflow-y:auto; }
+table.tabela.tabela-itens { font-size:12px; }
+.tabela-itens th:nth-child(3), .tabela-itens td:nth-child(3) { width:72px; min-width:72px; }
+.tabela-itens th:nth-child(4), .tabela-itens td:nth-child(4) { width:88px; min-width:88px; }
+.tabela-itens th:nth-child(5), .tabela-itens td:nth-child(5) { width:98px; min-width:98px; }
+</style>
 <div class="painel">
     <div class="painel-cabecalho">
-        <h3>
-            <?= $edicao ? 'Solicitacao interna ' . (int) $registro['numero'] : 'Nova solicitacao interna' ?>
-            <?php if ($edicao): ?>
-                <span class="badge <?= $situacao_rotulo[1] ?>"><?= html_escape($situacao_rotulo[0]) ?></span>
-            <?php endif; ?>
-        </h3>
-
-        <div class="acoes-ficha">
-            <?php if ($edicao): ?>
-                <a class="botao secundario pequeno" href="<?= site_url('compras/imprimir_solicitacao/' . $registro['numero']) ?>" target="_blank">Imprimir</a>
-            <?php endif; ?>
-
-            <?php if ($edicao && $aberta && $pode_gerir): ?>
-                <?= form_open('compras/solicitacao_fechar/' . $registro['numero'], array('style' => 'display:inline')) ?>
-                    <button type="submit" class="botao secundario pequeno" title="Somente fecha a solicitacao">Fechar</button>
-                <?= form_close() ?>
-
-                <?php if ( ! $tem_pedido): ?>
-                    <?= form_open('compras/solicitacao_gerar_pedido/' . $registro['numero'], array('style' => 'display:inline')) ?>
-                        <label class="check" style="display:inline-flex;gap:4px;font-size:12px;margin-right:4px">
-                            <input type="checkbox" name="somente_selecionados" value="S" checked>
-                            somente marcados
-                        </label>
-                        <button type="submit" class="botao pequeno">Gerar pedido</button>
-                    <?= form_close() ?>
+        <div class="cabecalho-titulo">
+            <h3>Solicitacao de Compra</h3>
+            <div class="dados-solicitacao">
+                <span>N&deg;: <strong><?= $edicao ? (int) $registro['numero'] : '-' ?></strong></span>
+                <span>Data: <strong><?= data_br($data) ?></strong></span>
+                <?php if ($edicao): ?>
+                    <span class="badge <?= $situacao_rotulo[1] ?>"><?= html_escape($situacao_rotulo[0]) ?></span>
                 <?php endif; ?>
-            <?php endif; ?>
-
-            <?php if ($edicao && ! $tem_cotacao && $pode_gerir): ?>
-                <?= form_open('compras/importar_solicitacao/' . $registro['numero'], array('style' => 'display:inline')) ?>
-                    <button type="submit" class="botao secundario pequeno">Importar p/ cotacao</button>
-                <?= form_close() ?>
-            <?php endif; ?>
-
-            <?php if ($tem_cotacao): ?>
-                <a class="botao secundario pequeno" href="<?= site_url('compras/cotacao/' . $registro['cotacao_codigo']) ?>">
-                    Cotacao <?= (int) $registro['cotacao_codigo'] ?>
-                </a>
-            <?php endif; ?>
-
-            <a class="botao secundario pequeno" href="<?= site_url('compras/solicitacoes') ?>">Voltar</a>
+                <span>N&deg; PC: <strong><?= $edicao && ! empty($registro['pedido_numero']) ? (int) $registro['pedido_numero'] : '-' ?></strong></span>
+                <span>Cota&ccedil;&atilde;o: <strong><?= $edicao && ! empty($registro['cotacao_codigo']) ? (int) $registro['cotacao_codigo'] : '-' ?></strong></span>
+            </div>
         </div>
+
     </div>
 
-    <?php if ($tem_pedido): ?>
-        <div class="painel-corpo" style="padding-bottom:0">
-            <div class="alert alert-success">
-                Solicitacao atendida pelo pedido de compra
-                <a href="<?= site_url('compras/ver/' . $registro['pedido_numero']) ?>"><?= (int) $registro['pedido_numero'] ?></a>.
-            </div>
-        </div>
-    <?php endif; ?>
+        <div class="painel-corpo" style="padding-bottom:12px">
+            <?= form_open($edicao ? 'compras/solicitacao/' . $registro['numero'] : 'compras/solicitacao', array('id' => 'form-solicitacao')) ?>
 
-    <?php if ($edicao): ?>
-        <div class="painel-corpo" style="padding-bottom:0">
-            <div class="detalhes">
-                <div class="detalhe">
-                    <div class="rotulo">Data</div>
-                    <div class="valor">
-                        <?= data_br($registro['data']) ?>
-                        <?= $registro['hora'] ? ' as ' . html_escape(substr((string) $registro['hora'], 0, 5)) : '' ?>
-                    </div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Setor</div>
-                    <div class="valor"><?= html_escape($registro['setor_nome'] ? $registro['setor_nome'] : '-') ?></div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Solicitante</div>
-                    <div class="valor"><?= html_escape($registro['funcionario_nome'] ? $registro['funcionario_nome'] : '-') ?></div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Local de entrega</div>
-                    <div class="valor"><?= html_escape($registro['local_entrega'] ? $registro['local_entrega'] : '-') ?></div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Responsavel pelo recebimento</div>
-                    <div class="valor">
-                        <?= html_escape($registro['responsavel_recebimento'] ? $registro['responsavel_recebimento'] : '-') ?>
-                        <?php if ( ! empty($registro['fone_responsavel'])): ?>
-                            <div class="ajuda"><?= html_escape($registro['fone_responsavel']) ?></div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Cadastro</div>
-                    <div class="valor"><?= html_escape($registro['usuario_cadastro'] ? $registro['usuario_cadastro'] : '-') ?></div>
-                    <div class="ajuda"><?= data_hora_br($registro['data_cadastro']) ?></div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Fechamento</div>
-                    <div class="valor"><?= html_escape($registro['usuario_fechamento'] ? $registro['usuario_fechamento'] : '-') ?></div>
-                    <div class="ajuda"><?= data_hora_br($registro['data_fechamento']) ?></div>
-                </div>
-                <div class="detalhe">
-                    <div class="rotulo">Observacoes</div>
-                    <div class="valor"><?= nl2br(html_escape($registro['observacao'] ? $registro['observacao'] : '-')) ?></div>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
+                <input type="hidden" name="data" value="<?= html_escape($data) ?>">
+                <input type="hidden" name="hora" value="<?= html_escape($hora) ?>">
 
-    <?php if ($edicao && ! $editavel): ?>
-        <div class="painel-corpo" style="padding-bottom:0">
-            <hr class="divisor">
-            <h4 class="secao-titulo">Itens da solicitacao</h4>
-        </div>
-        <div class="tabela-wrap">
-            <table class="tabela">
-                <thead>
-                    <tr>
-                        <th style="width:70px">Codigo</th>
-                        <th>Produto</th>
-                        <th class="centro" style="width:60px">Unid.</th>
-                        <th class="num" style="width:70px">Saldo</th>
-                        <th class="num" style="width:80px">Qtd</th>
-                        <th style="width:120px">Utilizacao</th>
-                        <th style="width:110px">Periodo</th>
-                        <th class="centro" style="width:70px">Repor</th>
-                        <th class="centro" style="width:80px">Marcado</th>
-                        <th class="centro" style="width:80px">Exportado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($itens)): ?>
-                        <tr><td colspan="10" class="vazio">Nenhum item na solicitacao.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($itens as $item): ?>
-                            <tr>
-                                <td><?= html_escape($item['produto_codigo'] ? $item['produto_codigo'] : (string) $item['produto_id']) ?></td>
-                                <td>
-                                    <a href="<?= site_url('produtos/ver/' . $item['produto_id']) ?>"><strong><?= html_escape($item['descricao']) ?></strong></a>
-                                </td>
-                                <td class="centro"><?= html_escape($item['unidade']) ?></td>
-                                <td class="num"><?= numero_br($item['saldo'], 3) ?></td>
-                                <td class="num"><?= numero_br($item['quantidade'], 3) ?></td>
-                                <td><?= data_br($item['data_utilizacao']) ?></td>
-                                <td><?= html_escape($item['periodo'] ? $item['periodo'] : '-') ?></td>
-                                <td class="centro"><?= bd_bool($item['repor_estoque']) ? 'Sim' : 'Nao' ?></td>
-                                <td class="centro"><?= bd_bool($item['selecionado']) ? 'Sim' : 'Nao' ?></td>
-                                <td class="centro"><?= bd_bool($item['exportado']) ? 'Sim' : 'Nao' ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php else: ?>
-        <div class="painel-corpo">
-            <?= form_open($edicao ? 'compras/solicitacao/' . $registro['numero'] : 'compras/solicitacao') ?>
-
-                <div class="form-grid">
-                    <div class="campo terco">
-                        <label for="data">Data *</label>
-                        <input type="date" name="data" id="data" value="<?= html_escape($data) ?>" required>
-                    </div>
-
-                    <div class="campo terco">
-                        <label for="hora">Hora</label>
-                        <input type="time" name="hora" id="hora" value="<?= html_escape($hora) ?>">
-                    </div>
-
-                    <div class="campo terco">
+                <div class="form-grid sol-campos">
+                    <div class="campo sol-setor">
                         <label for="setor_id">Setor solicitante</label>
-                        <select name="setor_id" id="setor_id">
+                        <select name="setor_id" id="setor_id" <?= $disabled_attr ?>>
                             <option value="">-</option>
                             <?php foreach ($setores as $s): ?>
                                 <option value="<?= (int) $s['id'] ?>"
@@ -197,9 +100,9 @@ $situacao_rotulo = isset($rotulos[$situacao]) ? $rotulos[$situacao] : array($sit
                         </select>
                     </div>
 
-                    <div class="campo terco">
+                    <div class="campo sol-solicitante">
                         <label for="funcionario_id">Solicitante</label>
-                        <select name="funcionario_id" id="funcionario_id">
+                        <select name="funcionario_id" id="funcionario_id" <?= $disabled_attr ?>>
                             <option value="">-</option>
                             <?php foreach ($funcionarios as $f): ?>
                                 <option value="<?= (int) $f['id'] ?>"
@@ -210,27 +113,88 @@ $situacao_rotulo = isset($rotulos[$situacao]) ? $rotulos[$situacao] : array($sit
                         </select>
                     </div>
 
-                    <div class="campo terco">
+                    <div class="campo sol-responsavel">
                         <label for="responsavel_recebimento">Responsavel pelo recebimento</label>
                         <input type="text" name="responsavel_recebimento" id="responsavel_recebimento" maxlength="80"
-                               value="<?= $edicao ? html_escape($registro['responsavel_recebimento']) : '' ?>">
+                               value="<?= $edicao ? html_escape($registro['responsavel_recebimento']) : '' ?>" <?= $disabled_attr ?>>
                     </div>
 
-                    <div class="campo terco">
+                    <div class="campo sol-fone">
                         <label for="fone_responsavel">Fone do responsavel</label>
                         <input type="text" name="fone_responsavel" id="fone_responsavel" maxlength="20"
-                               value="<?= $edicao ? html_escape($registro['fone_responsavel']) : '' ?>">
+                               value="<?= $edicao ? html_escape($registro['fone_responsavel']) : '' ?>" <?= $disabled_attr ?>>
                     </div>
 
-                    <div class="campo full">
+                    <div class="campo sol-setor">
                         <label for="local_entrega">Local de entrega</label>
-                        <input type="text" name="local_entrega" id="local_entrega" maxlength="200"
-                               value="<?= $edicao ? html_escape($registro['local_entrega']) : '' ?>">
+                        <textarea name="local_entrega" id="local_entrega" rows="2" maxlength="200" <?= $disabled_attr ?>><?= $edicao ? html_escape($registro['local_entrega']) : '' ?></textarea>
                     </div>
 
-                    <div class="campo full">
+                    <div class="campo sol-solicitante">
                         <label for="observacao">Observacoes</label>
-                        <textarea name="observacao" id="observacao"><?= $edicao ? html_escape($registro['observacao']) : '' ?></textarea>
+                        <textarea name="observacao" id="observacao" rows="2" <?= $disabled_attr ?>><?= $edicao ? html_escape($registro['observacao']) : '' ?></textarea>
+                    </div>
+
+                    <?php if ($edicao): ?>
+                    <div class="campo sol-auditoria">
+                        <div class="detalhes detalhes-auditoria">
+                        <div class="detalhe">
+                            <div class="rotulo">Cadastro</div>
+                            <div class="valor"><?= html_escape($nome_cadastro) ?></div>
+                            <?php if ( ! empty($registro['data_cadastro'])): ?>
+                                <div class="ajuda"><?= data_hora_br($registro['data_cadastro']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="detalhe">
+                            <div class="rotulo">Alteracao</div>
+                            <div class="valor"><?= html_escape($nome_alteracao) ?></div>
+                            <?php if ( ! empty($registro['data_ultima_alteracao'])): ?>
+                                <div class="ajuda"><?= data_hora_br($registro['data_ultima_alteracao']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="detalhe">
+                            <div class="rotulo">Fechamento</div>
+                            <div class="valor"><?= html_escape($nome_fechamento) ?></div>
+                            <?php if ( ! empty($registro['data_fechamento'])): ?>
+                                <div class="ajuda"><?= data_hora_br($registro['data_fechamento']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                        </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="sol-item-cadastro">
+                    <div class="form-grid">
+                        <div class="campo sol-produto">
+                            <label for="pf_novo_produto">Produto:</label>
+                            <div class="autocomplete" data-url="<?= site_url('compras/buscar_produtos') ?>"
+                                 data-unidade=".unidade-cad" data-estoque=".saldo-cad">
+                                <input type="text" class="autocomplete-busca" id="pf_novo_produto"
+                                       placeholder="Codigo ou descricao..." autocomplete="off" <?= $disabled_attr ?>>
+                                <input type="hidden" id="pf_novo_produto_id">
+                                <div class="autocomplete-lista"></div>
+                            </div>
+                        </div>
+                        <div class="campo sol-unid">
+                            <label for="pf_novo_unidade">Unid.</label>
+                            <input type="text" id="pf_novo_unidade" class="unidade-cad" readonly tabindex="-1">
+                        </div>
+                        <div class="campo sol-saldo">
+                            <label for="pf_novo_saldo">Saldo</label>
+                            <input type="text" id="pf_novo_saldo" class="saldo-cad" readonly tabindex="-1">
+                        </div>
+                        <div class="campo sol-qtd">
+                            <label for="pf_novo_qtd">Qtd</label>
+                            <input type="text" inputmode="numeric" id="pf_novo_qtd" class="qtd-cad" value="1" <?= $disabled_attr ?>>
+                        </div>
+                        <div class="campo sol-repor">
+                            <label for="pf_novo_repor">Repor</label>
+                            <input type="checkbox" id="pf_novo_repor" class="repor-cad" value="S" <?= $disabled_attr ?>>
+                        </div>
+                        <div class="campo sol-botao">
+                            <button type="button" class="botao pequeno" id="btn-adicionar-produto" <?= $disabled_attr ?>>+ Adicionar item</button>
+                        </div>
                     </div>
                 </div>
 
@@ -238,20 +202,17 @@ $situacao_rotulo = isset($rotulos[$situacao]) ? $rotulos[$situacao] : array($sit
 
                 <h4 class="secao-titulo">Itens solicitados</h4>
 
-                <div class="tabela-wrap">
+                <div class="tabela-wrap tabela-itens-rolagem">
                     <table class="tabela tabela-itens" data-solicitacao
                            data-template="linha-solicitacao" data-grupo="solicitacao">
                         <thead>
                             <tr>
                                 <th class="num" style="width:36px">#</th>
                                 <th style="min-width:230px">Produto</th>
-                                <th class="centro" style="width:58px">Unid.</th>
-                                <th class="num" style="width:70px">Saldo</th>
-                                <th class="num" style="width:80px">Qtd</th>
-                                <th style="width:135px">Utilizacao</th>
-                                <th style="width:110px">Periodo</th>
+                                <th class="centro" style="width:72px">Unid.</th>
+                                <th class="num" style="width:88px">Saldo</th>
+                                <th class="centro" style="width:98px">Qtd</th>
                                 <th class="centro" style="width:70px" title="Repor no estoque">Repor</th>
-                                <th class="centro" style="width:80px" title="Usar ao gerar o pedido">Marcado</th>
                                 <th class="centro" style="width:44px"></th>
                             </tr>
                         </thead>
@@ -259,100 +220,59 @@ $situacao_rotulo = isset($rotulos[$situacao]) ? $rotulos[$situacao] : array($sit
                     </table>
                 </div>
 
-                <div class="form-acoes" style="margin-top:10px">
-                    <button type="button" class="botao secundario" data-adicionar-item="solicitacao">+ Adicionar item</button>
-                </div>
+                <div class="form-acoes" style="margin-top:6px;padding-top:8px">
+                    <button type="submit" class="botao" <?= $disabled_attr ?>><?= $edicao ? 'Salvar alteracoes' : 'Criar solicitacao' ?></button>
+                    <a class="botao secundario" href="<?= site_url($edicao ? 'compras/solicitacao/' . $registro['numero'] : 'compras/solicitacoes') ?>"
+                       <?= $editavel ? '' : 'aria-disabled="true" tabindex="-1" onclick="return false" style="opacity:.5;pointer-events:none"' ?>>Cancelar</a>
 
-                <div class="form-acoes">
-                    <button type="submit" class="botao"><?= $edicao ? 'Salvar alteracoes' : 'Criar solicitacao' ?></button>
-                    <a class="botao secundario" href="<?= site_url($edicao ? 'compras/solicitacao/' . $registro['numero'] : 'compras/solicitacoes') ?>">Cancelar</a>
+                    <?php if ($edicao && ! $tem_pedido && $pode_gerir): ?>
+                        <button type="submit" class="botao pequeno" <?= $disabled_attr ?>
+                                formaction="<?= site_url('compras/solicitacao_gerar_pedido/' . $registro['numero']) ?>">Gerar pedido</button>
+                    <?php endif; ?>
+
+                    <?php if ($edicao && ! $tem_cotacao && $pode_gerir): ?>
+                        <button type="submit" class="botao secundario pequeno" <?= $disabled_attr ?>
+                                formaction="<?= site_url('compras/importar_solicitacao/' . $registro['numero']) ?>">Importar p/ cotacao</button>
+                    <?php endif; ?>
+
+                    <?php if ($tem_cotacao): ?>
+                        <a class="botao secundario pequeno" href="<?= site_url('compras/cotacao/' . $registro['cotacao_codigo']) ?>">Cotacao</a>
+                    <?php endif; ?>
+
+                    <?php if ($edicao): ?>
+                        <a class="botao secundario pequeno" href="<?= site_url('compras/imprimir_solicitacao/' . $registro['numero']) ?>" target="_blank">Imprimir</a>
+                    <?php endif; ?>
+
+                    <?php if ($edicao && $aberta && $pode_gerir): ?>
+                        <button type="submit" class="botao secundario pequeno" <?= $disabled_attr ?>
+                                title="Somente finaliza a solicitacao"
+                                formaction="<?= site_url('compras/solicitacao_fechar/' . $registro['numero']) ?>">Finalizar Solicitacao</button>
+                    <?php endif; ?>
+
+                    <a class="botao secundario pequeno" href="<?= site_url('compras/solicitacoes') ?>">Voltar</a>
                 </div>
 
             <?= form_close() ?>
         </div>
-    <?php endif; ?>
 
-    <?php if ( ! $edicao && ! empty($abaixo_minimo) && $editavel): ?>
-        <div class="painel-corpo">
-            <hr class="divisor">
-            <h4 class="secao-titulo">Produtos abaixo do estoque minimo</h4>
-            <div class="ajuda" style="margin-bottom:8px">
-                Clique em adicionar para incluir o produto na solicitacao com a quantidade sugerida.
-            </div>
-
-            <div class="tabela-wrap">
-                <table class="tabela">
-                    <thead>
-                        <tr>
-                            <th style="width:80px">Codigo</th>
-                            <th>Produto</th>
-                            <th class="centro" style="width:60px">Unid.</th>
-                            <th class="num" style="width:80px">Saldo</th>
-                            <th class="num" style="width:90px">Minimo</th>
-                            <th class="num" style="width:100px">Sugerido</th>
-                            <th class="num" style="width:110px">Custo</th>
-                            <th class="centro" style="width:100px"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($abaixo_minimo as $p): ?>
-                            <?php
-                            $sugerido = (float) $p['estoque_minimo'] - (float) $p['saldo'];
-                            if ($sugerido <= 0)
-                            {
-                                $sugerido = 1;
-                            }
-                            ?>
-                            <tr>
-                                <td><?= html_escape($p['codigo'] ? $p['codigo'] : (string) $p['id']) ?></td>
-                                <td><?= html_escape($p['descricao']) ?></td>
-                                <td class="centro"><?= html_escape($p['unidade']) ?></td>
-                                <td class="num"><?= numero_br($p['saldo'], 3) ?></td>
-                                <td class="num"><?= numero_br($p['estoque_minimo'], 3) ?></td>
-                                <td class="num"><?= numero_br($sugerido, 3) ?></td>
-                                <td class="num"><?= moeda_br($p['valor_compra']) ?></td>
-                                <td class="centro">
-                                    <button type="button" class="botao secundario pequeno"
-                                            data-add-produto
-                                            data-produto-id="<?= (int) $p['id'] ?>"
-                                            data-descricao="<?= html_escape($p['descricao']) ?>"
-                                            data-unidade="<?= html_escape($p['unidade']) ?>"
-                                            data-saldo="<?= (float) $p['saldo'] ?>"
-                                            data-quantidade="<?= (float) $sugerido ?>">
-                                        + Adicionar
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    <?php endif; ?>
 </div>
 
-<?php if ( ! $edicao || $editavel): ?>
 <template id="linha-solicitacao">
     <table><tbody>
         <tr class="linha-item">
             <td class="num numero-item">1</td>
             <td>
-                <div class="autocomplete"
-                     data-url="<?= site_url('compras/buscar_produtos') ?>"
-                     data-estoque=".saldo"
-                     data-unidade=".unidade">
-                    <input type="text" class="autocomplete-busca" placeholder="Codigo ou descricao..." autocomplete="off">
-                    <input type="hidden" name="produto_id[]">
-                    <div class="autocomplete-lista"></div>
-                </div>
+                <input type="text" class="produto-desc" readonly tabindex="-1">
+                <input type="hidden" name="produto_id[]">
             </td>
             <td><input type="text" class="unidade" readonly tabindex="-1"></td>
             <td><input type="text" class="saldo" readonly tabindex="-1" style="text-align:right"></td>
-            <td><input type="number" name="quantidade[]" class="qtd" value="1" min="0.001" step="0.001" style="text-align:right"></td>
-            <td><input type="date" name="data_utilizacao[]"></td>
-            <td><input type="text" name="periodo[]" maxlength="20" placeholder="ex.: mensal"></td>
+            <td>
+                <input type="text" inputmode="numeric" name="quantidade[]" class="qtd" value="1" placeholder="0">
+                <input type="hidden" name="data_utilizacao[]">
+                <input type="hidden" name="periodo[]">
+            </td>
             <td class="centro"><input type="checkbox" name="repor_estoque[]" value="S"></td>
-            <td class="centro"><input type="checkbox" name="selecionado[]" value="S" checked></td>
             <td class="centro"><button type="button" class="botao perigo pequeno remover-item" title="Remover item">&times;</button></td>
         </tr>
     </tbody></table>
@@ -369,11 +289,55 @@ window.BIOSTECH_SOLICITACAO_ITENS = <?= json_encode(array_map(function ($i) {
         'repor_estoque'   => bd_bool($i['repor_estoque']),
         'data_utilizacao' => $i['data_utilizacao'],
         'periodo'         => $i['periodo'],
-        'selecionado'     => bd_bool($i['selecionado']),
     );
 }, $itens), JSON_UNESCAPED_UNICODE) ?>;
 </script>
 
-<script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
-<script src="<?= base_url('assets/js/compras.js') ?>"></script>
-<?php endif; ?>
+<script src="<?= base_url('assets/js/autocomplete.js?v=3') ?>"></script>
+<script src="<?= base_url('assets/js/compras.js?v=4') ?>"></script>
+
+<script>
+(function () {
+    var form = document.getElementById('form-solicitacao');
+
+    if (form) {
+        form.addEventListener('keydown', function (event) {
+            var alvo = event.target;
+
+            if (event.key === 'Enter' && alvo && alvo.tagName === 'INPUT'
+                && alvo.type !== 'submit' && alvo.type !== 'button') {
+                event.preventDefault();
+            }
+        });
+    }
+
+    document.addEventListener('input', function (event) {
+        var alvo = event.target;
+
+        if (alvo && alvo.classList && alvo.classList.contains('qtd')) {
+            alvo.value = alvo.value.replace(/\D/g, '');
+        }
+    });
+
+    var fone = document.getElementById('fone_responsavel');
+
+    if (fone) {
+        function mascaraTelefone(valor) {
+            var digitos = valor.replace(/\D/g, '').slice(0, 11);
+
+            if (digitos === '') { return ''; }
+
+            var texto = '(' + digitos.slice(0, 2) + ')';
+
+            if (digitos.length > 2) { texto += ' ' + digitos.slice(2, 7); }
+            if (digitos.length > 7) { texto += '-' + digitos.slice(7, 11); }
+
+            return texto;
+        }
+
+        fone.maxLength = 15;
+        fone.value = mascaraTelefone(fone.value);
+        fone.addEventListener('input', function () { fone.value = mascaraTelefone(fone.value); });
+    }
+})();
+</script>

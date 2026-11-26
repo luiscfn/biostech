@@ -78,6 +78,8 @@ $prateleira = $editando && $registro['prateleira'] !== NULL ? (string) $registro
 .esp-campo-cliente .autocomplete-busca { width:100%; }
 .esp-campo-pequeno input { width:120px; }
 .esp-campo-botao .botao { height:30px; }
+.bloco-especiais { border:1px solid #c9d5e4; border-radius:6px; background:#fff; padding:12px 14px; margin:0 0 12px; }
+.bloco-especiais > h3 { margin:0 0 10px; padding-bottom:6px; border-bottom:2px solid var(--azul); color:var(--azul); font-size:13px; font-weight:700; }
 .campo-pf input[type=text], .campo-pf input[type=number], .campo-pf select, .campo-pf textarea { border:1px solid #7f90a8; background:#fff; padding:4px 6px; font-size:12px; border-radius:2px; }
 .campo-pf input[readonly] { background:#d9dde5; }
 .pf-largo { flex:1 1 360px; min-width:260px; }
@@ -111,6 +113,7 @@ $prateleira = $editando && $registro['prateleira'] !== NULL ? (string) $registro
 
     <div class="painel-corpo">
         <?= form_open($editando ? 'produtos/ver/' . $id : 'produtos/novo', array('id' => 'form-produto')) ?>
+            <button type="submit" style="display:none" tabindex="-1" aria-hidden="true"></button>
 
             <div class="bloco-pf">
                 <div class="titulo-pf">Produtos</div>
@@ -279,106 +282,106 @@ $prateleira = $editando && $registro['prateleira'] !== NULL ? (string) $registro
                 </div>
             </div>
 
-            <div class="pf-acoes">
-                <a class="botao secundario pequeno" href="<?= site_url('produtos/novo') ?>">Novo</a>
-                <button type="submit" class="botao pequeno"><?= $editando ? 'Atualizar' : 'Salvar' ?></button>
-                <a class="botao secundario pequeno" href="<?= site_url('produtos') ?>">Cancela</a>
-                <a class="botao secundario pequeno" href="<?= $editando ? site_url('produtos/dados_gerais/' . $id) : '#bloco-dados-gerais' ?>">Dados Gerais do Produto</a>
-
-                <?php if ($editando): ?>
-                    <?php foreach (array('primeiro' => 'Primeiro', 'anterior' => 'Anterior', 'proximo' => 'Proximo', 'ultimo' => 'Ultimo') as $chave => $rotulo): ?>
-                        <?php if ( ! empty($vizinhos[$chave])): ?>
-                            <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . (int) $vizinhos[$chave]) ?>"><?= $rotulo ?></a>
-                        <?php else: ?>
-                            <button type="button" class="botao secundario pequeno" disabled><?= $rotulo ?></button>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-
-                <a class="botao secundario pequeno" href="<?= site_url('logout') ?>">Sair</a>
-            </div>
-
         <?= form_close() ?>
+
+        <?php if ($editando): ?>
+            <div class="bloco-especiais">
+                <h3>Precos especiais para clientes selecionados</h3>
+                <?= form_open('produtos/especial_salvar/' . $id, array('id' => 'form-especial')) ?>
+                    <div class="esp-cadastro">
+                        <div class="esp-campo esp-campo-cliente">
+                            <label for="pf_cliente">Cliente:</label>
+                            <div class="autocomplete" data-url="<?= site_url('clientes/buscar_clientes') ?>">
+                                <input type="text" class="autocomplete-busca" id="pf_cliente" placeholder="Codigo ou nome do cliente..."
+                                       autocomplete="off" <?= $editar_esp ? 'readonly' : '' ?>
+                                       value="<?= $editar_esp ? html_escape($esp_editar['cliente_nome']) : '' ?>">
+                                <input type="hidden" name="cliente_id" id="pf_cliente_id" value="<?= $editar_esp ? (int) $editar_esp : '' ?>">
+                                <div class="autocomplete-lista"></div>
+                            </div>
+                        </div>
+                        <div class="esp-campo esp-campo-pequeno">
+                            <label for="pf_esp_perc">(%) Lucro:</label>
+                            <input type="text" name="perc_lucro" id="pf_esp_perc" placeholder="0,00"
+                                   value="<?= $editar_esp && $esp_editar['perc_lucro'] !== NULL ? html_escape(numero_br($esp_editar['perc_lucro'], 2)) : '' ?>">
+                        </div>
+                        <div class="esp-campo esp-campo-pequeno">
+                            <label for="pf_esp_valor">Valor de Venda:</label>
+                            <input type="text" name="valor_venda" id="pf_esp_valor" placeholder="0,00"
+                                   value="<?= $editar_esp && $esp_editar['valor_venda'] !== NULL ? html_escape(numero_br($esp_editar['valor_venda'], 2)) : '' ?>">
+                        </div>
+                        <div class="esp-campo esp-campo-botao">
+                            <button type="submit" class="botao pequeno"><?= $editar_esp ? 'Atualizar preco especial' : 'Salvar preco especial' ?></button>
+                        </div>
+                        <?php if ($editar_esp): ?>
+                            <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . $id) ?>">Cancelar edicao</a>
+                        <?php endif; ?>
+                    </div>
+                <?= form_close() ?>
+
+                <div class="tabela-wrap">
+                    <table class="tabela compacta">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th class="num" style="width:100px">(%) Lucro</th>
+                                <th class="num" style="width:130px">Valor de Venda</th>
+                                <th style="width:170px">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($especiais)): ?>
+                                <tr><td colspan="4" class="vazio">Nenhum preco especial cadastrado para este produto.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($especiais as $e): ?>
+                                    <tr>
+                                        <td><a href="<?= site_url('clientes/ver/' . (int) $e['cliente_id']) ?>"><?= html_escape($e['cliente_nome']) ?></a></td>
+                                        <td class="num"><?= $e['perc_lucro'] !== NULL ? numero_br($e['perc_lucro'], 2) . '%' : '-' ?></td>
+                                        <td class="num"><?= moeda_br($e['valor_venda']) ?></td>
+                                        <td class="acoes-tabela">
+                                            <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . $id . '?editar_esp=' . (int) $e['cliente_id']) ?>">Editar</a>
+                                            <?php if (in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE)): ?>
+                                                <?= form_open('produtos/especial_excluir/' . $id . '/' . (int) $e['cliente_id'], array('onsubmit' => "return confirm('Excluir o preco especial deste cliente?');")) ?>
+                                                    <button type="submit" class="botao pequeno perigo">Excluir</button>
+                                                <?= form_close() ?>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php if ($usuario['perfil'] === PERFIL_ADMIN): ?>
+                    <?= form_open('produtos/excluir/' . $id, array('onsubmit' => "return confirm('Excluir definitivamente o produto " . $id . "?');")) ?>
+                        <button type="submit" class="botao pequeno perigo">Apaga</button>
+                    <?= form_close() ?>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="pf-acoes">
+            <a class="botao secundario pequeno" href="<?= site_url('produtos/novo') ?>">Novo</a>
+            <button type="submit" form="form-produto" class="botao pequeno"><?= $editando ? 'Atualizar' : 'Salvar' ?></button>
+            <a class="botao secundario pequeno" href="<?= site_url('produtos') ?>">Cancela</a>
+            <a class="botao secundario pequeno" href="<?= $editando ? site_url('produtos/dados_gerais/' . $id) : '#bloco-dados-gerais' ?>">Dados Gerais do Produto</a>
+
+            <?php if ($editando): ?>
+                <?php foreach (array('primeiro' => 'Primeiro', 'anterior' => 'Anterior', 'proximo' => 'Proximo', 'ultimo' => 'Ultimo') as $chave => $rotulo): ?>
+                    <?php if ( ! empty($vizinhos[$chave])): ?>
+                        <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . (int) $vizinhos[$chave]) ?>"><?= $rotulo ?></a>
+                    <?php else: ?>
+                        <button type="button" class="botao secundario pequeno" disabled><?= $rotulo ?></button>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
+            <a class="botao secundario pequeno" href="<?= site_url('dashboard') ?>">Sair</a>
+        </div>
     </div>
 </div>
 
 <?php if ($editando): ?>
-    <div class="painel">
-        <div class="painel-cabecalho"><h3>Precos especiais para clientes selecionados</h3></div>
-        <div class="painel-corpo">
-            <?= form_open('produtos/especial_salvar/' . $id, array('id' => 'form-especial')) ?>
-                <div class="esp-cadastro">
-                    <div class="esp-campo esp-campo-cliente">
-                        <label for="pf_cliente">Cliente:</label>
-                        <div class="autocomplete" data-url="<?= site_url('clientes/buscar_clientes') ?>">
-                            <input type="text" class="autocomplete-busca" id="pf_cliente" placeholder="Codigo ou nome do cliente..."
-                                   autocomplete="off" <?= $editar_esp ? 'readonly' : '' ?>
-                                   value="<?= $editar_esp ? html_escape($esp_editar['cliente_nome']) : '' ?>">
-                            <input type="hidden" name="cliente_id" id="pf_cliente_id" value="<?= $editar_esp ? (int) $editar_esp : '' ?>">
-                            <div class="autocomplete-lista"></div>
-                        </div>
-                    </div>
-                    <div class="esp-campo esp-campo-pequeno">
-                        <label for="pf_esp_perc">(%) Lucro:</label>
-                        <input type="text" name="perc_lucro" id="pf_esp_perc" placeholder="0,00"
-                               value="<?= $editar_esp && $esp_editar['perc_lucro'] !== NULL ? html_escape(numero_br($esp_editar['perc_lucro'], 2)) : '' ?>">
-                    </div>
-                    <div class="esp-campo esp-campo-pequeno">
-                        <label for="pf_esp_valor">Valor de Venda:</label>
-                        <input type="text" name="valor_venda" id="pf_esp_valor" placeholder="0,00"
-                               value="<?= $editar_esp && $esp_editar['valor_venda'] !== NULL ? html_escape(numero_br($esp_editar['valor_venda'], 2)) : '' ?>">
-                    </div>
-                    <div class="esp-campo esp-campo-botao">
-                        <button type="submit" class="botao pequeno"><?= $editar_esp ? 'Atualizar preco especial' : 'Salvar preco especial' ?></button>
-                    </div>
-                    <?php if ($editar_esp): ?>
-                        <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . $id) ?>">Cancelar edicao</a>
-                    <?php endif; ?>
-                </div>
-            <?= form_close() ?>
-
-            <div class="tabela-wrap">
-                <table class="tabela compacta">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th class="num" style="width:100px">(%) Lucro</th>
-                            <th class="num" style="width:130px">Valor de Venda</th>
-                            <th style="width:170px">Acoes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($especiais)): ?>
-                            <tr><td colspan="4" class="vazio">Nenhum preco especial cadastrado para este produto.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($especiais as $e): ?>
-                                <tr>
-                                    <td><a href="<?= site_url('clientes/ver/' . (int) $e['cliente_id']) ?>"><?= html_escape($e['cliente_nome']) ?></a></td>
-                                    <td class="num"><?= $e['perc_lucro'] !== NULL ? numero_br($e['perc_lucro'], 2) . '%' : '-' ?></td>
-                                    <td class="num"><?= moeda_br($e['valor_venda']) ?></td>
-                                    <td class="acoes-tabela">
-                                        <a class="botao secundario pequeno" href="<?= site_url('produtos/ver/' . $id . '?editar_esp=' . (int) $e['cliente_id']) ?>">Editar</a>
-                                        <?php if (in_array($usuario['perfil'], array(PERFIL_ADMIN, PERFIL_GESTOR), TRUE)): ?>
-                                            <?= form_open('produtos/especial_excluir/' . $id . '/' . (int) $e['cliente_id'], array('onsubmit' => "return confirm('Excluir o preco especial deste cliente?');")) ?>
-                                                <button type="submit" class="botao pequeno perigo">Excluir</button>
-                                            <?= form_close() ?>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <?php if ($usuario['perfil'] === PERFIL_ADMIN): ?>
-                <?= form_open('produtos/excluir/' . $id, array('onsubmit' => "return confirm('Excluir definitivamente o produto " . $id . "?');")) ?>
-                    <button type="submit" class="botao pequeno perigo">Apaga</button>
-                <?= form_close() ?>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <script src="<?= base_url('assets/js/autocomplete.js') ?>"></script>
 <?php endif; ?>
 

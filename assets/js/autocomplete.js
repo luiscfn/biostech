@@ -67,6 +67,46 @@
         lista.style.display = 'none';
     }
 
+    /**
+     * Listas dentro de tabelas com rolagem sao fixadas no viewport para nao
+     * ficarem cortadas pelo container da tabela.
+     */
+    function posicionar(box, busca, lista) {
+        var pai = box.parentElement;
+
+        while (pai && pai !== document.body) {
+            var estilo = window.getComputedStyle(pai);
+
+            if (/(auto|scroll)/.test(estilo.overflowY)) {
+                var r = busca.getBoundingClientRect();
+
+                lista.style.position = 'fixed';
+                lista.style.top = (r.bottom + 3) + 'px';
+                lista.style.left = r.left + 'px';
+                lista.style.right = 'auto';
+                lista.style.width = r.width + 'px';
+                lista.style.maxHeight = Math.min(260, Math.max(120, window.innerHeight - r.bottom - 24)) + 'px';
+                lista.style.zIndex = '1000';
+
+                if (box.getAttribute('data-scroll-listener') !== '1') {
+                    box.setAttribute('data-scroll-listener', '1');
+                    pai.addEventListener('scroll', function () { limpar(lista); }, { passive: true });
+                }
+                return;
+            }
+
+            pai = pai.parentElement;
+        }
+
+        lista.style.position = '';
+        lista.style.top = '';
+        lista.style.left = '';
+        lista.style.right = '';
+        lista.style.width = '';
+        lista.style.maxHeight = '';
+        lista.style.zIndex = '';
+    }
+
     function acharCampo(box, alvo) {
         if (!alvo) {
             return null;
@@ -150,6 +190,13 @@
                 unidade.value = item.unidade !== undefined && item.unidade !== null ? item.unidade : '';
             }
 
+            [['data-cidade', 'cidade'], ['data-uf', 'uf'], ['data-endereco', 'endereco'],
+             ['data-bairro', 'bairro'], ['data-numero', 'endereco_numero'],
+             ['data-cep', 'cep'], ['data-fone', 'fone']].forEach(function (par) {
+                var alvo = acharCampo(box, box.getAttribute(par[0]));
+                if (alvo) { alvo.value = item[par[1]] || ''; }
+            });
+
             limpar(lista);
             busca.focus();
 
@@ -162,6 +209,7 @@
 
         function desenhar(itens) {
             lista.innerHTML = '';
+            posicionar(box, busca, lista);
 
             if (!itens.length) {
                 var vazio = document.createElement('div');
