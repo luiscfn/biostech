@@ -1008,6 +1008,24 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     .detalhes-dimensionamento .detalhe-orcamento { grid-column: span 2; margin-left: -10px; }
 }
 
+/* Fechamento de pedido: fornecedor em destaque na linha de detalhes */
+@media (min-width: 901px) {
+    .detalhes.detalhes-fechamento {
+        grid-template-columns: repeat(12, 1fr);
+        column-gap: 8px;
+    }
+    .detalhes-fechamento .detalhe-fornecedor { grid-column: span 5; }
+    .detalhes-fechamento .detalhe-data      { grid-column: span 1; }
+    .detalhes-fechamento .detalhe-itens     { grid-column: span 1; }
+    .detalhes-fechamento .detalhe-bruto     { grid-column: span 2; }
+    .detalhes-fechamento .detalhe-desconto  { grid-column: span 1; }
+    .detalhes-fechamento .detalhe-total     { grid-column: span 2; }
+}
+
+.detalhe-centro,
+.detalhe-centro .rotulo,
+.detalhe-centro .valor { text-align: center; }
+
 .detalhe-orcamento .orcamento-data {
     margin-left: 8px;
     color: var(--muted);
@@ -1166,6 +1184,25 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     letter-spacing: .4px;
 }
 
+/* Cabecalho da secao de parcelas: titulo a esquerda, botoes no fim da linha */
+.secao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.secao-cabecalho .secao-titulo { margin: 0; }
+
+.secao-acoes {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 /* Titulos de bloco em destaque (faixa clara + barra azul) */
 .secao-titulo.destaque {
     margin: 0 0 16px;
@@ -1253,6 +1290,26 @@ table.tabela .vazio { text-align: center; color: var(--muted); padding: 30px; }
     justify-content: flex-end;
     gap: 10px;
 }
+
+/* Modal do fechamento de pedido (formulario completo) */
+.modal-fechamento .modal-confirmacao-caixa {
+    width: min(1120px, calc(100vw - 32px));
+    max-height: 90vh;
+    overflow: auto;
+    padding: 16px 18px;
+}
+
+.modal-fechamento .painel {
+    border: 0;
+    box-shadow: none;
+    margin: 0;
+    border-radius: 0;
+}
+
+.modal-fechamento .painel-cabecalho { padding-top: 0; }
+
+/* Confirmacao de fechamento por cima do modal do formulario */
+.modal-fechamento .modal-confirmacao { z-index: 1100; }
 
 .divisor {
     border: none;
@@ -1378,6 +1435,95 @@ form.inline {
 .tabela-itens .total-linha {
     font-weight: 600;
     white-space: nowrap;
+}
+
+/* Tabela de parcelas do fechamento: compacta, colunas centralizadas */
+table.tabela.tabela-parcelas {
+    width: auto;
+    max-width: 100%;
+    margin-left: 0;
+}
+
+table.tabela.tabela-parcelas thead th,
+table.tabela.tabela-parcelas tbody td,
+table.tabela.tabela-parcelas .num {
+    text-align: center;
+}
+
+.tabela-parcelas thead th { padding: 6px; }
+
+.tabela-parcelas tbody td { padding: 4px 6px; }
+
+.tabela-parcelas input[type=number],
+.tabela-parcelas input[type=date] {
+    height: 26px;
+    padding: 2px 5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.tabela-parcelas .botao.pequeno { padding: 3px 7px; }
+
+/* Mostra 8 linhas e rola o restante; total e cabecalho fixos */
+.tabela-wrap-parcelas {
+    max-height: 330px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+table.tabela.tabela-parcelas thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+table.tabela.tabela-parcelas tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #eef4fa;
+    border-top: 1px solid var(--borda);
+    padding: 6px;
+}
+
+table.tabela.tabela-parcelas tbody td { padding: 5px 6px; }
+
+.parcelas-bloco { display: inline-block; max-width: 100%; }
+
+.parcelas-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: nowrap;
+}
+
+/* Fechamento: dados a esquerda e parcelas a direita */
+.fechamento-colunas {
+    display: grid;
+    grid-template-columns: 420px 580px;
+    gap: 24px;
+    align-items: start;
+    justify-content: start;
+}
+
+.fechamento-dados,
+.fechamento-parcelas {
+    min-width: 0;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    padding: 12px;
+    background: var(--branco);
+}
+
+.fechamento-dados .secao-titulo,
+.fechamento-dados .check { white-space: nowrap; }
+
+.fechamento-dados .secao-titulo,
+.fechamento-parcelas .secao-titulo { margin-top: 0; }
+
+@media (max-width: 900px) {
+    .fechamento-colunas { grid-template-columns: 1fr; }
 }
 
 .linha-total {

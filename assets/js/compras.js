@@ -559,26 +559,57 @@
         return d.getFullYear() + '-' + (mes.length < 2 ? '0' + mes : mes) + '-' + (dia.length < 2 ? '0' + dia : dia);
     }
 
+    function diasEntre(inicial, final) {
+        if (!inicial || !final) {
+            return null;
+        }
+
+        var a = inicial.split('-');
+        var b = final.split('-');
+
+        if (a.length !== 3 || b.length !== 3) {
+            return null;
+        }
+
+        var ta = Date.UTC(Number(a[0]), Number(a[1]) - 1, Number(a[2]));
+        var tb = Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2]));
+
+        if (isNaN(ta) || isNaN(tb)) {
+            return null;
+        }
+
+        return Math.round((tb - ta) / 86400000);
+    }
+
+    function escopoFechamento(tabela) {
+        return (tabela && tabela.closest('form')) || document;
+    }
+
     function atualizarParcelas(tabela) {
+        var escopo = escopoFechamento(tabela);
         var itens = linhas(tabela);
-        var fonte = document.getElementById('valor-total-fechamento');
+        var fonte = escopo.querySelector('[data-valor-total-fechamento]')
+                 || escopo.querySelector('#valor-total-fechamento');
         var total = fonte ? numero(fonte.getAttribute('data-valor')) : numero(tabela.getAttribute('data-total'));
         var n = itens.length;
-        var base = total > 0 && n > 0 ? Math.round((total / n) * 100) / 100 : 0;
-        var soma = Math.round(base * n * 100) / 100;
         var valores = [];
 
-        for (var i = 0; i < n; i++) {
-            valores.push(base);
+        // Rateio em centavos: a parte inteira vai para todas e o restante
+        // (sempre o maior valor) vai para a ultima parcela.
+        if (n > 0) {
+            var centavos = Math.round(total * 100);
+            var baseCent = Math.floor(centavos / n);
+            var ultimoCent = centavos - baseCent * (n - 1);
+
+            for (var i = 0; i < n; i++) {
+                valores.push(baseCent / 100);
+            }
+
+            valores[n - 1] = ultimoCent / 100;
         }
 
-        if (n > 0 && soma < total) {
-            valores[0] = Math.round((valores[0] + (total - soma)) * 100) / 100;
-        } else if (n > 0 && soma > total) {
-            valores[n - 1] = Math.round((valores[n - 1] - (soma - total)) * 100) / 100;
-        }
-
-        var baseData = document.getElementById('data_vencimento') ? document.getElementById('data_vencimento').value : '';
+        var campoBase = escopo.querySelector('input[name="data_vencimento"]');
+        var baseData = campoBase ? campoBase.value : '';
 
         for (var j = 0; j < itens.length; j++) {
             var linha = itens[j];
@@ -594,9 +625,148 @@
                 celula.textContent = formatar(valores[j] || 0);
             }
         }
+
+        var totalCell = tabela.querySelector('.total-parcelas');
+
+        if (totalCell) {
+            var somaValor = 0;
+
+            for (var k = 0; k < valores.length; k++) {
+                somaValor += valores[k];
+            }
+
+            totalCell.textContent = formatar(somaValor);
+        }
+    }
+
+    function iniciarConfirmacao(escopo) {
+        var form = escopo.tagName === 'FORM' ? escopo : escopo.querySelector('form');
+        var confirma = escopo.querySelector('[data-confirma-fechamento]');
+        var aviso = escopo.querySelector('[data-aviso-fechamento]');
+
+        if (!form || !confirma || !aviso || confirma.getAttribute('data-ligado') === '1') {
+            return null;
+        }
+
+        confirma.setAttribute('data-ligado', '1');
+
+        var mensagem = confirma.querySelector('[data-confirma-mensagem]');
+        var sim = confirma.querySelector('[data-confirma-sim]');
+        var nao = confirma.querySelector('[data-confirma-nao]');
+        var avisoMensagem = aviso.querySelector('[data-aviso-mensagem]');
+        var ok = aviso.querySelector('[data-aviso-ok]');
+
+        function abrir() {
+            if (mensagem) {
+                mensagem.textContent = 'Confirma fechamento do pedido: '
+                    + (form.getAttribute('data-pedido-numero') || '');
+            }
+            confirma.classList.add('visivel');
+        }
+
+        function fechar() {
+            confirma.classList.remove('visivel');
+        }
+
+        function mostrarAviso(texto) {
+            if (avisoMensagem) { avisoMensagem.textContent = texto; }
+            aviso.classList.add('visivel');
+        }
+
+        var botaoFechar = form.querySelector('[data-botao-fechar]');
+
+        if (botaoFechar) {
+            botaoFechar.addEventListener('click', abrir);
+        }
+
+        // Evita que Enter em qualquer campo feche o pedido sem confirmacao.
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            abrir();
+        });
+
+        if (sim) {
+            sim.addEventListener('click', function () {
+                sincronizarCheckboxes(form);
+                form.submit();
+            });
+        }
+
+        if (nao) {
+            nao.addEventListener('click', function () {
+                fechar();
+                mostrarAviso('Fechamento Cancelado');
+            });
+        }
+
+        if (ok) {
+            ok.addEventListener('click', function () {
+                aviso.classList.remove('visivel');
+            });
+        }
+
+        confirma.addEventListener('click', function (ev) {
+            if (ev.target === confirma) { fechar(); }
+        });
+
+        aviso.addEventListener('click', function (ev) {
+            if (ev.target === aviso) { aviso.classList.remove('visivel'); }
+        });
+
+        return abrir;
+    }
+
+    function gerarParcelas(tabela, quantidade, campoQtd) {
+        var texto = String(quantidade === undefined || quantidade === null ? '' : quantidade).trim();
+        var corpo = tabela.querySelector('tbody');
+
+        if (!corpo) {
+            return;
+        }
+
+        // Quantidade apagada depois de gerada: limpa a tabela de parcelas.
+        if (texto === '') {
+            if (campoQtd && campoQtd.getAttribute('data-gerado') === '1') {
+                corpo.innerHTML = '';
+                campoQtd.setAttribute('data-gerado', '0');
+            }
+            return;
+        }
+
+        var n = parseInt(texto, 10);
+
+        if (!n || n < 1) {
+            return;
+        }
+
+        corpo.innerHTML = '';
+
+        for (var i = 0; i < n; i++) {
+            adicionarLinha(tabela);
+        }
+
+        var itens = linhas(tabela);
+
+        for (var j = 0; j < itens.length; j++) {
+            var campo = itens[j].querySelector('input[name="parcela_dias[]"]');
+            var venc  = itens[j].querySelector('input[name="parcela_vencimento[]"]');
+
+            if (campo) { campo.value = j * 30; }
+            if (venc)  { venc.value = ''; }
+        }
+
+        if (campoQtd) { campoQtd.setAttribute('data-gerado', '1'); }
+
+        atualizarParcelas(tabela);
     }
 
     function iniciarParcelas(tabela) {
+        if (tabela.getAttribute('data-iniciada') === '1') {
+            return;
+        }
+
+        tabela.setAttribute('data-iniciada', '1');
+
         var quantos = parseInt(tabela.getAttribute('data-iniciais'), 10);
 
         if (!quantos || quantos < 1) {
@@ -620,7 +790,23 @@
         atualizarParcelas(tabela);
 
         tabela.addEventListener('input', function (ev) {
-            if (ev.target.name === 'parcela_dias[]') {
+            var nome = ev.target.name;
+
+            if (nome === 'parcela_dias[]') {
+                // Prazo informado -> calcula o vencimento.
+                atualizarParcelas(tabela);
+            } else if (nome === 'parcela_vencimento[]') {
+                // Vencimento informado -> calcula o prazo em dias.
+                var escopo = escopoFechamento(tabela);
+                var baseCampo = escopo.querySelector('input[name="data_vencimento"]');
+                var base = baseCampo ? baseCampo.value : '';
+                var qtd = ev.target.closest('tr').querySelector('input[name="parcela_dias[]"]');
+                var n = diasEntre(base, ev.target.value);
+
+                if (qtd && n !== null && ev.target.value) {
+                    qtd.value = n;
+                }
+
                 atualizarParcelas(tabela);
             }
         });
@@ -640,14 +826,44 @@
             }
         });
 
-        var base = document.getElementById('data_vencimento');
+        var escopo = escopoFechamento(tabela);
+        var base = escopo.querySelector('input[name="data_vencimento"]');
 
         if (base) {
             base.addEventListener('change', function () {
                 atualizarParcelas(tabela);
             });
         }
+
+        iniciarConfirmacao(escopo);
+
+        var qtdParcelas = escopo.querySelector('[data-quantidade-parcelas]');
+
+        if (qtdParcelas && qtdParcelas.getAttribute('data-ligado') !== '1') {
+            qtdParcelas.setAttribute('data-ligado', '1');
+            qtdParcelas.addEventListener('input', function () {
+                gerarParcelas(tabela, this.value, this);
+            });
+            qtdParcelas.addEventListener('change', function () {
+                gerarParcelas(tabela, this.value, this);
+            });
+        }
     }
+
+    // API publica usada quando o formulario e injetado dinamicamente (modal).
+    window.ComprasFechamento = {
+        iniciar: function (raiz) {
+            var escopo = raiz || document;
+            var tabelas = escopo.querySelectorAll('table[data-parcelas]');
+
+            for (var i = 0; i < tabelas.length; i++) {
+                iniciarParcelas(tabelas[i]);
+            }
+        },
+        gerar: function (tabela, quantidade) {
+            gerarParcelas(tabela, quantidade);
+        }
+    };
 
     // ==================================================================
     // Solicitacao interna
@@ -938,54 +1154,54 @@
             }
         }
 
-        var botoes = document.querySelectorAll('[data-adicionar-item]');
+        // Delegado para funcionar tambem com o formulario injetado no modal.
+        document.addEventListener('click', function (ev) {
+            var botao = ev.target.closest('[data-adicionar-item]');
 
-        for (var b = 0; b < botoes.length; b++) {
-            botoes[b].addEventListener('click', function (ev) {
-                ev.preventDefault();
+            if (!botao) {
+                return;
+            }
 
-                var grupo = this.getAttribute('data-adicionar-item');
-                var tabela = document.querySelector('table[data-grupo="' + grupo + '"]')
-                          || document.querySelector('table[data-compra]')
-                          || document.querySelector('table[data-cotacao]')
-                          || document.querySelector('table[data-solicitacao]');
+            ev.preventDefault();
 
-                if (!tabela) {
-                    return;
+            var grupo = botao.getAttribute('data-adicionar-item');
+            var escopo = botao.closest('form') || document;
+            var tabela = escopo.querySelector('table[data-grupo="' + grupo + '"]')
+                      || escopo.querySelector('table[data-compra]')
+                      || escopo.querySelector('table[data-cotacao]')
+                      || escopo.querySelector('table[data-solicitacao]');
+
+            if (!tabela) {
+                return;
+            }
+
+            var anterior = null;
+
+            if (tabela.hasAttribute('data-parcelas')) {
+                var existentes = linhas(tabela);
+
+                if (existentes.length) {
+                    var diasAnterior = existentes[existentes.length - 1].querySelector('input[name="parcela_dias[]"]');
+                    anterior = diasAnterior ? numero(diasAnterior.value) : 0;
                 }
+            }
 
-                if (tabela.hasAttribute('data-parcelas') && linhas(tabela).length >= 12) {
-                    return;
+            var nova = adicionarLinha(tabela);
+            renumerar(tabela);
+
+            if (tabela.hasAttribute('data-parcelas') && nova && anterior !== null) {
+                var diasNovo = nova.querySelector('input[name="parcela_dias[]"]');
+
+                if (diasNovo) {
+                    diasNovo.value = anterior + 30;
                 }
+            }
 
-                var anterior = null;
-
-                if (tabela.hasAttribute('data-parcelas')) {
-                    var existentes = linhas(tabela);
-
-                    if (existentes.length) {
-                        var diasAnterior = existentes[existentes.length - 1].querySelector('input[name="parcela_dias[]"]');
-                        anterior = diasAnterior ? numero(diasAnterior.value) : 0;
-                    }
-                }
-
-                var nova = adicionarLinha(tabela);
-                renumerar(tabela);
-
-                if (tabela.hasAttribute('data-parcelas') && nova && anterior !== null) {
-                    var diasNovo = nova.querySelector('input[name="parcela_dias[]"]');
-
-                    if (diasNovo) {
-                        diasNovo.value = anterior + 30;
-                    }
-                }
-
-                if (tabela.hasAttribute('data-compra')) {
-                    atualizarTotaisPedido(tabela);
-                } else if (tabela.hasAttribute('data-parcelas')) {
-                    atualizarParcelas(tabela);
-                }
-            });
-        }
+            if (tabela.hasAttribute('data-compra')) {
+                atualizarTotaisPedido(tabela);
+            } else if (tabela.hasAttribute('data-parcelas')) {
+                atualizarParcelas(tabela);
+            }
+        });
     });
 })();

@@ -107,6 +107,7 @@ $route['compras/replicar/(:num)']              = 'compras/replicar/$1';
 $route['compras/excluir_item/(:num)/(:num)']   = 'compras/excluir_item/$1/$2';
 $route['compras/transferir_item/(:num)']       = 'compras/transferir_item/$1';
 $route['compras/fechar/(:num)']                = 'compras/fechar/$1';
+$route['compras/fechar_modal/(:num)']          = 'compras/fechar_modal/$1';
 $route['compras/cancelar_fechamento/(:num)']   = 'compras/cancelar_fechamento/$1';
 $route['compras/cotacoes']                     = 'compras/cotacoes';
 $route['compras/cotacao']                      = 'compras/cotacao';

@@ -362,8 +362,7 @@ table.tabela-itens tbody td, table.tabela-itens tfoot td { padding:6px 8px; font
 
                 <?php if ($edicao): ?>
                     <button type="button" class="botao secundario" id="btn-transfere-item">Transfere item</button>
-                    <button type="submit" class="botao secundario"
-                            formaction="<?= site_url('compras/fechar/' . $registro['numero']) ?>">Fechar Pedido</button>
+                    <button type="button" class="botao secundario" id="btn-fechar-pedido">Fechar Pedido</button>
                     <a class="botao secundario" href="<?= site_url('compras/ver/' . $registro['numero'] . '?aba=log') ?>">Mostrar Alteracoes</a>
                     <button type="submit" class="botao pequeno perigo"
                             formaction="<?= site_url('compras/excluir/' . $registro['numero']) ?>"
@@ -439,6 +438,13 @@ table.tabela-itens tbody td, table.tabela-itens tfoot td { padding:6px 8px; font
         <input type="hidden" name="produto_id" id="transf-form-produto">
         <input type="hidden" name="acao" id="transf-form-acao">
     <?= form_close() ?>
+
+    <div class="modal-confirmacao modal-fechamento" id="modal-fechar-pedido" role="dialog" aria-modal="true"
+         aria-label="Fechar pedido de compra">
+        <div class="modal-confirmacao-caixa modal-fechamento-caixa">
+            <div id="modal-fechar-conteudo"></div>
+        </div>
+    </div>
 <?php endif; ?>
 
 <template id="linha-pedido">
@@ -482,7 +488,7 @@ window.BIOSTECH_ITENS = <?= json_encode(array_map(function ($i) {
 </script>
 
 <script src="<?= base_url('assets/js/autocomplete.js?v=4') ?>"></script>
-<script src="<?= base_url('assets/js/compras.js?v=7') ?>"></script>
+<script src="<?= base_url('assets/js/compras.js?v=8') ?>"></script>
 
 <script>
 (function () {
@@ -588,6 +594,66 @@ window.BIOSTECH_ITENS = <?= json_encode(array_map(function ($i) {
             document.getElementById('form-transfere-item').submit();
         });
     }
+})();
+</script>
+
+<script>
+(function () {
+    var abrir  = document.getElementById('btn-fechar-pedido');
+    var modal  = document.getElementById('modal-fechar-pedido');
+    var corpo  = document.getElementById('modal-fechar-conteudo');
+
+    if (!abrir || !modal || !corpo) { return; }
+
+    function fechar() {
+        modal.classList.remove('visivel');
+    }
+
+    function ligarBotoesFechar() {
+        var botoes = corpo.querySelectorAll('[data-fechar-modal]');
+
+        for (var i = 0; i < botoes.length; i++) {
+            botoes[i].addEventListener('click', fechar);
+        }
+    }
+
+    abrir.addEventListener('click', function () {
+        corpo.innerHTML = '<p style="padding:20px">Carregando...</p>';
+        modal.classList.add('visivel');
+
+        fetch('<?= site_url('compras/fechar_modal/' . $registro['numero']) ?>', {
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (resposta) {
+            if (!resposta.ok) { throw new Error('erro'); }
+            return resposta.text();
+        })
+        .then(function (html) {
+            corpo.innerHTML = html;
+
+            if (window.ComprasFechamento) {
+                window.ComprasFechamento.iniciar(corpo);
+            }
+
+            ligarBotoesFechar();
+
+            var campo = corpo.querySelector('[data-quantidade-parcelas]');
+            if (campo) { campo.focus(); }
+        })
+        .catch(function () {
+            corpo.innerHTML = '<p style="padding:20px">Nao foi possivel carregar o fechamento.</p>';
+            ligarBotoesFechar();
+        });
+    });
+
+    modal.addEventListener('click', function (ev) {
+        if (ev.target === modal) { fechar(); }
+    });
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape' && modal.classList.contains('visivel')) { fechar(); }
+    });
 })();
 </script>
 <?php endif; ?>

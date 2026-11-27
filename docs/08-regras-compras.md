@@ -162,29 +162,34 @@ senão:
 - `atualiza_preco_compra` marca o item que deve atualizar o custo do produto no
   fechamento.
 
-### 4.3 Parcelas (regra `VALPARC` do Access)
+### 4.3 Parcelas (regra `VALPARC` do Access, adaptada)
 
-- Máximo **12** parcelas; `dias` e `vencimento` não podem decrescer.
-- `vencimento` vazio é calculado a partir da data-base (`data_vencimento` >
-  `data_compra` > data atual) mais `dias`.
-- Rateio:
+- Quantidade de parcelas **livre**, informada pelo usuário no campo
+  "Quantidade de parcelas"; a grade é gerada automaticamente. Não há limite
+  de 12 parcelas e `dias`/`vencimento` podem variar livremente.
+- `dias` e `vencimento` são calculados um pelo outro, tendo como base o
+  **Vencimento Base** (`data_vencimento`):
+  - informado `dias` → `vencimento = base + dias`;
+  - informado `vencimento` → `dias = vencimento - base` (em dias).
+- Rateio (a sobra vai sempre para a última parcela, que fica com o maior valor):
 
   ```
-  base = round(total / n, 2)
-  soma = round(base * n, 2)
-  se soma < total: 1ª parcela absorve (total - soma)
-  se soma > total: última parcela absorve (soma - total)
+  centavos   = round(total * 100)
+  base       = floor(centavos / n)          (para as n-1 primeiras)
+  ultima     = centavos - base * (n - 1)    (maior valor)
   ```
 
 - A última parcela precisa ficar com valor positivo.
+- `numero_par` é `integer`, sem restrição de quantidade no banco.
 
 ### 4.4 Fechamento (`F_CONFIRMA_PEDIDO_COMPRA_011`)
 
 Pré-requisitos: pedido `aberto`, com fornecedor e pelo menos um item.
 
-1. Atualiza o cabeçalho: situação `fechado`, NF, data da NF, 1º vencimento,
-   condição de pagamento, forma/documento de recebimento, centro de custo,
-   prazo de entrega, usuário e data do fechamento.
+1. Atualiza o cabeçalho: situação `fechado`, NF, data da NF, **Vencimento Base**,
+   condição de pagamento, forma de recebimento, usuário e data do fechamento.
+   `data_compra`, documento, centro de custo e prazo de entrega não são mais
+   informados na tela: seus valores já gravados no pedido são mantidos.
 2. Regrava as parcelas (apaga as anteriores e insere as normalizadas).
 3. Gera **uma entrada de estoque por item**, agrupadas pelo mesmo `lote`, com
    `origem='compra'`, `origem_id=<numero do pedido>`, `documento=<num_nf>` e

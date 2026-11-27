@@ -6,8 +6,8 @@
  * Regras principais (ver docs/08-regras-compras.md):
  *  - somente pedido aberto pode ser alterado/excluido;
  *  - fechamento exige fornecedor e itens, gera estoque e contas a pagar;
- *  - parcelas de 1 a 12 com dias e vencimentos nao decrescentes;
- *  - soma das parcelas igual ao total do pedido (rateio com ajuste);
+ *  - quantidade de parcelas livre; prazo e vencimento calculados um pelo outro;
+ *  - soma das parcelas igual ao total do pedido (sobra na ultima parcela);
  *  - cancelamento do fechamento estorna o estoque e cancela os titulos;
  *  - exclusao de item/pedido somente enquanto aberto.
  */
@@ -858,9 +858,9 @@ class Compras_model extends MY_Model
                 $this->_data($this->_v($dados, 'data_vencimento')) ?: $parcelas[0]['vencimento'],
                 $this->_int($this->_v($dados, 'condicao_pagamento')),
                 $this->_int($this->_v($dados, 'forma_recebimento')),
-                $this->_int($this->_v($dados, 'documento_recebimento')),
-                $this->_int($this->_v($dados, 'centro_custo')),
-                $this->_int($this->_v($dados, 'prazo_entrega')),
+                $this->_int($this->_v($dados, 'documento_recebimento')) ?: $this->_int($p['documento_recebimento']),
+                $this->_int($this->_v($dados, 'centro_custo')) ?: $this->_int($p['centro_custo']),
+                $this->_int($this->_v($dados, 'prazo_entrega')) ?: $this->_int($p['prazo_entrega']),
                 $usuario['login'],
                 $numero,
             )
@@ -2652,56 +2652,33 @@ class Compras_model extends MY_Model
             $limpa[] = array('dias' => 0, 'vencimento' => $base);
         }
 
-        if (count($limpa) > 12)
-        {
-            return array('erro' => 'O pedido permite no maximo 12 parcelas.');
-        }
-
-        $anterior_dias = -1;
-        $anterior_venc = NULL;
-
         foreach ($limpa as $i => $p)
         {
-            if ($p['dias'] < 0)
+            $dias = $p['dias'] === NULL ? 0 : (int) $p['dias'];
+            $venc = $p['vencimento'];
+
+            if ($venc === NULL)
             {
-                return array('erro' => 'O prazo em dias da parcela ' . ($i + 1) . ' e invalido.');
+                // Informado o prazo: calcula o vencimento a partir do Vencimento Base.
+                $venc = date('Y-m-d', strtotime($base . ' +' . $dias . ' days'));
+            }
+            elseif ($dias === 0 && $venc !== $base)
+            {
+                // Informado o vencimento: calcula o prazo em dias.
+                $dias = (int) round((strtotime($venc) - strtotime($base)) / 86400);
             }
 
-            if ($p['vencimento'] === NULL)
-            {
-                $p['vencimento'] = date('Y-m-d', strtotime($base . ' +' . $p['dias'] . ' days'));
-            }
-
-            if ($p['dias'] < $anterior_dias)
-            {
-                return array('erro' => 'O prazo em dias da parcela ' . ($i + 1) . ' nao pode ser menor que o da parcela anterior.');
-            }
-
-            if ($anterior_venc !== NULL && $p['vencimento'] < $anterior_venc)
-            {
-                return array('erro' => 'O vencimento da parcela ' . ($i + 1) . ' nao pode ser menor que o da parcela anterior.');
-            }
-
-            $anterior_dias = $p['dias'];
-            $anterior_venc = $p['vencimento'];
-
-            $limpa[$i] = $p;
+            $limpa[$i] = array('dias' => $dias, 'vencimento' => $venc);
         }
 
-        // Rateio (mesma regra do VALPARC do Access).
-        $n    = count($limpa);
-        $base_valor = round($total / $n, 2);
-        $soma = round($base_valor * $n, 2);
-        $valores = array_fill(0, $n, $base_valor);
-
-        if ($soma < $total)
-        {
-            $valores[0] = round($valores[0] + ($total - $soma), 2);
-        }
-        elseif ($soma > $total)
-        {
-            $valores[$n - 1] = round($valores[$n - 1] - ($soma - $total), 2);
-        }
+        // Rateio em centavos: parte inteira para todas e o restante (sempre o
+        // maior valor) vai para a ultima parcela.
+        $n        = count($limpa);
+        $centavos = (int) round($total * 100);
+        $base_cent = (int) floor($centavos / $n);
+        $ultimo_cent = $centavos - $base_cent * ($n - 1);
+        $valores  = array_fill(0, $n, round($base_cent / 100, 2));
+        $valores[$n - 1] = round($ultimo_cent / 100, 2);
 
         if ($valores[$n - 1] <= 0)
         {

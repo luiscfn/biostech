@@ -366,9 +366,41 @@ class Compras extends MY_Controller
 
     public function fechar($numero)
     {
+        $numero = (int) $numero;
+        $dados  = $this->_preparar_fechamento($numero);
+
+        if ($this->eh_post())
+        {
+            $this->_processar_fechamento($numero);
+        }
+
+        $this->titulo = 'Fechar pedido ' . $numero;
+        $this->render('compras/fechar', $dados);
+    }
+
+    // ------------------------------------------------------------------
+
+    /**
+     * Carrega o formulario de fechamento em um fragmento HTML, para ser
+     * exibido dentro do modal da tela de cadastro/edicacao do pedido.
+     */
+    public function fechar_modal($numero)
+    {
+        $numero = (int) $numero;
+        $dados  = $this->_preparar_fechamento($numero);
+        $dados['modal'] = TRUE;
+
+        $html = $this->load->view('compras/fechar', $dados, TRUE);
+
+        $this->output->set_content_type('text/html')->set_output($html);
+    }
+
+    // ------------------------------------------------------------------
+
+    private function _preparar_fechamento($numero)
+    {
         $this->exigir_perfil(array(PERFIL_ADMIN, PERFIL_GESTOR));
 
-        $numero = (int) $numero;
         $pedido = $this->compras_model->pedido($numero);
 
         if (empty($pedido))
@@ -390,59 +422,63 @@ class Compras extends MY_Controller
             redirect('compras/editar/' . $numero);
         }
 
-        if ($this->eh_post())
-        {
-            $dados = array(
-                'data_compra'            => $this->input->post('data_compra'),
-                'num_nf'                 => $this->input->post('num_nf'),
-                'data_nf'                => $this->input->post('data_nf'),
-                'data_vencimento'        => $this->input->post('data_vencimento'),
-                'condicao_pagamento'     => $this->input->post('condicao_pagamento'),
-                'forma_recebimento'      => $this->input->post('forma_recebimento'),
-                'documento_recebimento'  => $this->input->post('documento_recebimento'),
-                'centro_custo'           => $this->input->post('centro_custo'),
-                'prazo_entrega'          => $this->input->post('prazo_entrega'),
-                'gerar_contas'           => $this->input->post('gerar_contas'),
-                'fornecedor_estoque'     => $this->input->post('fornecedor_estoque'),
-            );
-
-            $parcelas = $this->_post_parcelas();
-
-            $resultado = $this->compras_model->fechar_pedido($numero, $dados, $parcelas, $this->usuario);
-
-            if ( ! $resultado['ok'])
-            {
-                $this->flash($resultado['erro'], 'erro');
-                redirect('compras/fechar/' . $numero);
-            }
-
-            $this->auditoria->registrar('alterar', 'compra_pedido', $numero, array(
-                'fechamento'  => TRUE,
-                'parcelas'    => count($resultado['parcelas']),
-                'conta_pagar' => $resultado['conta_pagar'],
-                'lote'        => $resultado['lote'],
-            ));
-
-            $mensagem = 'Pedido ' . $numero . ' fechado. Estoque atualizado (lote ' . $resultado['lote'] . ').';
-
-            if ( ! empty($resultado['conta_pagar']))
-            {
-                $mensagem .= ' Contas a pagar geradas sob o numero ' . $resultado['conta_pagar'] . '.';
-            }
-
-            $this->flash($mensagem);
-            redirect('compras/ver/' . $numero . '?aba=parcelas');
-        }
-
-        $this->titulo = 'Fechar pedido ' . $numero;
-        $this->render('compras/fechar', array(
+        return array(
             'registro' => $pedido,
             'itens'    => $itens,
             'prazos'   => ! empty($pedido['fornecedor_codigo'])
                             ? $this->compras_model->prazos($pedido['fornecedor_codigo'])
                             : array(),
             'dominios' => $this->_dominios(),
+            'modal'    => FALSE,
+        );
+    }
+
+    // ------------------------------------------------------------------
+
+    private function _processar_fechamento($numero)
+    {
+        // Campos removidos da tela permanecem com os valores ja gravados no pedido.
+        $pedido = $this->compras_model->pedido($numero);
+
+        $dados = array(
+            'data_compra'            => isset($pedido['data_compra']) ? $pedido['data_compra'] : $pedido['data'],
+            'num_nf'                 => $this->input->post('num_nf'),
+            'data_nf'                => $this->input->post('data_nf'),
+            'data_vencimento'        => $this->input->post('data_vencimento'),
+            'condicao_pagamento'     => $this->input->post('condicao_pagamento'),
+            'forma_recebimento'      => $this->input->post('forma_recebimento'),
+            'documento_recebimento'  => isset($pedido['documento_recebimento']) ? $pedido['documento_recebimento'] : NULL,
+            'centro_custo'           => isset($pedido['centro_custo']) ? $pedido['centro_custo'] : NULL,
+            'prazo_entrega'          => isset($pedido['prazo_entrega']) ? $pedido['prazo_entrega'] : NULL,
+            'gerar_contas'           => $this->input->post('gerar_contas'),
+            'fornecedor_estoque'     => $this->input->post('fornecedor_estoque'),
+        );
+
+        $parcelas  = $this->_post_parcelas();
+        $resultado = $this->compras_model->fechar_pedido($numero, $dados, $parcelas, $this->usuario);
+
+        if ( ! $resultado['ok'])
+        {
+            $this->flash($resultado['erro'], 'erro');
+            redirect('compras/editar/' . $numero);
+        }
+
+        $this->auditoria->registrar('alterar', 'compra_pedido', $numero, array(
+            'fechamento'  => TRUE,
+            'parcelas'    => count($resultado['parcelas']),
+            'conta_pagar' => $resultado['conta_pagar'],
+            'lote'        => $resultado['lote'],
         ));
+
+        $mensagem = 'Pedido ' . $numero . ' fechado. Estoque atualizado (lote ' . $resultado['lote'] . ').';
+
+        if ( ! empty($resultado['conta_pagar']))
+        {
+            $mensagem .= ' Contas a pagar geradas sob o numero ' . $resultado['conta_pagar'] . '.';
+        }
+
+        $this->flash($mensagem);
+        redirect('compras/ver/' . $numero . '?aba=parcelas');
     }
 
     // ------------------------------------------------------------------

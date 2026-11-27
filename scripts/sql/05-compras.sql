@@ -89,12 +89,11 @@ CREATE INDEX IF NOT EXISTS biostech_compras_itens_pedido_idx
 CREATE TABLE IF NOT EXISTS {schema}.biostech_compras_parcelas (
     pedido_numero            integer NOT NULL
                              REFERENCES {schema}.biostech_compras_pedidos (numero) ON DELETE CASCADE,
-    numero_par               smallint NOT NULL,
+    numero_par               integer NOT NULL,
     dias                     integer NOT NULL DEFAULT 0,
     vencimento               date NOT NULL,
     valor                    numeric(15,2) NOT NULL,
-    PRIMARY KEY (pedido_numero, numero_par),
-    CONSTRAINT biostech_compras_parcelas_num_ck CHECK (numero_par BETWEEN 1 AND 12)
+    PRIMARY KEY (pedido_numero, numero_par)
 );
 
 -- ------------------------------------------------------------
